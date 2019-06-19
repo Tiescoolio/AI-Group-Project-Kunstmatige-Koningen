@@ -7,6 +7,7 @@ HUPROJECTNAME="huwebshop-$HUPROJECTNAME"
 # echo $HUPROJECTNAME
 gcloud projects create $HUPROJECTNAME --set-as-default
 gcloud app create --project=$HUPROJECTNAME --region=europe-west
+gcloud services enable cloudbuild.googleapis.com
 gcloud app deploy
 
 echo "Script completed."
