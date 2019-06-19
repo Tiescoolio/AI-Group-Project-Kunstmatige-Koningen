@@ -10,7 +10,7 @@ gcloud app create --project=$HUPROJECTNAME --region=europe-west
 echo "In order to deploy this application, you have to link a billing account."
 echo "Note that the gcloud methods used here are in beta, and may fail over time."
 echo "The following billing accounts are associated with this user:"
-gcloud beta billing account list
+gcloud beta billing accounts list
 echo "Please input the full ACCOUNT_ID of the billing account you want to use:"
 read BILLINGACCOUNT
 gcloud beta billing projects link $HUPROJECTNAME --billing-account $BILLINGACCOUNT
