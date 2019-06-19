@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+	<div style="background-image:url({{ product.img }})" id="detailpagepicture" class="huredborder"></div>
+	<h2>{{ product.name }}</h2>
+	<p>{{ product.description }}</p>
+	{% if product.attributes is defined %}
+		<table id="detailattributes">
+			{% for attribute in product.attributes %}
+			<tr><td>{{ attribute.name }}</td><td>{{ attribute.value }}</td></tr>
+			{% endfor %}
+		</table><br/><br/>
+	{% endif %}
+	<span id="detailpageprice">{{ product.price }}</span>&nbsp;
+	<a href="#" class="hured button" function="add-to-shopping-cart" productid="{{ product.productid }}">Toevoegen aan winkelwagentje</a>
+{% endblock %}

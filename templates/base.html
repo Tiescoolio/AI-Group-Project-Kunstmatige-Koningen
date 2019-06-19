@@ -1,0 +1,52 @@
+<!doctype html>
+<!-- This file is meant to contain the base wrapper that applies for all content, such as the header, footer, css and js resources. -->
+<html>
+	<head>
+		<!-- TODO: get a favicon to setup. -->
+		<!-- TODO: make the title dynamic and appropriate. -->
+		<title>HU Webshop Project</title>
+		<!-- TODO: add dynamic meta tags for each page. -->
+		<link rel="shortcut icon" type="image/png" href="/static/favicon.png">
+		<!-- Add Javascript libraries under this heading. -->
+		<script src="/static/jquery-3.4.1.min.js"></script>
+		<script src="/static/dynamic-elements.js"></script>
+		<!-- Add CSS files under this heading. -->
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto&display=swap">
+		<link rel="stylesheet" type="text/css" href="/static/stylesheet.css"></style>
+	</head>
+	<body>
+		<!-- TODO: add a logical header here that allows the user to navigate, including the shopping cart. -->
+		{% block header %}
+		<div id="header">
+			<div id="logobackground">
+				<img id="logo" src="/static/hulogo.png" />
+				<h1 id="title">HU Webshop</h1>
+			</div>
+			<div id="topbarbackground">
+				<div id="topbar">
+					<div id="greeting">Welkom, {{ session.first_name }} {{ session.last_name }}!</div>
+					<div id="menu"><a href="/">Homepage</a> | <a href="/producten">Producten</a> | <a href="/winkelwagen">Winkelwagen<span id="shopping-cart-count"> (&nbsp;)</span></a></div>
+				</div>
+			</div>
+		</div>
+		{% endblock %}
+		<!-- TODO: extend this content block in subsequent templates. -->
+		<div id="content">
+			{% block content %}{{ contenttext }}{% endblock %}
+			{% block suggestionbox %}
+			<div id="suggestionbox">
+				<div id="suggestiontext">Suggesties?</div>
+			</div>
+			{% endblock %}
+		</div>
+		{% block footer %}
+		<div id="footer">
+			<div id="bottombarbackground">
+				<div id="bottombar"></div>
+			</div>
+			<br/>
+			<div id="credits">&copy; Hogeschool Utrecht, 2019.</div>
+		</div>
+		{% endblock %}
+	</body> 
+</html>
