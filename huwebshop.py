@@ -1,5 +1,5 @@
 from flask import Flask, request, session, render_template, redirect, url_for, g
-import random, os, json
+import random, os, json, huw_utilities
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
@@ -24,26 +24,7 @@ productcount = products.count_documents({})
 # index. If not, we create it here once.
 colnames = client.huwebshop.collection_names()
 if "categoryindex" not in colnames:
-	cats = products.find({},["category","sub_category","sub_sub_category","sub_sub_sub_category"])
-	index = {}
-	for cat in cats:
-		try:
-			c = [cat["category"]]
-			if c[0] not in index and c[0] is not None:
-				index[c[0]] = {}
-			c.append(cat["sub_category"])
-			if c[1] not in index[c[0]] and c[1] is not None:
-				index[c[0]][c[1]] = {}
-			c.append(cat["sub_sub_category"])
-			if c[2] not in index[c[0]][c[1]] and c[2] is not None:
-				index[c[0]][c[1]][c[2]] = {}
-			c.append(cat["sub_sub_sub_category"])
-			if c[3] not in index[c[0]][c[1]][c[2]] and c[3] is not None:
-				index[c[0]][c[1]][c[2]][c[3]] = {}
-		except:
-			pass
-	indexloc = client.huwebshop.categoryindex
-	indexid = indexloc.insert_one(index).inserted_id
+	huw_utilities.createcategoryindex(client)
 productindex = client.huwebshop.categoryindex.find_one({})
 
 '''
@@ -65,9 +46,9 @@ def check_session():
 		session['last_name'] = random.choice(fake_last_names)
 		session['shopping_cart'] = []
 		session['items_per_page'] = pagination_counts[0]
-		# It's a little hacky to store this in session data, but you can reasonably
-		# expect this to be a short array, and otherwise, a whole other mechanism is
-		# required to get this done!
+		# It's a little hacky to store this in session data, but you can 
+		# reasonably expect this to be a short array, and otherwise, a whole 
+		# other mechanism is required to get this done!
 		session['pagination_counts'] = pagination_counts 
 		session['session_valid'] = 1
 
@@ -78,7 +59,8 @@ explicitly specified.
 '''
 @app.route('/dynamic-shopping-cart', methods=['POST'])
 def dynamic_shopping_cart():
-	# TODO: expand upon this method, ensuring it actually transfers all relevant information.
+	# TODO: expand upon this method, ensuring it actually transfers all relevant
+	# information.
 	itemcount = 0
 	for tup in session['shopping_cart']:
 		itemcount += tup[1]
