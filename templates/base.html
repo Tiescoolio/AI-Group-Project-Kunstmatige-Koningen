@@ -18,6 +18,16 @@
 		<!-- TODO: add a logical header here that allows the user to navigate, including the shopping cart. -->
 		{% block header %}
 		<div id="header">
+			{% block sessionbar %}
+			<div id="sessionbarbackground">
+				<div id="sessionbar-static">
+					Gebruiker: {{ packet.profile_id }} <a function="show-sessionbar-dynamic" href="#">(Aanpassen)</a>
+				</div>
+				<div id="sessionbar-dynamic" style="display:none;">
+					Gebruiker: <input id="profile-id-input" type="text" value="{{ packet.profile_id }}" size="80" /> <input type="button" value="Aanpassen" function="change-profile-id"/> <a function="show-sessionbar-static" href="#">(X)</a>
+				</div>
+			</div>
+			{% endblock %}
 			<div id="logobackground">
 				<img id="logo" src="/static/hulogo.png" />
 				<h1 id="title">HU Webshop</h1>
@@ -25,10 +35,65 @@
 			<div id="topbarbackground">
 				<div id="topbar">
 					<div id="greeting">Welkom, {{ session.first_name }} {{ session.last_name }}!</div>
-					<div id="menu"><a href="/">Homepage</a> | <a href="/producten">Producten</a> | <a href="/winkelwagen">Winkelwagen<span id="shopping-cart-count"> (&nbsp;)</span></a></div>
 				</div>
 			</div>
+			{% block menu %}
+			<div id="menubarbackground">
+				<div id="menubar">
+					{% for k, v in packet.categoryindex.items() %}
+					<div class="menuitem" dropdown="menudropdown-{{ packet.categories_encode[k] }}">	
+						<a href="/producten/{{ packet.categories_encode[k] }}">{{ k }}</a>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+			<div id="menudropdownbackground">
+				{% for k, v in packet.categoryindex.items() %}
+				{% if v|length %}
+				<div class="menudropdown" id="menudropdown-{{ packet.categories_encode[k] }}">
+					<ul>
+						{% for k2, v2 in v.items() %}
+						<li><a href="/producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}">{{ k2 }}</a></li>
+						{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+				{% endfor %}
+			</div>
+			{% endblock %}
 		</div>
+		{% endblock %}
+		{% block oldmenu %}
+		<!--
+		<ul>
+			{% for k, v in packet.categoryindex.items() %}
+			<li><a href="producten/{{ packet.categories_encode[k] }}">{{ k }}</a></li>
+			{% if v|length %}
+				<ul>
+					{% for k2, v2 in v.items() %}
+					<li><a href="producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}">{{ k2 }}</a></li>
+					{% if v2|length %}
+						<ul>
+							{% for k3, v3 in v2.items() %}
+							<li><a href="producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}/{{ packet.categories_encode[k3] }}">{{ k3 }}</a></li>
+							 Note that, in practice, the data does not contain this level of categories.
+							This is only left in as a failsafe.
+							{% if v3|length %}
+								<ul>
+									{% for k4, v4 in v3.items() %}
+									<li><a href="producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}/{{ packet.categories_encode[k3] }}/{{ packet.categories_encode[k4] }}">{{ k4 }}</a></li>
+									{% endfor %}
+								</ul>
+							{% endif %}
+							{% endfor %}
+						</ul>
+					{% endif %}
+					{% endfor %}
+				</ul>
+			{% endif %}
+			{% endfor %}
+		</ul>
+		-->
 		{% endblock %}
 		<!-- TODO: extend this content block in subsequent templates. -->
 		<div id="content">

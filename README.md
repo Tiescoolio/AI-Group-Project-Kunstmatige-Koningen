@@ -3,7 +3,17 @@ Git for the HU Webshop project.
 
 Todo:
 
-- Test this code on a local deployment.
+X Compile methods that translate between full category names and URL-friendly names.
+X Compose the full top menu.
+- Import the visitors table through mongoimport (other computer required).
+- Add elements for changing the session ID.
+- Get the top menu to display properly in the base template.
+- Create generic category page for all categories - read: create working dynamic product queries for any categories
+- Create expanded shopping cart functionality
+- Create session ID switches and search functionality
+- Create separate session switch functions
+- Compose meaningless dummy recommendation service in the Cloud
+X Change the bottombar layout (center align)
 
 --------------------
 
@@ -11,7 +21,7 @@ Requirements:
 
 - Python 3
 - Flask (includes Jinja and Werkzeug)
-- python-dotenv met command line interface support
+- python-dotenv (pip install -U python-dotenv)
 - MongoDB (installer)
 - Pymongo package
 - jQuery
@@ -19,7 +29,7 @@ Requirements:
 
 --------------------
 
-Answered:
+Development Questions:
 
 - How can I autodeploy my script to the cloud?
 	- Through a fairly complicated shell script, but there is a draft version of the pre-project packaging version in the helloworld folder of the project.
@@ -28,13 +38,8 @@ Answered:
 
 - How does the database operate when I run it on my local machine?
 	- Fine, actually, and fairly quickly too.
-- How many entries have no appropriate images?
-	- 4535 out of 12800 entries have no pictures (search terms: {'images.0.0' : null}); but seeing as the data is (at least partially) intentionally faulty, it stands to reason that a default image would be better than explicitly looking up alternatives.
 - How can I package my code such that I can easily push it to the App Engine - or any other platform?
 	- Command line variables that allow you to specify where the database/collection is you are trying to connect to, a YAML file to provide the configuration, a requirements.txt to automate getting the libraries through pip and a shell script to execute the deployment automatically from the cloud shell. But this, at the moment, is not yet required.
-- What is the average size of the images involved, and subsequently, what is the estimated size of all images collected?
-	- 17.75 KB for the small ones (oom.: 20), and 440 KB for the big ones (oom.: 500 KB).
-	Say that one pairing is about 550 KB. Times 8265 (the number of entries with images) that comes out to approximately four-and-a-half GB.
 - Can the shop actually be crawled for images?
 	- Not since the 18th of June, it can't. The site appears to have been locked behind a rudimentary login prompt.
 
