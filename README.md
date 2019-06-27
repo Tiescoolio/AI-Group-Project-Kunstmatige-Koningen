@@ -1,6 +1,16 @@
 # huwebshop
 Git for the HU Webshop project.
 
+## Todo
+
+- Add elements for changing the session ID.
+- Get the top menu to display properly in the base template.
+- Create generic category page for all categories - read: create working dynamic product queries for any categories
+- Create expanded shopping cart functionality
+- Create session ID switches and search functionality
+- Create separate session switch functions
+- Compose meaningless dummy recommendation service in the Cloud
+
 ## Notes about the Project
 
 When testing this project, the following issues arose when trying to work with the full dataset provided:
@@ -20,35 +30,14 @@ It deserves the consideration of the Hogeschool to pay for a centrally hosted Cl
 
 - A random selection of visitors (i.e. profiles), < 100 MB in size, that are known to have at least one associated existing session.
 - The subset of sessions associated with the visitors selected, <= 100 MB in size.
-- A subset of all products associated with these visitors, ideally also <= 100 MB in size.
+- The file containing all products, which is 357 MB in size.
 
 These restrictions are inspired by the following aspects:
 
-- If all files come out to 100 MB or less, they can also be included in the Github repository for this project, collecting all necessary data in one place;
+- When compressing the products file in a .zip archive, all of the files can also be included in the Github repository for this project, collecting all necessary data in one place;
 - If the products subset has to stay approximately its original size (357 MB), the total size of all files is very likely to remain within the MongoDB Free Tier Cluster range (512 MB).
 
-## Todo
-
-X Clean the MongoDB cluster
-X Write script to extract all visitor IDs from all sessions (sessions.buid.0) - don't forget to add the first one!
-	- No buid value: 85187. Empty buid value: 5. Failed lines: 89. Actual lines in the result file: 3217097. Sum total: 3302378. A few less results than 3302442, but sure!
-X Assemble the frequency for all of the visitor IDs across the sessions.
-- Compute the average number of occurrences per ID.
-
-X Compile methods that translate between full category names and URL-friendly names.
-X Compose the full top menu.
-- Import the visitors table through mongoimport (other computer required).
-- Add elements for changing the session ID.
-- Get the top menu to display properly in the base template.
-- Create generic category page for all categories - read: create working dynamic product queries for any categories
-- Create expanded shopping cart functionality
-- Create session ID switches and search functionality
-- Create separate session switch functions
-- Compose meaningless dummy recommendation service in the Cloud
-X Change the bottombar layout (center align)
-
-Note: visitors.json = profiles!
-Note: to count lines, use the wc -l command
+This first testing subset can now be found in the folder datasets_sample_1/.
 
 ## Requirements
 
@@ -59,6 +48,11 @@ Note: to count lines, use the wc -l command
 - Pymongo package
 - jQuery
 - Some cool buttons (https://fdossena.com/?p=html5cool/buttons/i.frag)
+
+## Notes to Self
+
+visitors.json = profiles!
+To count lines, use the wc -l command in the Unix shell
 
 ## Development Questions
 
