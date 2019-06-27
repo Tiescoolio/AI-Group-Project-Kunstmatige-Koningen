@@ -29,6 +29,12 @@ These restrictions are inspired by the following aspects:
 
 ## Todo
 
+X Clean the MongoDB cluster
+X Write script to extract all visitor IDs from all sessions (sessions.buid.0) - don't forget to add the first one!
+	- No buid value: 85187. Empty buid value: 5. Failed lines: 89. Actual lines in the result file: 3217097. Sum total: 3302378. A few less results than 3302442, but sure!
+X Assemble the frequency for all of the visitor IDs across the sessions.
+- Compute the average number of occurrences per ID.
+
 X Compile methods that translate between full category names and URL-friendly names.
 X Compose the full top menu.
 - Import the visitors table through mongoimport (other computer required).
@@ -41,8 +47,8 @@ X Compose the full top menu.
 - Compose meaningless dummy recommendation service in the Cloud
 X Change the bottombar layout (center align)
 
-- Note: visitors.json = profiles!
-- sessions.json
+Note: visitors.json = profiles!
+Note: to count lines, use the wc -l command
 
 ## Requirements
 
