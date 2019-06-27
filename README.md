@@ -35,7 +35,13 @@ It deserves the consideration of the Hogeschool to pay for a centrally hosted Cl
 These restrictions are inspired by the following aspects:
 
 - When compressing the products file in a .zip archive, all of the files can also be included in the Github repository for this project, collecting all necessary data in one place;
-- If the products subset has to stay approximately its original size (357 MB), the total size of all files is very likely to remain within the MongoDB Free Tier Cluster range (512 MB).
+- If the products subset remains its original size, the total size of all files is very likely to remain within the MongoDB Free Tier Cluster range (512 MB).
+
+The first testing subset has been composed according to the following additional requirements:
+
+- Based on a back-of-the-envelope estimation of the number of sessions that fit into 100 MB, we find that about 21606 sessions can fit into the file.
+- Out of these, we want 15000 of the sessions to have been added by frequent users - i.e. users that have 10 or more sessions attributed to one of their browser configurations. This assures that the sample set contains profiles with "heavy" parameters to test on.
+- The remaining 6606, we want to fill with infrequent users - i.e. browser configurations that have 3 or fewer sessions attributed to them. (Note that since one user may have multiple browser configurations, the user itself may still be frequent, but given the general sparseness of the data, this is presumed to be sufficiently unlikely.) This assures that the sample set contains profiles with "light" parameters to test on.
 
 This first testing subset can now be found in the folder datasets_sample_1/.
 
