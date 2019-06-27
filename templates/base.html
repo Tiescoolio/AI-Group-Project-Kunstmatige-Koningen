@@ -20,11 +20,11 @@
 		<div id="header">
 			{% block sessionbar %}
 			<div id="sessionbarbackground">
-				<div id="sessionbar-static">
-					Gebruiker: {{ packet.profile_id }} <a function="show-sessionbar-dynamic" href="#">(Aanpassen)</a>
+				<div id="sessionbar-static" class="centerstage textright textwhiteshadow">
+					Gebruiker-ID: {{ packet.profile_id }} <a function="show-sessionbar-dynamic" href="#">(Aanpassen)</a>
 				</div>
-				<div id="sessionbar-dynamic" style="display:none;">
-					Gebruiker: <input id="profile-id-input" type="text" value="{{ packet.profile_id }}" size="80" /> <input type="button" value="Aanpassen" function="change-profile-id"/> <a function="show-sessionbar-static" href="#">(X)</a>
+				<div id="sessionbar-dynamic" class="centerstage textright textwhiteshadow" style="display:none;">
+					Gebruiker-ID: <input id="profile-id-input" type="text" value="{{ packet.profile_id }}" size="80" />&nbsp;&nbsp;<a href="#" function="change-profile-id" class="hured smallbutton"/>Aanpassen</a>&nbsp;&nbsp;<a function="show-sessionbar-static" href="#">(X)</a>
 				</div>
 			</div>
 			{% endblock %}
