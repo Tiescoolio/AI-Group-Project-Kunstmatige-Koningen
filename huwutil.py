@@ -20,7 +20,6 @@ def createcategoryindex(client):
 				index[c[0]][c[1]][c[2]][c[3]] = {}
 		except:
 			pass
-	#index = countcategoryindex(client, index)
 	print(index)
 	for key, value in index.items():
 		index[key] = recursecatindex(client, key, value)
@@ -35,16 +34,6 @@ def recursecatindex(client, key, value, level=0):
 	if key[0:1] != "_":
 		value['_count'] = client.huwebshop.products.count_documents({levels[level]:key})
 	return value
-
-def countcategoryindex(client, dictionary, level=0):
-	levels = ["category","sub_category","sub_sub_category","sub_sub_sub_category"]
-	if isinstance(dictionary, dict):
-		for key, value in dictionary.items():
-			if value:
-				dictionary[key] = countcategoryindex(value, level+1)
-			if key[0:1] != "_" and isinstance(dictionary[key], dict):
-				dictionary[key]['_count'] = client.huwebshop.products.count_documents({levels[level]:key})
-	return dictionary
 
 def dictflatten(dictionary, sumlist=[]):
 	for key, value in dictionary.items():

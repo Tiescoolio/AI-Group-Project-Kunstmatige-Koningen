@@ -19,7 +19,6 @@ if os.getenv("MONGODBUSER") is not None:
 else:
 	client = MongoClient()
 products = client.huwebshop.products
-productcount = products.count_documents({})
 # Once the client is booted up, we check whether it already has a category 
 # index. If not, we create it here once.
 colnames = client.huwebshop.collection_names()
@@ -65,6 +64,7 @@ def check_session():
 		session['session_id'] = str(first_found_session)
 		session['session_valid'] = 1
 
+
 '''
 ..:: Post Functions ::..
 Functions that are hailed through AJAX, and which only refresh the page when
@@ -107,6 +107,7 @@ def add_to_shopping_cart(productid):
 	session['shopping_cart'] = session['shopping_cart']
 	return dynamic_shopping_cart()
 
+
 '''
 ..:: Actual Pages ::..
 The pages that contain actual, non-debug functionality.
@@ -130,7 +131,24 @@ def homepage():
 @app.route('/producten/<cat1>/<cat2>/<cat3>')
 @app.route('/producten/<cat1>/<cat2>/<cat3>/<cat4>')
 def producten(cat1=None, cat2=None, cat3=None, cat4=None):
-	return render_packet_template('emptyproducts.html') #"Cat1: "+str(cat1)+" Cat2: "+str(cat2)+" Cat3: "+str(cat3)+" Cat4: "+str(cat4)
+	# Gather all relevant criteria.
+	levels = ['category','sub_category','sub_sub_category','sub_sub_sub_category']
+	querydict = {}
+	for key, value in enumerate([cat1, cat2, cat3, cat4]):
+		if value is not None:
+			querydict[levels[key]] = categories_decode[value]
+	selectedproducts = client.huwebshop.products.find(querydict, ['name']).limit(session['items_per_page'])
+	# cursor.skip
+	# cursor.limit
+	productstring = ""
+	for product in selectedproducts:
+		productstring += str(product)
+	return render_packet_template('products.html', {'products': productstring}) #"Cat1: "+str(cat1)+" Cat2: "+str(cat2)+" Cat3: "+str(cat3)+" Cat4: "+str(cat4)
+
+# This page is a generic product detail page for any site.
+@app.route('/productdetail/<int:productid>')
+def productdetail(productid):
+	return render_packet_template('productdetail.html')
 
 # This page is the user's shopping cart.
 @app.route('/winkelmand')
