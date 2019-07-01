@@ -24,7 +24,7 @@ $(document).ready(function() {
 	});
 
 	$("[function=change-profile-id]").click(function(event){ 
-		$.ajax({url:"/change-profile-id", method:"POST", data:{"profile_id":$("input#profile-id-input").val()}}).done(function(){ location.reload(); });
+		$.ajax({url:"/change-profile-id", method:"POST", data:{"session_id":$("input#profile-id-input").val()}}).done(function(){ location.reload(); });
 		event.preventDefault();
 	});
 	
@@ -36,9 +36,31 @@ $(document).ready(function() {
 		});
 	});
 
+/*
 	$(".menuitem").hover(function(){
 		$("#"+$(this).attr("dropdown")).attr("style","display:block");
 	}, function(){
 		$("#"+$(this).attr("dropdown")).attr("style","display:none");
 	});
+*/
+/*
+	$("#menuwrapper").hover(function(event){
+		var target = $( event.target );
+		$(".menudropdown").attr("style","display:none");
+		if(target.attr('dropdown')){
+			$("#"+target.attr("dropdown")).attr("style","display:block");
+		}
+	}, function(){
+		$(".menudropdown").attr("style","display:none");
+	})
+*/
+	$(".menuitem").hover(function(){
+		$(".menudropdown").attr("style","display:none");
+		$("#"+$(this).attr("dropdown")).attr("style","display:block");
+	}, function(){});
+
+	$("#menuwrapper").hover(function(event){}, function(){
+		$(".menudropdown").attr("style","display:none");
+	})
+
 });

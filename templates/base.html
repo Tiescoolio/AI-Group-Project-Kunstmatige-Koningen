@@ -21,80 +21,60 @@
 			{% block sessionbar %}
 			<div id="sessionbarbackground">
 				<div id="sessionbar-static" class="centerstage textright textwhiteshadow">
-					Gebruiker-ID: {{ packet.profile_id }} <a function="show-sessionbar-dynamic" href="#">(Aanpassen)</a>
+					Sessie-ID: {{ packet.session_id }} <a function="show-sessionbar-dynamic" href="#">(Aanpassen)</a>
 				</div>
 				<div id="sessionbar-dynamic" class="centerstage textright textwhiteshadow" style="display:none;">
-					Gebruiker-ID: <input id="profile-id-input" type="text" value="{{ packet.profile_id }}" size="80" />&nbsp;&nbsp;<a href="#" function="change-profile-id" class="hured smallbutton"/>Aanpassen</a>&nbsp;&nbsp;<a function="show-sessionbar-static" href="#">(X)</a>
+					Sessie-ID: <input id="profile-id-input" type="text" value="{{ packet.session_id }}" size="80" />&nbsp;&nbsp;<a href="#" function="change-profile-id" class="hured smallbutton"/>Aanpassen</a>&nbsp;&nbsp;<a function="show-sessionbar-static" href="#">(X)</a>
 				</div>
 			</div>
 			{% endblock %}
+			{% block logobar %}
 			<div id="logobackground">
-				<img id="logo" src="/static/hulogo.png" />
-				<h1 id="title">HU Webshop</h1>
-			</div>
-			<div id="topbarbackground">
-				<div id="topbar">
-					<div id="greeting">Welkom, {{ session.first_name }} {{ session.last_name }}!</div>
-				</div>
-			</div>
-			{% block menu %}
-			<div id="menubarbackground">
-				<div id="menubar">
-					{% for k, v in packet.categoryindex.items() %}
-					<div class="menuitem" dropdown="menudropdown-{{ packet.categories_encode[k] }}">	
-						<a href="/producten/{{ packet.categories_encode[k] }}">{{ k }}</a>
+				<div id="logobar">
+					<img id="logo" src="/static/hulogo.png" />
+					<div id="logosubbarwtwo" class="logosubbar">
+						|
 					</div>
-					{% endfor %}
+					<div id="logosubbar" class="logosubbar">
+						<a href="/winkelmand">Winkelmand</a>
+					</div>
+					<div id="logosubbarwtwo" class="logosubbar">
+						|
+					</div>
 				</div>
-			</div>
-			<div id="menudropdownbackground">
-				{% for k, v in packet.categoryindex.items() %}
-				{% if v|length %}
-				<div class="menudropdown" id="menudropdown-{{ packet.categories_encode[k] }}">
-					<ul>
-						{% for k2, v2 in v.items() %}
-						<li><a href="/producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}">{{ k2 }}</a></li>
-						{% endfor %}
-					</ul>
-				</div>
-				{% endif %}
-				{% endfor %}
 			</div>
 			{% endblock %}
-		</div>
-		{% endblock %}
-		{% block oldmenu %}
-		<!--
-		<ul>
-			{% for k, v in packet.categoryindex.items() %}
-			<li><a href="producten/{{ packet.categories_encode[k] }}">{{ k }}</a></li>
-			{% if v|length %}
-				<ul>
-					{% for k2, v2 in v.items() %}
-					<li><a href="producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}">{{ k2 }}</a></li>
-					{% if v2|length %}
+			{% block menu %}
+			<span id="menuwrapper">
+				<div id="menubarbackground">
+					<div id="menubar">
+						{% for k in packet.mainmenulist %}
+						<div class="menuitem" dropdown="menudropdown-{{ packet.categories_encode[k] }}">	
+							<a href="/producten/{{ packet.categories_encode[k] }}">{{ k }}</a>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+				<div id="menudropdownbackground">
+					{% for k, v in packet.categoryindex.items() %}
+					{% if v|length %}
+					<div class="menudropdown" id="menudropdown-{{ packet.categories_encode[k] }}">
 						<ul>
-							{% for k3, v3 in v2.items() %}
-							<li><a href="producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}/{{ packet.categories_encode[k3] }}">{{ k3 }}</a></li>
-							 Note that, in practice, the data does not contain this level of categories.
-							This is only left in as a failsafe.
-							{% if v3|length %}
-								<ul>
-									{% for k4, v4 in v3.items() %}
-									<li><a href="producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}/{{ packet.categories_encode[k3] }}/{{ packet.categories_encode[k4] }}">{{ k4 }}</a></li>
-									{% endfor %}
-								</ul>
+							{% for k2, v2 in v.items() %}
+							{% if k2[0:1] != "_" %}
+							<li><a href="/producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}">{{ k2 }}</a></li>
 							{% endif %}
 							{% endfor %}
 						</ul>
+					</div>
 					{% endif %}
 					{% endfor %}
-				</ul>
-			{% endif %}
-			{% endfor %}
-		</ul>
-		-->
+				</div>
+			</span>
+			{% endblock %}
+		</div>
 		{% endblock %}
+		
 		<!-- TODO: extend this content block in subsequent templates. -->
 		<div id="content">
 			{% block content %}{{ contenttext }}{% endblock %}

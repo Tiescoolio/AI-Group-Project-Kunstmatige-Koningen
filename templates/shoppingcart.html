@@ -1,11 +1,4 @@
 {% extends "base.html" %}
 {% block content %}
-	{% if shoppingcart %}
-	Huidige inhoud van uw winkelwagentje:<br/><br/>
-	{% for product in shoppingcart %}
-		{{ product.itemcount}} maal de {{ product.name }}, voor {{ product.price }} elk<br/>
-	{% endfor %}
-	{% else %}
-		U heeft nog niets in uw winkelwagentje, {{ session['first_name'] }} {{ session['last_name'] }}!
-	{% endif %}
+	Winkelwagentje. (to work on)
 {% endblock %}

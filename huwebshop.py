@@ -25,6 +25,9 @@ productcount = products.count_documents({})
 colnames = client.huwebshop.collection_names()
 if "categoryindex" not in colnames:
 	huwutil.createcategoryindex(client)
+else:
+	if client.huwebshop.categoryindex.count_documents({}) == 0:
+		huwutil.createcategoryindex(client)
 categoryindex = client.huwebshop.categoryindex.find_one({})
 del categoryindex['_id']
 categorylist = huwutil.dictflatten(categoryindex)
@@ -35,15 +38,16 @@ for cat in categorylist:
 	categories_encode[cat] = enc_cat
 	categories_decode[enc_cat] = cat
 
-
+countlist = list(map(lambda x, y: (y['_count'], x), categoryindex.keys(), categoryindex.values()))
+countlist.sort(reverse=True)
+mainmenulist = list(map(lambda x: x[1], countlist[0:8]))
 
 '''
 ..:: Global Variables ::..
 Variables used across the application, kept in one place for reference.
 '''
 pagination_counts = [3, 6, 12, 0]
-fake_first_names = ["Steve", "Jean", "Paean", "Mirabelle", "Alma", "Xanthippe", "Salazar", "Gem", "Ornacia", "Ben"]
-fake_last_names = ["Shimmertwig", "Trapezoid", "Gauntyl", "Wasserwald", "Smith", "Johnson", "Womble", "Octagon", "Framboise", "von Tuile"]
+first_found_session = client.huwebshop.sessions.find_one({})['buid'][0]
 
 '''
 ..:: Session Functions ::..
@@ -52,15 +56,13 @@ Functions that maintain and modify the session data contents.
 @app.before_request
 def check_session():
 	if ('session_valid' not in session) or (session['session_valid'] != 1):
-		session['first_name'] = random.choice(fake_first_names)
-		session['last_name'] = random.choice(fake_last_names)
 		session['shopping_cart'] = []
 		session['items_per_page'] = pagination_counts[0]
 		# It's a little hacky to store this in session data, but you can 
 		# reasonably expect this to be a short array, and otherwise, a whole 
 		# other mechanism is required to get this done!
 		session['pagination_counts'] = pagination_counts 
-		session['profile_id'] = "r341TmoDKGyPQeXaKtXodC8Mlcx0j70stIq6wgekBjZvDSBlmw2or5eT3ar8WR68c0K1"
+		session['session_id'] = str(first_found_session)
 		session['session_valid'] = 1
 
 '''
@@ -70,10 +72,11 @@ explicitly specified.
 '''
 @app.route('/change-profile-id', methods=['POST'])
 def change_profile_id():
-	newprofileid = request.form.get('profile_id')
-	# TODO: check whether a valid profile ID has been provided.
-	session['profile_id'] = newprofileid
-	return "True"
+	newprofileid = request.form.get('session_id')
+	profidexists = client.huwebshop.sessions.find_one({'buid':request.form.get('session_id')})
+	if profidexists:
+		session['session_id'] = newprofileid
+	return "Done"
 
 
 @app.route('/dynamic-shopping-cart', methods=['POST'])
@@ -110,9 +113,10 @@ The pages that contain actual, non-debug functionality.
 '''
 def render_packet_template(template="homepage.html", packet={}):
 	packet['categoryindex'] = categoryindex
+	packet['mainmenulist'] = mainmenulist
 	packet['categories_encode'] = categories_encode
 	packet['categories_decode'] = categories_decode
-	packet['profile_id'] = session['profile_id']
+	packet['session_id'] = session['session_id']
 	return render_template(template, packet=packet)
 
 # This page is the homepage of the actual site.
@@ -128,12 +132,12 @@ def homepage():
 def producten(cat1=None, cat2=None, cat3=None, cat4=None):
 	return render_packet_template('emptyproducts.html') #"Cat1: "+str(cat1)+" Cat2: "+str(cat2)+" Cat3: "+str(cat3)+" Cat4: "+str(cat4)
 
-'''
 # This page is the user's shopping cart.
-@app.route('/winkelwagen')
-def winkelwagen():
-	return render_template('shoppingcart.html', shoppingcart=get_shopping_cart())
+@app.route('/winkelmand')
+def winkelmand():
+	return render_packet_template('shoppingcart.html')
 
+'''
 def get_shopping_cart():
 	retval = []
 	for tup in session['shopping_cart']:
