@@ -3,18 +3,19 @@ Git for the HU Webshop project.
 
 ## Questions To Be Answered
 
+- Which solution would you prefer for the storage issues as described below in Notes On The Project?
+- Should an instance of this code run in the cloud directly during the course, for general demonstrations?
 - How secretive should I be about this data? Can a database containing all of it be exposed to the outside world?
-- Which of the possible expansions are necessities for 
+- Which of the possible expansions are necessities for future usage?
 
 ## Possible Expansions
 
 - Search functionality (either piecemeal or full-text/dynamic)
 - Test recommendation service elsewhere in the cloud
 - Automatically generated product images
-- Additional styling
 - Session ID synonyms
 
-## Notes about the Project
+## Notes On The Project
 
 When testing this project, the following issues arose when trying to work with the full dataset provided:
 
@@ -62,6 +63,7 @@ This first testing subset can now be found in the folder datasets_sample_1/.
 - Roboto Font (Google Fonts)
 - Some cool buttons (https://fdossena.com/?p=html5cool/buttons/i.frag)
 
+<!--
 ## Development Questions
 
 - How can I autodeploy my script to the cloud?
@@ -90,3 +92,5 @@ This first testing subset can now be found in the folder datasets_sample_1/.
 	- This is already done automatically by Flask in the render_template function.
 - How would I store an item in the shopping cart, if changing the shopping cart requires sending a request to the server?
 	- A basic URL-based method definitely works, without much of a hitch. But I don't think this is reflective of current web standards. An AJAX approach would be more appropriate - at which point, jQuery is the next logical move. To be further developed, once the templates are setup in a logical way in the project proper.
+
+-->
