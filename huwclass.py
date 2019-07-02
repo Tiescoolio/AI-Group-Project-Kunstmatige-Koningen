@@ -31,7 +31,12 @@ class HUWebshop(object):
     mainmenucount = 8
     mainmenuitems = None
 
-    paginationcounts = [6, 12, 24, 0]
+    paginationcounts = [8, 16, 32, 0]
+
+    productfields = ["name", "price.selling_price", "properties.discount", "images"]
+
+    # Popular | Similar | Combination | Behaviour | Personal
+    recommendationtypes = {'popular':"Anderen kochten ook",'similar':"Soortgelijke producten",'combination':'Combineert goed met','behaviour':'Passend bij uw gedrag','personal':'Persoonlijk aanbevolen'}
 
     def __init__(self, app):
         """ Within this constructor, we establish a connection with the database
@@ -135,8 +140,138 @@ class HUWebshop(object):
         c = urllib.parse.quote(c)
         return c
 
+    def prepproduct(self,p):
+        """ This helper function flattens and rationalizes the values retrieved
+        for a product block element. """
+        r = {}
+        r['name'] = p['name']
+        r['price'] = p['price']['selling_price']
+        r['price'] = str(r['price'])[0:-2]+",-" if r['price'] % 100 == 0 else str(r['price'])[0:-2]+","+str(r['price'])[-2:]
+        if r['price'][0:1] == ",":
+            r['price'] = "0"+r['price']
+        if p['properties']['discount'] is not None:
+            r['discount'] = p['properties']['discount'] 
+        r['smallimage'] = "" # TODO: replace this with actual images!
+        r['bigimage'] = "" # TODO: replace this with actual images!
+        r['id'] = p['_id']
+        return r
+
+    def checksession(self):
+        """ This function sets certain generally used session variables when
+        those have not yet been set. This executes before every request, but
+        will most likely only make changes once. """
+        if ('session_valid' not in session) or (session['session_valid'] != 1):
+            session['shopping_cart'] = []
+            session['items_per_page'] = self.paginationcounts[0]
+            session['session_id'] = self.database.sessions.find_one({})['buid'][0]
+            session['session_valid'] = 1
+
+    def renderpackettemplate(self, template="homepage.html", packet={}):
+        """ This helper function adds all generally important variables to the
+        packet sent to the templating engine, then calling upon Flask to 
+        perform the actual render. """
+        packet['categoryindex'] = self.categoryindex
+        packet['mainmenulist'] = self.mainmenuitems
+        packet['categories_encode'] = self.catencode
+        packet['categories_decode'] = self.catdecode
+        packet['paginationcounts'] = self.paginationcounts
+        packet['session_id'] = session['session_id']
+        return render_template(template, packet=packet)
+
+    def productpage(self, catlist=[], page=1):
+        """ This function renders the product page template with the products it
+        can retrieve from the database, based on the URL path provided. """
+        queryfilter = {}
+        nononescats = []
+        for k, v in enumerate(catlist):
+            if v is not None:
+                queryfilter[self.catlevels[k]] = self.catdecode[v]
+                nononescats.append(v)
+        querycursor = self.database.products.find(queryfilter, self.productfields)
+        prodcount = self.database.products.count_documents(queryfilter)
+        skipindex = session['items_per_page']*(page-1)
+        querycursor.skip(skipindex)
+        querycursor.limit(session['items_per_page'])
+        prodlist = list(map(self.prepproduct, list(querycursor)))
+        if len(nononescats) > 1:
+            pagepath = "/producten/"+("/".join(nononescats))+"/"
+        else:
+            pagepath = "/producten/"
+        return self.renderpackettemplate('products.html', {'products': prodlist, \
+            'productcount': prodcount, \
+            'pstart': skipindex + 1, \
+            'pend': skipindex + session['items_per_page'], \
+            'prevpage': pagepath+str(page-1) if (page > 1) else False, \
+            'nextpage': pagepath+str(page+1) if (session['items_per_page']*page < prodcount) else False, \
+            'r_products':prodlist[0:4], \
+            'r_type':list(self.recommendationtypes.keys())[0],\
+            'r_string':list(self.recommendationtypes.values())[0]
+            })
+
+    def productdetail(self, productid):
+        """ This function renders the product detail page based on the product
+        id provided. """
+        product = self.database.products.find_one({"_id":str(productid)})
+        return self.renderpackettemplate('productdetail.html', {'product':product,\
+            'prepproduct':self.prepproduct(product),\
+            'r_products':[self.prepproduct(product)]*4, \
+            'r_type':list(self.recommendationtypes.keys())[1],\
+            'r_string':list(self.recommendationtypes.values())[1]})
+
+    def shoppingcart(self):
+        """ This function renders the shopping cart for the user. """
+        return self.renderpackettemplate('shoppingcart.html')
+
+    def categoryoverview(self):
+        return self.renderpackettemplate('categoryoverview.html')
+
+    def changeprofileid(self):
+        """ This function checks whether the provided session ID actually exists
+        and stores it in the session if it does. """
+        newprofileid = request.form.get('session_id')
+        profidexists = self.database.sessions.find_one({'buid':request.form.get('session_id')})
+        if profidexists:
+            session['session_id'] = newprofileid
+        return "Done"
 
 huw = HUWebshop(app)
+
+@app.before_request
+def huw_check_session():
+    huw.checksession()
+
+@app.route('/')
+def homepage():
+    return huw.renderpackettemplate()
+
+@app.route('/producten/')
+@app.route('/producten/<cat1>')
+@app.route('/producten/<cat1>/<cat2>')
+@app.route('/producten/<cat1>/<cat2>/<cat3>')
+@app.route('/producten/<cat1>/<cat2>/<cat3>/<cat4>')
+@app.route('/producten/<int:page>')
+@app.route('/producten/<cat1>/<int:page>')
+@app.route('/producten/<cat1>/<cat2>/<int:page>')
+@app.route('/producten/<cat1>/<cat2>/<cat3>/<int:page>')
+@app.route('/producten/<cat1>/<cat2>/<cat3>/<cat4>/<int:page>')
+def producten(cat1=None, cat2=None, cat3=None, cat4=None, page=1):
+    return huw.productpage([cat1, cat2, cat3, cat4], page)
+
+@app.route('/productdetail/<productid>')
+def productdetail(productid):
+    return huw.productdetail(productid)
+
+@app.route('/winkelmand')
+def winkelmand():
+    return huw.shoppingcart()
+
+@app.route('/categorieoverzicht')
+def categorieoverzicht():
+    return huw.categoryoverview()
+
+@app.route('/change-profile-id', methods=['POST'])
+def changeprofileid():
+    return huw.changeprofileid()
 
 # Decorators to process
 '''

@@ -1,5 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
-Products page.
-{{ packet.products }}
+
+<div id="products">
+{% for product in packet.products %}
+	<a href="/productdetail/{{ product.id }}">
+		<div class="productpageblock">
+			<div class="productname">{{ product.name }}</div>
+			<div class="productprice">{{ product.price }}</div>
+			<div class="productdiscount">{{ product.discount }}</div>
+		</div>
+	</a>
+{% endfor %}
+</div>
+<div id="productnavigation">
+	{% if packet.prevpage %}
+		<a href="{{packet.prevpage}}">&lt;</a>&nbsp;|&nbsp;
+	{% endif %}
+	{{ packet.pstart }} - {{ packet.pend }} van {{packet.productcount}}
+	{% if packet.nextpage %}
+		&nbsp;|&nbsp;<a href="{{packet.nextpage}}">&gt;</a>
+	{% endif %}
+</div>
 {% endblock %}

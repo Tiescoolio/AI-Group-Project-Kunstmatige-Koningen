@@ -27,6 +27,7 @@ body {
 
 body, a:link, a:visited, a:hover, a:active {
 	color:#272727;
+	text-decoration:none;
 }
 
 .centerstage {
@@ -105,9 +106,18 @@ a.hured{
 .logosubbar {
 	float:right;
 	text-align:right;
-	height:25px;
-	margin-top:75px;
+	height:28px;
+	margin-top:65px;
+	padding-top:7px;
 	background-color:white;
+	padding-left:5px;
+	padding-right:5px;
+	font-size:16px;
+	color:#a8a8a8;
+}
+
+.logosubbar a {
+	color:#a8a8a8;
 }
 
 #logo {
@@ -118,19 +128,86 @@ a.hured{
 /* ..:: Main Menu Styling ::.. */
 
 #menubarbackground {
-	background-color:rgba(0,146,210,1);
+	width:100%;
+	background-color:white;
+	padding-top:7px;
+	border-bottom:1px solid rgba(0,146,210,1);
 }
 
 #menudropdownbackground {
 	position:relative;
 }
 
+.menuitem, .submenuitem {
+	display:inline-block;
+	margin-left:3px;
+	margin-right:3px;
+	font-size:12px;
+	font-weight:bold;
+}
+
 .menudropdown {
-	position: absolute; /* Sit on top of the page content */
-	display: none; /* Hidden by default */
+	position: absolute; 
+	display: none;
 	width:100%;
-	background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-	z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+	background-color: #fafafa; 
+	z-index: 2; 
+	padding-top:7px;
+	padding-bottom:10px;
+	border-bottom:1px solid rgba(0,146,210,1);
+}
+
+/* ..:: Product Object Styling ::.. */
+
+.productpageblock {
+	margin-left:9px;
+	margin-right:9px;
+	margin-bottom:10px;
+	width:130px;
+	height:130px;
+	display:block;
+	float:left;
+	font-size:12px;
+	border: 1px solid rgba(0,146,210,1);
+}
+
+.productname {
+	font-weight:bold;
+	font-size:12px;
+	margin-top:10px;
+	margin-bottom:3px;
+}
+
+.productprice {
+	font-weight:bold;
+	font-size:14px;
+	color:#e6331c;
+	margin-top:3px;
+	margin-bottom:3px;
+}
+
+.productdiscount {
+	margin-top:2px;
+	margin-bottom:2px;
+	color:white;
+	background-color: rgba(0,146,210,1);
+}
+
+/* ..:: Products Page Styling ::.. */
+
+#products, #recommendedproducts {
+	text-align:center;
+	width:600px;
+	margin-left:auto;
+	margin-right:auto;
+	overflow:auto;
+}
+
+#productnavigation {
+	text-align:right;
+	margin-top:10px;
+	padding:5px;
+	border: 1px solid rgba(0,146,210,1);
 }
 
 /* ..:: Bottom Bar Styling ::.. */
@@ -151,10 +228,6 @@ a.hured{
 #topbarbackground, #bottombarbackground {
 	width:100%;
 	height:40px;
-}
-
-#menubarbackground {
-	width:100%;
 }
 
 #topbar, #bottombar {
@@ -182,14 +255,6 @@ a.hured{
 
 #greeting {
 	float:left;
-}
-
-.menuitem {
-	display:inline-block;
-	margin-left:10px;
-	margin-right:10px;
-	font-size:14px;
-	font-weight:bold;
 }
 
 .menuitem  a:link, #menu a:visited, #menu a:hover, #menu a:active {
@@ -238,11 +303,7 @@ a.hured{
 	overflow:auto;
 }
 
-#productnavigation {
-	text-align:right;
-	margin-top:10px;
-	padding:5px;
-}
+
 
 .productentry {
 	width:190px;

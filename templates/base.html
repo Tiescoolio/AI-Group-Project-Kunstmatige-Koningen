@@ -53,19 +53,20 @@
 							<a href="/producten/{{ packet.categories_encode[k] }}">{{ k }}</a>
 						</div>
 						{% endfor %}
+						<div class="menuitem">
+							<a href="/categorieoverzicht">&gt;</a>
+						</div>
 					</div>
 				</div>
 				<div id="menudropdownbackground">
 					{% for k, v in packet.categoryindex.items() %}
 					{% if v|length %}
 					<div class="menudropdown" id="menudropdown-{{ packet.categories_encode[k] }}">
-						<ul>
-							{% for k2, v2 in v.items() %}
-							{% if k2[0:1] != "_" %}
-							<li><a href="/producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}">{{ k2 }}</a></li>
-							{% endif %}
-							{% endfor %}
-						</ul>
+						{% for k2, v2 in v.items() %}
+						{% if k2[0:1] != "_" %}
+						<a href="/producten/{{ packet.categories_encode[k] }}/{{ packet.categories_encode[k2] }}" class="submenuitem">{{ k2 }}</a>
+						{% endif %}
+						{% endfor %}
 					</div>
 					{% endif %}
 					{% endfor %}
@@ -79,8 +80,17 @@
 		<div id="content">
 			{% block content %}{{ contenttext }}{% endblock %}
 			{% block suggestionbox %}
-			<div id="suggestionbox">
-				<div id="suggestiontext">Suggesties?</div>
+			<h4>{{ packet.r_string }}</h4>
+			<div id="recommendedproducts">
+				{% for product in packet.r_products %}
+					<a href="/productdetail/{{ product.id }}">
+						<div class="productpageblock">
+							<div class="productname">{{ product.name }}</div>
+							<div class="productprice">{{ product.price }}</div>
+							<div class="productdiscount">{{ product.discount }}</div>
+						</div>
+					</a>
+				{% endfor %}
 			</div>
 			{% endblock %}
 		</div>

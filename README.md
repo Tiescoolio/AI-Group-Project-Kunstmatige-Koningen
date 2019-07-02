@@ -1,15 +1,18 @@
 # huwebshop
 Git for the HU Webshop project.
 
-## Todo
+## Questions To Be Answered
 
-- Add elements for changing the session ID.
-- Get the top menu to display properly in the base template.
-- Create generic category page for all categories - read: create working dynamic product queries for any categories
-- Create expanded shopping cart functionality
-- Create session ID switches and search functionality
-- Create separate session switch functions
-- Compose meaningless dummy recommendation service in the Cloud
+- How secretive should I be about this data? Can a database containing all of it be exposed to the outside world?
+- Which of the possible expansions are necessities for 
+
+## Possible Expansions
+
+- Search functionality (either piecemeal or full-text/dynamic)
+- Test recommendation service elsewhere in the cloud
+- Automatically generated product images
+- Additional styling
+- Session ID synonyms
 
 ## Notes about the Project
 
@@ -49,16 +52,15 @@ This first testing subset can now be found in the folder datasets_sample_1/.
 
 - Python 3
 - Flask (includes Jinja and Werkzeug)
-- python-dotenv (pip install -U python-dotenv)
-- MongoDB (installer)
+- python-dotenv package (pip install -U python-dotenv)
 - Pymongo package
+- MongoDB Community Edition (for local installs)
+
+## Included Sources
+
 - jQuery
+- Roboto Font (Google Fonts)
 - Some cool buttons (https://fdossena.com/?p=html5cool/buttons/i.frag)
-
-## Notes to Self
-
-visitors.json = profiles!
-To count lines, use the wc -l command in the Unix shell
 
 ## Development Questions
 
