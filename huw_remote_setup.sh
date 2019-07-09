@@ -11,5 +11,5 @@ rm -f .env
 echo "MONGODBSERVER=$MONGODBSERVER" >> .env
 echo "MONGODBUSER=$MONGODBUSER" >> .env
 echo "MONGODBPASSWORD=$MONGODBPASSWORD" >> .env
-export FLASK_APP=huwebshop.py
+export FLASK_APP=huwclass.py
 python -m flask run

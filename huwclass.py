@@ -35,7 +35,6 @@ class HUWebshop(object):
 
     productfields = ["name", "price.selling_price", "properties.discount", "images"]
 
-    # Popular | Similar | Combination | Behaviour | Personal
     recommendationtypes = {'popular':"Anderen kochten ook",'similar':"Soortgelijke producten",'combination':'Combineert goed met','behaviour':'Passend bij uw gedrag','personal':'Persoonlijk aanbevolen'}
 
     def __init__(self, app):
@@ -176,6 +175,7 @@ class HUWebshop(object):
         packet['categories_decode'] = self.catdecode
         packet['paginationcounts'] = self.paginationcounts
         packet['session_id'] = session['session_id']
+        packet['shopping_cart'] = session['shopping_cart']
         return render_template(template, packet=packet)
 
     def productpage(self, catlist=[], page=1):
@@ -219,10 +219,24 @@ class HUWebshop(object):
             'r_string':list(self.recommendationtypes.values())[1]})
 
     def shoppingcart(self):
-        """ This function renders the shopping cart for the user. """
-        return self.renderpackettemplate('shoppingcart.html')
+        """ This function renders the shopping cart for the user.
+        i = []
+        for tup in session['shopping_cart']:
+            product = self.database.products.find_one({"_id":tup[0]})
+            product["itemcount"] = tup[1]
+            i.append(product)"""
+        i = []
+        for tup in session['shopping_cart']:
+            product = self.prepproduct(self.database.products.find_one({"_id":str(tup[0])}))
+            product["itemcount"] = tup[1]
+            i.append(product)
+        return self.renderpackettemplate('shoppingcart.html',{'itemsincart':i,\
+            'r_products':(i*4)[0:4], \
+            'r_type':list(self.recommendationtypes.keys())[2],\
+            'r_string':list(self.recommendationtypes.values())[2]})
 
     def categoryoverview(self):
+        """ This subpage shows all top-level categories in its main menu. """
         return self.renderpackettemplate('categoryoverview.html')
 
     def changeprofileid(self):
@@ -233,6 +247,17 @@ class HUWebshop(object):
         if profidexists:
             session['session_id'] = newprofileid
         return "Done"
+
+    def addtoshoppingcart(self, productid):
+        """ This function adds one to the shopping cart. """
+        cartids = list(map(lambda x: x[0], session['shopping_cart']))
+        if productid in cartids:
+            ind = cartids.index(productid)
+            session['shopping_cart'][ind] = (session['shopping_cart'][ind][0], session['shopping_cart'][ind][1]+1)
+        else:
+            session['shopping_cart'].append((productid, 1))
+        session['shopping_cart'] = session['shopping_cart']
+        return "{}"
 
 huw = HUWebshop(app)
 
@@ -272,6 +297,10 @@ def categorieoverzicht():
 @app.route('/change-profile-id', methods=['POST'])
 def changeprofileid():
     return huw.changeprofileid()
+
+@app.route('/add-to-shopping-cart/<int:productid>', methods=['POST'])
+def addtoshoppingcart(productid):
+    return huw.addtoshoppingcart(productid)
 
 # Decorators to process
 '''

@@ -31,15 +31,15 @@
 			{% block logobar %}
 			<div id="logobackground">
 				<div id="logobar">
-					<img id="logo" src="/static/hulogo.png" />
-					<div id="logosubbarwtwo" class="logosubbar">
-						|
+					<a href="/"><img id="logo" src="/static/voorbeeldshoplogo_small.png" /></a>
+					<div id="logosubbarright" class="logosubbar">
+						&nbsp;
 					</div>
 					<div id="logosubbar" class="logosubbar">
 						<a href="/winkelmand">Winkelmand</a>
 					</div>
-					<div id="logosubbarwtwo" class="logosubbar">
-						|
+					<div id="logosubbarleft" class="logosubbar">
+						&nbsp;
 					</div>
 				</div>
 			</div>
@@ -80,16 +80,19 @@
 		<div id="content">
 			{% block content %}{{ contenttext }}{% endblock %}
 			{% block suggestionbox %}
+			{% if packet.r_products %}
 			<h4>{{ packet.r_string }}</h4>
+			{% endif %}
 			<div id="recommendedproducts">
 				{% for product in packet.r_products %}
-					<a href="/productdetail/{{ product.id }}">
-						<div class="productpageblock">
+					<div class="productpageblock">
+						<a href="/productdetail/{{ product.id }}">
 							<div class="productname">{{ product.name }}</div>
 							<div class="productprice">{{ product.price }}</div>
 							<div class="productdiscount">{{ product.discount }}</div>
-						</div>
-					</a>
+						</a>
+						<a href="#" function="add-to-shopping-cart" class="recommended-addtocart button hured" productid="{{ product.id }}">In winkelmand</a>
+					</div>
 				{% endfor %}
 			</div>
 			{% endblock %}

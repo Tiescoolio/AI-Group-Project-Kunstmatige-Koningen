@@ -1,19 +1,27 @@
 # huwebshop
 Git for the HU Webshop project.
 
-## Questions To Be Answered
+## Todo
 
-- Which solution would you prefer for the storage issues as described below in Notes On The Project?
-- Should an instance of this code run in the cloud directly during the course, for general demonstrations?
-- How secretive should I be about this data? Can a database containing all of it be exposed to the outside world?
-- Which of the possible expansions are necessities for future usage?
+[ ] Set up local REST service for recommendations
+[ ] Session IDs to Profile IDs (by object ID)
+[ ] Structural rewrite of code
+[ ] Product page layout improvements
+[ ] Design improvements
+[ ] Reinstate pagination
+[ ] Documentation
+[ ] UML diagram
+[ ] Optional: image generator
+[ ] Optional: search function
 
-## Possible Expansions
+## Notes On Future Improvements
 
-- Search functionality (either piecemeal or full-text/dynamic)
-- Test recommendation service elsewhere in the cloud
-- Automatically generated product images
-- Session ID synonyms
+MongoDB - alles
+Recommendation - SQL
+
+Voorkeur recommendation dummy: REST API - plaatselijk draaien
+	- "Stuur alleen IDs terug!"
+Overzetten op profile-ids ("Objectids")
 
 ## Notes On The Project
 

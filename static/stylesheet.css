@@ -93,7 +93,7 @@ a.hured{
 /* ..:: Logo Bar Styling ::.. */
 
 #logobackground {
-	background-color:rgba(0,146,210,1);
+	background-image:url('/static/menubackground.png');
 	height:100px;
 }
 
@@ -116,12 +116,22 @@ a.hured{
 	color:#a8a8a8;
 }
 
+#logosubbarleft {
+	background-image:url('/static/anglesectionback.png');
+	width:5px;
+}
+
+#logosubbarright {
+	background-image:url('/static/anglesectionforward.png');
+	width:5px;
+}
+
 .logosubbar a {
 	color:#a8a8a8;
 }
 
 #logo {
-	width:100px;
+	width:165px;
 	float:left;
 }
 
@@ -191,6 +201,27 @@ a.hured{
 	margin-bottom:2px;
 	color:white;
 	background-color: rgba(0,146,210,1);
+}
+
+.productitemcount {
+	font-size:14px;
+	font-weight:bold;
+}
+
+.recommended-addtocart, .productpage-addtocart {
+	display:inline-block;
+	padding:0.3em 1.2em;
+	margin:0 0.1em 0.1em 0;
+	border:0.16em solid rgba(255,255,255,0);
+	border-radius:2em;
+	box-sizing: border-box;
+	text-decoration:none;
+	font-family:'Roboto',sans-serif;
+	font-weight:300;
+	color:#FFFFFF;
+	text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
+	text-align:center;
+	transition: all 0.2s;
 }
 
 /* ..:: Products Page Styling ::.. */
