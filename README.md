@@ -3,16 +3,16 @@ Git for the HU Webshop project.
 
 ## Todo
 
-[ ] Set up local REST service for recommendations
-[ ] Session IDs to Profile IDs (by object ID)
-[ ] Structural rewrite of code
-[ ] Product page layout improvements
-[ ] Design improvements
-[ ] Reinstate pagination
-[ ] Documentation
-[ ] UML diagram
-[ ] Optional: image generator
-[ ] Optional: search function
+- [ ] Set up local REST service for recommendations
+- [ ] Session IDs to Profile IDs (by object ID)
+- [ ] Structural rewrite of code
+- [ ] Product page layout improvements
+- [ ] Design improvements
+- [ ] Reinstate pagination
+- [ ] Documentation
+- [ ] UML diagram
+- [ ] Optional: image generator
+- [ ] Optional: search function
 
 ## Notes On Future Improvements
 
