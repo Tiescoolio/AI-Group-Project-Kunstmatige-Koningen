@@ -315,19 +315,6 @@ def changepaginationcount():
 
 # Decorators to process
 '''
-@app.before_request
-@app.route('/change-profile-id', methods=['POST'])
-@app.route('/dynamic-shopping-cart', methods=['POST'])
-@app.route('/producten/pagination-change/<int:pagval>', methods=['POST'])
-@app.route('/add-to-shopping-cart/<int:productid>', methods=['POST'])
-@app.route('/')
-@app.route('/producten/')
-@app.route('/producten/<cat1>')
-@app.route('/producten/<cat1>/<cat2>')
-@app.route('/producten/<cat1>/<cat2>/<cat3>')
-@app.route('/producten/<cat1>/<cat2>/<cat3>/<cat4>')
-@app.route('/productdetail/<int:productid>')
-@app.route('/winkelmand')
 @app.errorhandler(404)
 @app.errorhandler(405)
 '''
