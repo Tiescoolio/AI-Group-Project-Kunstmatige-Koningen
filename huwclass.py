@@ -2,6 +2,7 @@ from flask import Flask, request, session, render_template, redirect, url_for, g
 import random, os, json, huwutil, urllib.parse
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from bson.objectid import ObjectId
 
 # We load the environment variables, if they exist, from the .env file in this
 # folder.
@@ -21,7 +22,7 @@ class HUWebshop(object):
     client = None
     database = None
 
-    envnames = ["MONGODBUSER","MONGODBPASSWORD","MONGODBSERVER"]
+    envvals = ["MONGODBUSER","MONGODBPASSWORD","MONGODBSERVER"]
     dbstring = 'mongodb+srv://{0}:{1}@{2}/test?retryWrites=true&w=majority'
 
     categoryindex = None
@@ -45,9 +46,9 @@ class HUWebshop(object):
         # Depending on whether environment variables have been set, we connect
         # to a local or remote instance of MongoDB.
         load_dotenv()
-        if os.getenv(self.envnames[0]) is not None:
-            self.envnames = list(map(lambda x: str(os.getenv(x)), self.envnames))
-            self.client = MongoClient(self.dbstring.format(*self.envnames))
+        if os.getenv(self.envvals[0]) is not None:
+            self.envvals = list(map(lambda x: str(os.getenv(x)), self.envvals))
+            self.client = MongoClient(self.dbstring.format(*self.envvals))
         else:
             self.client = MongoClient()
         self.database = self.client.huwebshop 
@@ -163,6 +164,7 @@ class HUWebshop(object):
             session['shopping_cart'] = []
             session['items_per_page'] = self.paginationcounts[0]
             session['session_id'] = self.database.sessions.find_one({})['buid'][0]
+            session['profile_id'] = str(self.database.profiles.find_one({})['_id'])
             session['session_valid'] = 1
 
     def renderpackettemplate(self, template="homepage.html", packet={}):
@@ -174,7 +176,9 @@ class HUWebshop(object):
         packet['categories_encode'] = self.catencode
         packet['categories_decode'] = self.catdecode
         packet['paginationcounts'] = self.paginationcounts
+        packet['items_per_page'] = session['items_per_page']
         packet['session_id'] = session['session_id']
+        packet['profile_id'] = session['profile_id']
         packet['shopping_cart'] = session['shopping_cart']
         return render_template(template, packet=packet)
 
@@ -200,7 +204,7 @@ class HUWebshop(object):
         return self.renderpackettemplate('products.html', {'products': prodlist, \
             'productcount': prodcount, \
             'pstart': skipindex + 1, \
-            'pend': skipindex + session['items_per_page'], \
+            'pend': skipindex + session['items_per_page'] if session['items_per_page'] > 0 else prodcount, \
             'prevpage': pagepath+str(page-1) if (page > 1) else False, \
             'nextpage': pagepath+str(page+1) if (session['items_per_page']*page < prodcount) else False, \
             'r_products':prodlist[0:4], \
@@ -219,12 +223,7 @@ class HUWebshop(object):
             'r_string':list(self.recommendationtypes.values())[1]})
 
     def shoppingcart(self):
-        """ This function renders the shopping cart for the user.
-        i = []
-        for tup in session['shopping_cart']:
-            product = self.database.products.find_one({"_id":tup[0]})
-            product["itemcount"] = tup[1]
-            i.append(product)"""
+        """ This function renders the shopping cart for the user."""
         i = []
         for tup in session['shopping_cart']:
             product = self.prepproduct(self.database.products.find_one({"_id":str(tup[0])}))
@@ -242,14 +241,15 @@ class HUWebshop(object):
     def changeprofileid(self):
         """ This function checks whether the provided session ID actually exists
         and stores it in the session if it does. """
-        newprofileid = request.form.get('session_id')
-        profidexists = self.database.sessions.find_one({'buid':request.form.get('session_id')})
+        newprofileid = request.form.get('profile_id')
+        profidexists = self.database.profiles.find_one({'_id': ObjectId(newprofileid)})
         if profidexists:
-            session['session_id'] = newprofileid
+            session['profile_id'] = newprofileid
         return "Done"
 
-    def addtoshoppingcart(self, productid):
+    def addtoshoppingcart(self):
         """ This function adds one to the shopping cart. """
+        productid = request.form.get('product_id')
         cartids = list(map(lambda x: x[0], session['shopping_cart']))
         if productid in cartids:
             ind = cartids.index(productid)
@@ -258,6 +258,13 @@ class HUWebshop(object):
             session['shopping_cart'].append((productid, 1))
         session['shopping_cart'] = session['shopping_cart']
         return "{}"
+
+    def changepaginationcount(self):
+        """ This function changes the number of items displayed on the provided 
+        page. """
+        session['items_per_page'] = int(request.form.get('items_per_page'))
+        # TODO: add method that returns the exact URL the user should be returned to, including offset
+        return request.form.get('refurl')
 
 huw = HUWebshop(app)
 
@@ -298,9 +305,13 @@ def categorieoverzicht():
 def changeprofileid():
     return huw.changeprofileid()
 
-@app.route('/add-to-shopping-cart/<int:productid>', methods=['POST'])
-def addtoshoppingcart(productid):
-    return huw.addtoshoppingcart(productid)
+@app.route('/add-to-shopping-cart', methods=['POST'])
+def addtoshoppingcart():
+    return huw.addtoshoppingcart()
+
+@app.route('/producten/pagination-change', methods=['POST'])
+def changepaginationcount():
+    return huw.changepaginationcount()
 
 # Decorators to process
 '''

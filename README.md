@@ -3,25 +3,33 @@ Git for the HU Webshop project.
 
 ## Todo
 
-- [ ] Set up local REST service for recommendations
-- [ ] Session IDs to Profile IDs (by object ID)
-- [ ] Structural rewrite of code
+- [x] Session IDs to Profile IDs (by object ID)
+- [x] Reinstate pagination
+- [x] Improve the methods, structure and comments of the dynamic elements
+- [x] Restructure and clean up the CSS code
+- [ ] Add commentary subsections to the huwclass.py
+- [ ] Rewrite the huwclass.py to set up URL mappings from within
+- [ ] Reinstate a better written dynamic shopping cart mechanism
+- [ ] Add error message for incorrect profile IDs
 - [ ] Product page layout improvements
-- [ ] Design improvements
-- [ ] Reinstate pagination
+- [ ] Design improvements and tweaks (closer to the real thing)
 - [ ] Documentation
 - [ ] UML diagram
+- [ ] Set up local REST service for recommendations
+- [ ] Structural review and rewrite of code if needed
 - [ ] Optional: image generator
 - [ ] Optional: search function
+- [ ] Optional: offset and page relocation pagination
+- [ ] Optional: responsive design
+- [ ] Optional: price calculation and discount rule implementation
 
 ## Notes On Future Improvements
 
-MongoDB - alles
-Recommendation - SQL
+MongoDB - alles draaien via mongoimport op het eigen systeem
+Recommendation - SQL database
 
 Voorkeur recommendation dummy: REST API - plaatselijk draaien
 	- "Stuur alleen IDs terug!"
-Overzetten op profile-ids ("Objectids")
 
 ## Notes On The Project
 

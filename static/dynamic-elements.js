@@ -1,59 +1,31 @@
-// TODO: expand upon this function, displaying dynamic shopping cart elements in HTML.
-function update_dynamic_shopping_cart(data){
-	shopdata = JSON.parse(data);
-	$("#shopping-cart-count").html(" ("+shopdata.itemcount+")");
-}
 
 $(document).ready(function() {
 	
-	$("a[function=add-to-shopping-cart]").click(function(event){
-		$.ajax({url:"/add-to-shopping-cart/"+$(this).attr("productid"), method:"POST"}).done(update_dynamic_shopping_cart);
+	// These functions deal with the profile bar at the top of every page; be it
+	// through hiding and showing the different types of bar, or through sending
+	// the actual request that changes the profile ID for a given session.
+
+	$("a[function=show-profilebar-dynamic]").click(function(event){
+		$("#profilebar-static").attr("style","display:none");
+		$("#profilebar-dynamic").attr("style","");
 		event.preventDefault();
 	});
 
-	$("a[function=show-sessionbar-dynamic]").click(function(event){
-		$("#sessionbar-static").attr("style","display:none");
-		$("#sessionbar-dynamic").attr("style","");
-		event.preventDefault();
-	});
-
-	$("a[function=show-sessionbar-static]").click(function(event){
-		$("#sessionbar-dynamic").attr("style","display:none");
-		$("#sessionbar-static").attr("style","");
+	$("a[function=show-profilebar-static]").click(function(event){
+		$("#profilebar-dynamic").attr("style","display:none");
+		$("#profilebar-static").attr("style","");
 		event.preventDefault();
 	});
 
 	$("[function=change-profile-id]").click(function(event){ 
-		$.ajax({url:"/change-profile-id", method:"POST", data:{"session_id":$("input#profile-id-input").val()}}).done(function(){ location.reload(); });
+		$.ajax({url:"/change-profile-id", method:"POST", data:{"profile_id":$("input#profile-id-input").val()}}).done(function(){ location.reload(); });
 		event.preventDefault();
 	});
 	
-	$.ajax({url:"/dynamic-shopping-cart", method:"POST"}).done(update_dynamic_shopping_cart);
-	
-	$("select#pagination-select").change(function(){ 
-		$.ajax({url:"/producten/pagination-change/"+$(this).val(), method:"POST"}).done(function(data){ 
-			window.location.href = data;
-		});
-	});
 
-/*
-	$(".menuitem").hover(function(){
-		$("#"+$(this).attr("dropdown")).attr("style","display:block");
-	}, function(){
-		$("#"+$(this).attr("dropdown")).attr("style","display:none");
-	});
-*/
-/*
-	$("#menuwrapper").hover(function(event){
-		var target = $( event.target );
-		$(".menudropdown").attr("style","display:none");
-		if(target.attr('dropdown')){
-			$("#"+target.attr("dropdown")).attr("style","display:block");
-		}
-	}, function(){
-		$(".menudropdown").attr("style","display:none");
-	})
-*/
+	// These functions deal with dynamically showing and hiding the main menu
+	// subcategory dropdowns.
+
 	$(".menuitem").hover(function(){
 		$(".menudropdown").attr("style","display:none");
 		$("#"+$(this).attr("dropdown")).attr("style","display:block");
@@ -62,5 +34,21 @@ $(document).ready(function() {
 	$("#menuwrapper").hover(function(event){}, function(){
 		$(".menudropdown").attr("style","display:none");
 	})
+
+	// This function submits the request for adding items to the shopping cart.
+
+	$("a[function=add-to-shopping-cart]").click(function(event){
+		$.ajax({url:"/add-to-shopping-cart", method:"POST", data: {"product_id": $(this).attr("productid")}});
+		event.preventDefault();
+	});
+
+	// This function submits the request for changing the displayed number of
+	// items per page.
+
+	$("select#pagination-select").change(function(){ 
+		$.ajax({url:"/producten/pagination-change", method:"POST", data:{"refurl": window.location.pathname, "items_per_page": $(this).val()}}).done(function(data){ 
+			window.location.href = data;
+		});
+	});
 
 });

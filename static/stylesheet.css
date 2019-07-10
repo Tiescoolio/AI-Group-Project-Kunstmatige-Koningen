@@ -58,33 +58,39 @@ a.button{
 	color:#FFFFFF;
 	text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
 	text-align:center;
-	transition: all 0.2s;
 }
 
-a.smallbutton{
-	display:inline-block;
+a.button.small{
 	padding:0.15em 0.6em;
-	margin:0 0.1em 0.1em 0;
-	border:0.16em solid rgba(255,255,255,0);
-	border-radius:2em;
-	box-sizing: border-box;
-	text-decoration:none;
-	font-family:'Roboto',sans-serif;
-	font-weight:300;
-	color:#FFFFFF;
-	text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
-	text-align:center;
-	transition: all 0.2s;
 }
 
-a.hured{
-	background-color:#e6331c;
+a.button:hover{
+	border-color: rgba(255,255,255,1);
 }
+
+@media all and (max-width:30em){
+	a.button{
+		display:block;
+		margin:0.2em auto;
+	}
+}
+
+.hured { background-color:#e6331c; }
+.huredborder { border:1px solid #e6331c; }
+.hublue { background-color:#0092d2; }
+.hublueborder { border:1px solid #0092d2; }
+.hublueborderbottom { border-bottom:1px solid #0092d2; }
+.red{ background-color:#f14e4e; }
+.orange{ background-color:#f1bb4e; }
+.green{ background-color:#84f14e; }
+.aquamarine{ background-color:#4ef18f; }
+.blue{ background-color:#4e9af1; }
+.purple{ background-color:#9a4ef1; }
+.amaranth{ background-color:#e52b50; }
 
 /* ..:: Session Bar Styling ::.. */
 
 #sessionbarbackground {
-	background-color:rgba(0,146,210,1);
 	padding:7px 0px;
 	color:white;
 	font-size:10pt;
@@ -95,12 +101,6 @@ a.hured{
 #logobackground {
 	background-image:url('/static/menubackground.png');
 	height:100px;
-}
-
-#logobar {
-	max-width:800px;
-	margin-left:auto;
-	margin-right:auto;
 }
 
 .logosubbar {
@@ -138,14 +138,12 @@ a.hured{
 /* ..:: Main Menu Styling ::.. */
 
 #menubarbackground {
-	width:100%;
 	background-color:white;
 	padding-top:7px;
-	border-bottom:1px solid rgba(0,146,210,1);
 }
 
-#menudropdownbackground {
-	position:relative;
+#menubar {
+	padding-bottom:10px;
 }
 
 .menuitem, .submenuitem {
@@ -156,6 +154,10 @@ a.hured{
 	font-weight:bold;
 }
 
+#menudropdownbackground {
+	position:relative;
+}
+
 .menudropdown {
 	position: absolute; 
 	display: none;
@@ -164,7 +166,13 @@ a.hured{
 	z-index: 2; 
 	padding-top:7px;
 	padding-bottom:10px;
-	border-bottom:1px solid rgba(0,146,210,1);
+}
+
+/* ..:: Content Block Styling ::.. */
+
+#content {
+	margin-top:50px;
+	margin-bottom:50px;
 }
 
 /* ..:: Product Object Styling ::.. */
@@ -178,7 +186,6 @@ a.hured{
 	display:block;
 	float:left;
 	font-size:12px;
-	border: 1px solid rgba(0,146,210,1);
 }
 
 .productname {
@@ -200,7 +207,6 @@ a.hured{
 	margin-top:2px;
 	margin-bottom:2px;
 	color:white;
-	background-color: rgba(0,146,210,1);
 }
 
 .productitemcount {
@@ -208,23 +214,7 @@ a.hured{
 	font-weight:bold;
 }
 
-.recommended-addtocart, .productpage-addtocart {
-	display:inline-block;
-	padding:0.3em 1.2em;
-	margin:0 0.1em 0.1em 0;
-	border:0.16em solid rgba(255,255,255,0);
-	border-radius:2em;
-	box-sizing: border-box;
-	text-decoration:none;
-	font-family:'Roboto',sans-serif;
-	font-weight:300;
-	color:#FFFFFF;
-	text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
-	text-align:center;
-	transition: all 0.2s;
-}
-
-/* ..:: Products Page Styling ::.. */
+/* ..:: Products Overview Styling ::.. */
 
 #products, #recommendedproducts {
 	text-align:center;
@@ -238,212 +228,15 @@ a.hured{
 	text-align:right;
 	margin-top:10px;
 	padding:5px;
-	border: 1px solid rgba(0,146,210,1);
 }
 
-/* ..:: Bottom Bar Styling ::.. */
+/* ..:: Bottom Bar and Credits Styling ::.. */
 
-#bottombarbackground {
-	background-color:rgba(0,146,210,1);
-}
-
-/* ..:: ...to be sorted... ::.. */
-
-#title {
-	display:block;
-	float:right;
-	font-size:50px;
-	color:#272727;
-}
-
-#topbarbackground, #bottombarbackground {
-	width:100%;
+#bottombarbackground, #bottombar {
 	height:40px;
-}
-
-#topbar, #bottombar {
-	max-width:800px;
-	height:40px;
-}
-
-#menubar {
-	max-width:800px;
-	padding-bottom:10px;
-}
-
-
-#topbar, #content, #menubar, #bottombar {
-	max-width:800px;
-	margin-left:auto;
-	margin-right:auto;
-}
-
-#greeting, #menu {
-	margin-top:10px;
-	color:white;
-	text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
-}
-
-#greeting {
-	float:left;
-}
-
-.menuitem  a:link, #menu a:visited, #menu a:hover, #menu a:active {
-	text-decoration:none;
-}
-
-
-
-#menu {
-	float:right;
-}
-
-#menu a:link, #menu a:visited, #menu a:hover, #menu a:active {
-	color:white;
-}
-
-#content {
-	margin-top:50px;
-	margin-bottom:50px;
-}
-
-#suggestionbox {
-	height:150px;
-	border: 1px solid #9d9d9d;
-	background-color:#dfdfdf;
-	margin-top:25px;
-	margin-bottom:25px;
-}
-
-#suggestiontext {
-	color:#9d9d9d;
-	margin-top:70px;
-	font-size:10px;
 }
 
 #credits {
 	font-size:10px;
 	color:#909090;
-}
-
-#products {
-	text-align:center;
-	width:600px;
-	margin-left:auto;
-	margin-right:auto;
-	overflow:auto;
-}
-
-
-
-.productentry {
-	width:190px;
-	display:block;
-	float:left;
-}
-
-.productpagepicture {
-	background-position:center;
-	background-size:cover;
-	width:150px;
-	height:150px;
-	margin-left:auto;
-	margin-right:auto;
-}
-
-.productpageinfo {
-	height:100px;
-}
-
-.productprice {
-	font-weight:bold;
-}
-
-#detailpagepicture {
-	background-position:center;
-	background-size:cover;
-	width:300px;
-	height:300px;
-	margin-left:auto;
-	margin-right:auto;
-}
-
-#detailpageprice {
-	font-weight:bold;
-	font-size:20px;
-}
-
-#detailattributes {
-	display:inline-block;
-	margin-left:auto;
-	margin-right:auto;
-	text-align:left;
-	border-collapse:collapse;
-	margin-bottom:15px;
-}
-
-#detailattributes td {
-	border: 1px solid #272727;
-	padding:10px 15px;
-}
-
-.huredborder {
-	border:1px solid #e6331c;
-}
-
-a.button{
-	display:inline-block;
-	padding:0.3em 1.2em;
-	margin:0 0.1em 0.1em 0;
-	border:0.16em solid rgba(255,255,255,0);
-	border-radius:2em;
-	box-sizing: border-box;
-	text-decoration:none;
-	font-family:'Roboto',sans-serif;
-	font-weight:300;
-	color:#FFFFFF;
-	text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);
-	text-align:center;
-	transition: all 0.2s;
-}
-
-a.button:hover{
-	border-color: rgba(255,255,255,1);
-}
-
-@media all and (max-width:30em){
-	a.button{
-		display:block;
-		margin:0.2em auto;
-	}
-}
-
-a.red{ 
-	background-color:#f14e4e;
-}
-
-
-
-a.orange{ 
-	background-color:#f1bb4e;
-}
-
-a.green{ 
-	background-color:#84f14e;
-}
-
-a.aquamarine{ 
-	background-color:#4ef18f;
-}
-
-a.blue{ 
-	background-color:#4e9af1;
-}
-
-a.purple{ 
-	background-color:#9a4ef1;
-}
-
-a.amaranth{ 
-	background-color:#e52b50;
 }
