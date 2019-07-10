@@ -3,25 +3,25 @@ Git for the HU Webshop project.
 
 ## Todo
 
-- [x] Session IDs to Profile IDs (by object ID)
-- [x] Reinstate pagination
-- [x] Improve the methods, structure and comments of the dynamic elements
-- [x] Restructure and clean up the CSS code
-- [ ] Add commentary subsections to the huwclass.py
-- [ ] Rewrite the huwclass.py to set up URL mappings from within
-- [ ] Reinstate a better written dynamic shopping cart mechanism
-- [ ] Add error message for incorrect profile IDs
-- [ ] Product page layout improvements
+- [ ] Code structure
+  - [ ] Change all dynamic element communication to JSON type objects
+  - [ ] Rewrite Bash script for environment variables, including recommendations and altering the mechanism inside huwclass
+  - [ ] Rewrite the huwclass.py to set up URL mappings from within
+  - [ ] Structural review and rewrite of code if needed
 - [ ] Design improvements and tweaks (closer to the real thing)
+  - [ ] Product page layout improvements
+  - [ ] Stylize the dynamic shopping cart element
 - [ ] Documentation
-- [ ] UML diagram
-- [ ] Set up local REST service for recommendations
-- [ ] Structural review and rewrite of code if needed
-- [ ] Optional: image generator
-- [ ] Optional: search function
-- [ ] Optional: offset and page relocation pagination
-- [ ] Optional: responsive design
-- [ ] Optional: price calculation and discount rule implementation
+  - [ ] Code structure description
+  - [ ] Automatically generated HTML documentation/docstrings
+  - [ ] UML diagram
+- [ ] Local recommendations REST service
+- [ ] Optional improvements
+  - [ ] Image generator
+  - [ ] Search function
+  - [ ] Offset and page relocation pagination
+  - [ ] Responsive design
+  - [ ] Price calculation and discount rule implementation
 
 ## Notes On Future Improvements
 

@@ -26,6 +26,9 @@
 				<div id="profilebar-dynamic" class="centerstage textright textwhiteshadow" style="display:none;">
 					Profiel-ID: <input id="profile-id-input" type="text" value="{{ packet.profile_id }}" size="30" />&nbsp;&nbsp;<a href="#" function="change-profile-id" class="hured small button"/>Aanpassen</a>&nbsp;&nbsp;<a function="show-profilebar-static" href="#">(X)</a>
 				</div>
+				<div id="profilebar-error" class="centerstage textright textwhiteshadow" style="display:none;">
+					Fout: geen geldig profiel-ID opgegeven. Voer de hexadecimale string in behorend bij het _id van het gewenste profiel.
+				</div>
 			</div>
 			{% endblock %}
 			{% block logobar %}
@@ -36,7 +39,7 @@
 						&nbsp;
 					</div>
 					<div id="logosubbar" class="logosubbar">
-						<a href="/winkelmand">Winkelmand</a>
+						<a href="/winkelmand">Winkelmand (<span id="shoppingcartcount">{{ packet.shopping_cart_count }}</span>)</a>
 					</div>
 					<div id="logosubbarleft" class="logosubbar">
 						&nbsp;

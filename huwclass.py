@@ -38,6 +38,8 @@ class HUWebshop(object):
 
     recommendationtypes = {'popular':"Anderen kochten ook",'similar':"Soortgelijke producten",'combination':'Combineert goed met','behaviour':'Passend bij uw gedrag','personal':'Persoonlijk aanbevolen'}
 
+    """ ..:: Initialization and Category Index Functions ::.. """
+
     def __init__(self, app):
         """ Within this constructor, we establish a connection with the database
         and perform necessary setup of the database (if applicable) and menu."""
@@ -113,6 +115,8 @@ class HUWebshop(object):
         if k[:1] != "_":
             v['_count'] = self.database.products.count_documents({self.catlevels[l]:k})
 
+    """ ..:: Helper Functions ::.. """
+
     def flattendict(self,d,s=[]):
         """ This helper function provides a list of all keys that exist within a
         nested dictionary. """
@@ -156,6 +160,12 @@ class HUWebshop(object):
         r['id'] = p['_id']
         return r
 
+    def shoppingcartcount(self):
+        """ This function returns the number of items in the shopping cart. """
+        return sum(list(map(lambda x: x[1], session['shopping_cart'])))
+
+    """ ..:: Session and Templating Functions ::.. """
+
     def checksession(self):
         """ This function sets certain generally used session variables when
         those have not yet been set. This executes before every request, but
@@ -180,7 +190,10 @@ class HUWebshop(object):
         packet['session_id'] = session['session_id']
         packet['profile_id'] = session['profile_id']
         packet['shopping_cart'] = session['shopping_cart']
+        packet['shopping_cart_count'] = self.shoppingcartcount()
         return render_template(template, packet=packet)
+
+    """ ..:: Full Page Endpoints ::.. """
 
     def productpage(self, catlist=[], page=1):
         """ This function renders the product page template with the products it
@@ -209,7 +222,7 @@ class HUWebshop(object):
             'nextpage': pagepath+str(page+1) if (session['items_per_page']*page < prodcount) else False, \
             'r_products':prodlist[0:4], \
             'r_type':list(self.recommendationtypes.keys())[0],\
-            'r_string':list(self.recommendationtypes.values())[0]
+            'r_string':list(self.recommendationtypes.values())[0]\
             })
 
     def productdetail(self, productid):
@@ -238,14 +251,21 @@ class HUWebshop(object):
         """ This subpage shows all top-level categories in its main menu. """
         return self.renderpackettemplate('categoryoverview.html')
 
+    """ ..:: Dynamic AJAX Endpoints ::.. """
+
     def changeprofileid(self):
         """ This function checks whether the provided session ID actually exists
         and stores it in the session if it does. """
-        newprofileid = request.form.get('profile_id')
-        profidexists = self.database.profiles.find_one({'_id': ObjectId(newprofileid)})
-        if profidexists:
-            session['profile_id'] = newprofileid
-        return "Done"
+        try:
+            newprofileid = request.form.get('profile_id')
+            profidexists = self.database.profiles.find_one({'_id': ObjectId(newprofileid)})
+            if profidexists:
+                session['profile_id'] = newprofileid
+                return "1"
+            else:
+                return "0"
+        except:
+            return "0"
 
     def addtoshoppingcart(self):
         """ This function adds one to the shopping cart. """
@@ -257,13 +277,14 @@ class HUWebshop(object):
         else:
             session['shopping_cart'].append((productid, 1))
         session['shopping_cart'] = session['shopping_cart']
-        return "{}"
+        return str(self.shoppingcartcount())
 
     def changepaginationcount(self):
         """ This function changes the number of items displayed on the provided 
         page. """
         session['items_per_page'] = int(request.form.get('items_per_page'))
-        # TODO: add method that returns the exact URL the user should be returned to, including offset
+        # TODO: add method that returns the exact URL the user should be 
+        # returned to, including offset
         return request.form.get('refurl')
 
 huw = HUWebshop(app)

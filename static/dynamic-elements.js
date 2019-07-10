@@ -18,7 +18,14 @@ $(document).ready(function() {
 	});
 
 	$("[function=change-profile-id]").click(function(event){ 
-		$.ajax({url:"/change-profile-id", method:"POST", data:{"profile_id":$("input#profile-id-input").val()}}).done(function(){ location.reload(); });
+		$("#profilebar-error").attr("style","display:none");
+		$.ajax({url:"/change-profile-id", method:"POST", data:{"profile_id":$("input#profile-id-input").val()}}).done(function(data){ 
+			if(data == "1"){
+				location.reload();
+			} else {
+				$("#profilebar-error").attr("style","");
+			}
+		});
 		event.preventDefault();
 	});
 	
@@ -38,7 +45,9 @@ $(document).ready(function() {
 	// This function submits the request for adding items to the shopping cart.
 
 	$("a[function=add-to-shopping-cart]").click(function(event){
-		$.ajax({url:"/add-to-shopping-cart", method:"POST", data: {"product_id": $(this).attr("productid")}});
+		$.ajax({url:"/add-to-shopping-cart", method:"POST", data: {"product_id": $(this).attr("productid")}}).done(function(data){
+			$("#shoppingcartcount").html(data);
+		});
 		event.preventDefault();
 	});
 
