@@ -20,7 +20,8 @@ $(document).ready(function() {
 	$("[function=change-profile-id]").click(function(event){ 
 		$("#profilebar-error").attr("style","display:none");
 		$.ajax({url:"/change-profile-id", method:"POST", data:{"profile_id":$("input#profile-id-input").val()}}).done(function(data){ 
-			if(data == "1"){
+			response = JSON.parse(data);
+			if(response.success){
 				location.reload();
 			} else {
 				$("#profilebar-error").attr("style","");
@@ -46,7 +47,10 @@ $(document).ready(function() {
 
 	$("a[function=add-to-shopping-cart]").click(function(event){
 		$.ajax({url:"/add-to-shopping-cart", method:"POST", data: {"product_id": $(this).attr("productid")}}).done(function(data){
-			$("#shoppingcartcount").html(data);
+			response = JSON.parse(data);
+			if(response.success){
+				$("#shoppingcartcount").html(response.itemcount);
+			}
 		});
 		event.preventDefault();
 	});
@@ -56,7 +60,10 @@ $(document).ready(function() {
 
 	$("select#pagination-select").change(function(){ 
 		$.ajax({url:"/producten/pagination-change", method:"POST", data:{"refurl": window.location.pathname, "items_per_page": $(this).val()}}).done(function(data){ 
-			window.location.href = data;
+			response = JSON.parse(data);
+			if(response.success){
+				window.location.href = response.refurl;
+			}
 		});
 	});
 

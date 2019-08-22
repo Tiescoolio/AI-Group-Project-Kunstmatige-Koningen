@@ -4,9 +4,6 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 
-# We load the environment variables, if they exist, from the .env file in this
-# folder.
-load_dotenv()
 # The secret key used for session encryption is randomly generated every time
 # the server is started up. This means all session data (including the 
 # shopping cart) is erased between server instances.
@@ -78,6 +75,28 @@ class HUWebshop(object):
         countlist = list(map(lambda x, y: (y['_count'], x), self.categoryindex.keys(), self.categoryindex.values()))
         countlist.sort(reverse=True)
         self.mainmenuitems = [x[1] for x in countlist[0:self.mainmenucount]]
+
+        # Finally, we here attach URL rules to all pages we wish to render, to
+        # make the code self-contained; although the more common decorators do
+        # the same thing, we wish to have this class contain as much logic as
+        # possible.
+        self.app.before_request(self.checksession)
+        self.app.add_url_rule('/', 'index', self.renderpackettemplate)
+        self.app.add_url_rule('/producten/', 'producten-0', self.productpage)
+        self.app.add_url_rule('/producten/<cat1>/', 'producten-1', self.productpage)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/', 'producten-2', self.productpage)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/', 'producten-3', self.productpage)
+        self.app.add_url_rule('/producten/<int:page>/', 'producten-4', self.productpage)
+        self.app.add_url_rule('/producten/<cat1>/<int:page>/', 'producten-5', self.productpage)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/<int:page>/', 'producten-6', self.productpage)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/<int:page>/', 'producten-7', self.productpage)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/<cat4>/<int:page>/', 'producten-8', self.productpage)
+        self.app.add_url_rule('/productdetail/<productid>/', 'productdetail', self.productdetail)
+        self.app.add_url_rule('/winkelmand/', 'winkelmand', self.shoppingcart)
+        self.app.add_url_rule('/categorieoverzicht/', 'categorieoverzicht', self.categoryoverview)
+        self.app.add_url_rule('/change-profile-id', 'profielid', self.changeprofileid, methods=['POST'])
+        self.app.add_url_rule('/add-to-shopping-cart', 'toevoegenaanwinkelmand', self.addtoshoppingcart, methods=['POST'])
+        self.app.add_url_rule('/producten/pagination-change', 'aantalperpaginaaanpassen', self.changepaginationcount, methods=['POST'])
 
     def createcategoryindex(self):
         """ Within this function, we compose a nested dictionary of all 
@@ -194,8 +213,14 @@ class HUWebshop(object):
         return render_template(template, packet=packet)
 
     """ ..:: Full Page Endpoints ::.. """
+        
+    def productpagewrap(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
+        """ This function serves as a wrapper around the productpage function,
+        to make its direct usage a little easier. """
+        return self.productpage([cat1, cat2, cat3, cat4], page)
 
-    def productpage(self, catlist=[], page=1):
+    def productpage(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
+        catlist = [cat1, cat2, cat3, cat4]
         """ This function renders the product page template with the products it
         can retrieve from the database, based on the URL path provided. """
         queryfilter = {}
@@ -261,11 +286,10 @@ class HUWebshop(object):
             profidexists = self.database.profiles.find_one({'_id': ObjectId(newprofileid)})
             if profidexists:
                 session['profile_id'] = newprofileid
-                return "1"
-            else:
-                return "0"
+                return '{"success":true}'
+            return '{"success":false}'
         except:
-            return "0"
+            return '{"success":false}'
 
     def addtoshoppingcart(self):
         """ This function adds one to the shopping cart. """
@@ -277,7 +301,7 @@ class HUWebshop(object):
         else:
             session['shopping_cart'].append((productid, 1))
         session['shopping_cart'] = session['shopping_cart']
-        return str(self.shoppingcartcount())
+        return '{"success":true, "itemcount":'+str(self.shoppingcartcount())+'}'
 
     def changepaginationcount(self):
         """ This function changes the number of items displayed on the provided 
@@ -285,57 +309,8 @@ class HUWebshop(object):
         session['items_per_page'] = int(request.form.get('items_per_page'))
         # TODO: add method that returns the exact URL the user should be 
         # returned to, including offset
-        return request.form.get('refurl')
+        return '{"success":true, "refurl":"'+request.form.get('refurl')+'"}'
+
+    # TODO: add @app.errorhandler(404) and @app.errorhandler(405)
 
 huw = HUWebshop(app)
-
-@app.before_request
-def huw_check_session():
-    huw.checksession()
-
-@app.route('/')
-def homepage():
-    return huw.renderpackettemplate()
-
-@app.route('/producten/')
-@app.route('/producten/<cat1>')
-@app.route('/producten/<cat1>/<cat2>')
-@app.route('/producten/<cat1>/<cat2>/<cat3>')
-@app.route('/producten/<cat1>/<cat2>/<cat3>/<cat4>')
-@app.route('/producten/<int:page>')
-@app.route('/producten/<cat1>/<int:page>')
-@app.route('/producten/<cat1>/<cat2>/<int:page>')
-@app.route('/producten/<cat1>/<cat2>/<cat3>/<int:page>')
-@app.route('/producten/<cat1>/<cat2>/<cat3>/<cat4>/<int:page>')
-def producten(cat1=None, cat2=None, cat3=None, cat4=None, page=1):
-    return huw.productpage([cat1, cat2, cat3, cat4], page)
-
-@app.route('/productdetail/<productid>')
-def productdetail(productid):
-    return huw.productdetail(productid)
-
-@app.route('/winkelmand')
-def winkelmand():
-    return huw.shoppingcart()
-
-@app.route('/categorieoverzicht')
-def categorieoverzicht():
-    return huw.categoryoverview()
-
-@app.route('/change-profile-id', methods=['POST'])
-def changeprofileid():
-    return huw.changeprofileid()
-
-@app.route('/add-to-shopping-cart', methods=['POST'])
-def addtoshoppingcart():
-    return huw.addtoshoppingcart()
-
-@app.route('/producten/pagination-change', methods=['POST'])
-def changepaginationcount():
-    return huw.changepaginationcount()
-
-# Decorators to process
-'''
-@app.errorhandler(404)
-@app.errorhandler(405)
-'''

@@ -4,9 +4,9 @@ Git for the HU Webshop project.
 ## Todo
 
 - [ ] Code structure
-  - [ ] Change all dynamic element communication to JSON type objects
+  - [X] Change all dynamic element communication to JSON type objects
   - [ ] Rewrite Bash script for environment variables, including recommendations and altering the mechanism inside huwclass
-  - [ ] Rewrite the huwclass.py to set up URL mappings from within
+  - [X] Rewrite the huwclass.py to set up URL mappings from within
   - [ ] Structural review and rewrite of code if needed
 - [ ] Design improvements and tweaks (closer to the real thing)
   - [ ] Product page layout improvements
@@ -17,6 +17,7 @@ Git for the HU Webshop project.
   - [ ] UML diagram
 - [ ] Local recommendations REST service
 - [ ] Optional improvements
+  - [ ] Error pages
   - [ ] Image generator
   - [ ] Search function
   - [ ] Offset and page relocation pagination
