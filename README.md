@@ -8,13 +8,15 @@ Git for the HU Webshop project.
   - [ ] Rewrite Bash script for environment variables, including recommendations and altering the mechanism inside huwclass
   - [X] Rewrite the huwclass.py to set up URL mappings from within
   - [ ] Structural review and rewrite of code if needed
+  - [X] Rename huwclass.py 
+  - [ ] Review soon-to-be-deprecated statements and replace
 - [ ] Design improvements and tweaks (closer to the real thing)
   - [ ] Product page layout improvements
   - [ ] Stylize the dynamic shopping cart element
 - [ ] Documentation
   - [ ] Code structure description
-  - [ ] Automatically generated HTML documentation/docstrings
-  - [ ] UML diagram
+  - [X] Automatically generated HTML documentation/docstrings - skipped, for lack of results
+  - [X] UML diagram - skipped, for lack of necessity
 - [ ] Local recommendations REST service
 - [ ] Optional improvements
   - [ ] Error pages

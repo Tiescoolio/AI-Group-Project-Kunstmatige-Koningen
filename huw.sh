@@ -1,3 +1,3 @@
 #!/bin/sh
-export FLASK_APP=huwclass.py
+export FLASK_APP=huw.py
 python -m flask run
