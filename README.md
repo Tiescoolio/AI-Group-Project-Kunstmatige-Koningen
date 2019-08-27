@@ -4,22 +4,19 @@ Git for the HU Webshop project.
 ## Todo
 
 - [X] Local recommendations REST service
-  - [X] Create a second Flask service, one that behaves as a REST service
-  - [X] Check whether both can run simultaneously
-  - [X] Create a first back-and-forth dummy communication method
-  - [X] Add a simple method to the pages that contain recommendations on them
-  - [X] Expand this method to send all necessary information to the REST service
 - [ ] Code structure
-  - [ ] Review soon-to-be-deprecated statements and replace them with appropriate alternatives
+  - [X] Review soon-to-be-deprecated statements and replace them with appropriate alternatives
   - [ ] Structural review and rewrite of code if needed
-- [ ] Design improvements and tweaks (closer to the real thing)
-  - [ ] Product page layout improvements
-  - [ ] Stylize the dynamic shopping cart element
 - [ ] Documentation (Word document started)
   - [ ] Word document
   - [ ] Instruction video
   - [ ] Code documentation in huw and huw_recommend
+- [ ] Design improvements and tweaks (closer to the real thing)
+  - [ ] Product page layout improvements
+  - [ ] Stylize the dynamic shopping cart element
 - [ ] Optional improvements
+  - [ ] Sorted category index
+  - [ ] Correct pagination redirects
   - [ ] Error pages
   - [ ] Image generator
   - [ ] Search function
@@ -71,7 +68,7 @@ This first testing subset can now be found in the folder datasets_sample_1/.
 
 ## Requirements
 
-- Python 3
+- Python 3 -> deprecated after python 3.7 due to deprecated statements in the libraries this code relies on!
 - Flask (includes Jinja and Werkzeug)
 - python-dotenv package (pip install -U python-dotenv)
 - Pymongo package

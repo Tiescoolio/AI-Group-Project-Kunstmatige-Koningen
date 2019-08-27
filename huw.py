@@ -56,7 +56,7 @@ class HUWebshop(object):
 
         # Once we have a connection to the database, we check to see whether it
         # has a category index prepared; if not, we have a function to make it.
-        if "categoryindex" not in self.database.collection_names() or self.database.categoryindex.count_documents({}) == 0:
+        if "categoryindex" not in self.database.list_collection_names() or self.database.categoryindex.count_documents({}) == 0:
             self.createcategoryindex()
 
         # We retrieve the categoryindex from the database when it is set.
@@ -230,11 +230,6 @@ class HUWebshop(object):
         return []
 
     """ ..:: Full Page Endpoints ::.. """
-        
-    def productpagewrap(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
-        """ This function serves as a wrapper around the productpage function,
-        to make its direct usage a little easier. """
-        return self.productpage([cat1, cat2, cat3, cat4], page)
 
     def productpage(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
         catlist = [cat1, cat2, cat3, cat4]
