@@ -3,18 +3,17 @@ Git for the HU Webshop project.
 
 ## Todo
 
-- [X] Local recommendations REST service
-- [ ] Code structure
-  - [X] Review soon-to-be-deprecated statements and replace them with appropriate alternatives
-  - [ ] Structural review and rewrite of code if needed
+- [X] Code structure
 - [ ] Documentation (Word document started)
+  - [X] Code documentation in huw and huw_recommend
   - [ ] Word document
-  - [ ] Instruction video
-  - [ ] Code documentation in huw and huw_recommend
+  - [ ] Instructional video
+  - [ ] Expected database structure
 - [ ] Design improvements and tweaks (closer to the real thing)
   - [ ] Product page layout improvements
   - [ ] Stylize the dynamic shopping cart element
 - [ ] Optional improvements
+  - [ ] Test on the own system through mongoimport with new admin credentials
   - [ ] Sorted category index
   - [ ] Correct pagination redirects
   - [ ] Error pages
@@ -27,10 +26,6 @@ Git for the HU Webshop project.
 ## Notes On Future Improvements
 
 MongoDB - alles draaien via mongoimport op het eigen systeem
-Recommendation - SQL database
-
-Voorkeur recommendation dummy: REST API - plaatselijk draaien
-	- "Stuur alleen IDs terug!"
 
 ## Notes On The Project
 

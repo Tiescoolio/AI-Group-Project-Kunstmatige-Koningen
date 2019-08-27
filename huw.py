@@ -10,7 +10,6 @@ from bson.objectid import ObjectId
 app = Flask(__name__)
 app.secret_key = os.urandom(16)
 
-
 class HUWebshop(object):
     """ This class combines all logic behind the HU Example Webshop project. 
     Note that all rendering is performed within the templates themselves."""
@@ -19,7 +18,7 @@ class HUWebshop(object):
     client = None
     database = None
 
-    envvals = ["MONGODBUSER","MONGODBPASSWORD","MONGODBSERVER"]
+    envvals = ["MONGODBUSER","MONGODBPASSWORD","MONGODBSERVER","RECOMADDRESS"]
     dbstring = 'mongodb+srv://{0}:{1}@{2}/test?retryWrites=true&w=majority'
     recseraddress = "http://127.0.0.1:5001"
 
@@ -44,12 +43,20 @@ class HUWebshop(object):
         self.app = app
 
         # Depending on whether environment variables have been set, we connect
-        # to a local or remote instance of MongoDB.
+        # to a local or remote instance of MongoDB, and a default or non-default
+        # external recommendation service.
         load_dotenv()
+        envdict = {}
         if os.getenv(self.envvals[0]) is not None:
-            self.envvals = list(map(lambda x: str(os.getenv(x)), self.envvals))
-            self.client = MongoClient(self.dbstring.format(*self.envvals))
-            self.recseraddress = os.getenv("RECOMADDRESS")
+            for val in self.envvals:
+                envdict[val] = str(os.getenv(val))
+            print(envdict)
+            if envdict["MONGODBUSER"] and envdict["MONGODBPASSWORD"] and envdict["MONGODBSERVER"]:
+                self.client = MongoClient(self.dbstring.format(envdict["MONGODBUSER"], envdict["MONGODBPASSWORD"], envdict["MONGODBSERVER"]))
+            else:
+                self.client = MongoClient()
+            if envdict["RECOMADDRESS"]:
+                self.recseraddress = envdict["RECOMADDRESS"]
         else:
             self.client = MongoClient()
         self.database = self.client.huwebshop 
@@ -200,8 +207,8 @@ class HUWebshop(object):
 
     def renderpackettemplate(self, template="homepage.html", packet={}):
         """ This helper function adds all generally important variables to the
-        packet sent to the templating engine, then calling upon Flask to 
-        perform the actual render. """
+        packet sent to the templating engine, then calss upon Flask to forward
+        the rendering to Jinja. """
         packet['categoryindex'] = self.categoryindex
         packet['mainmenulist'] = self.mainmenuitems
         packet['categories_encode'] = self.catencode
@@ -219,7 +226,9 @@ class HUWebshop(object):
     def recommendations(self, count):
         """ This function returns the recommendations from the provided page
         and context, by sending a request to the designated recommendation
-        service. """
+        service. At the moment, it only transmits the profile ID and the number
+        of expected recommendations; to have more user information in the REST
+        request, this function would have to change."""
         resp = requests.get(self.recseraddress+"/"+session['profile_id']+"/"+str(count))
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
@@ -232,9 +241,10 @@ class HUWebshop(object):
     """ ..:: Full Page Endpoints ::.. """
 
     def productpage(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
-        catlist = [cat1, cat2, cat3, cat4]
         """ This function renders the product page template with the products it
-        can retrieve from the database, based on the URL path provided. """
+        can retrieve from the database, based on the URL path provided (which
+        corresponds to product categories). """
+        catlist = [cat1, cat2, cat3, cat4]
         queryfilter = {}
         nononescats = []
         for k, v in enumerate(catlist):
@@ -304,7 +314,7 @@ class HUWebshop(object):
             return '{"success":false}'
 
     def addtoshoppingcart(self):
-        """ This function adds one to the shopping cart. """
+        """ This function adds one object to the shopping cart. """
         productid = request.form.get('product_id')
         cartids = list(map(lambda x: x[0], session['shopping_cart']))
         if productid in cartids:
@@ -316,8 +326,8 @@ class HUWebshop(object):
         return '{"success":true, "itemcount":'+str(self.shoppingcartcount())+'}'
 
     def changepaginationcount(self):
-        """ This function changes the number of items displayed on the provided 
-        page. """
+        """ This function changes the number of items displayed on the product 
+        listing pages. """
         session['items_per_page'] = int(request.form.get('items_per_page'))
         # TODO: add method that returns the exact URL the user should be 
         # returned to, including offset
