@@ -1,5 +1,5 @@
 from flask import Flask, request, session, render_template, redirect, url_for, g
-import random, os, json, urllib.parse
+import random, os, json, urllib.parse, requests
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
@@ -21,6 +21,7 @@ class HUWebshop(object):
 
     envvals = ["MONGODBUSER","MONGODBPASSWORD","MONGODBSERVER"]
     dbstring = 'mongodb+srv://{0}:{1}@{2}/test?retryWrites=true&w=majority'
+    recseraddress = "http://127.0.0.1:5001"
 
     categoryindex = None
     catlevels = ["category","sub_category","sub_sub_category","sub_sub_sub_category"]
@@ -48,6 +49,7 @@ class HUWebshop(object):
         if os.getenv(self.envvals[0]) is not None:
             self.envvals = list(map(lambda x: str(os.getenv(x)), self.envvals))
             self.client = MongoClient(self.dbstring.format(*self.envvals))
+            self.recseraddress = os.getenv("RECOMADDRESS")
         else:
             self.client = MongoClient()
         self.database = self.client.huwebshop 
@@ -212,6 +214,21 @@ class HUWebshop(object):
         packet['shopping_cart_count'] = self.shoppingcartcount()
         return render_template(template, packet=packet)
 
+    """ ..:: Recommendation Functions ::.. """
+
+    def recommendations(self, count):
+        """ This function returns the recommendations from the provided page
+        and context, by sending a request to the designated recommendation
+        service. """
+        resp = requests.get(self.recseraddress+"/"+session['profile_id']+"/"+str(count))
+        if resp.status_code == 200:
+            recs = eval(resp.content.decode())
+            queryfilter = {"_id": {"$in": recs}}
+            querycursor = self.database.products.find(queryfilter, self.productfields)
+            resultlist = list(map(self.prepproduct, list(querycursor)))
+            return resultlist
+        return []
+
     """ ..:: Full Page Endpoints ::.. """
         
     def productpagewrap(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
@@ -245,7 +262,7 @@ class HUWebshop(object):
             'pend': skipindex + session['items_per_page'] if session['items_per_page'] > 0 else prodcount, \
             'prevpage': pagepath+str(page-1) if (page > 1) else False, \
             'nextpage': pagepath+str(page+1) if (session['items_per_page']*page < prodcount) else False, \
-            'r_products':prodlist[0:4], \
+            'r_products':self.recommendations(4), \
             'r_type':list(self.recommendationtypes.keys())[0],\
             'r_string':list(self.recommendationtypes.values())[0]\
             })
@@ -256,7 +273,7 @@ class HUWebshop(object):
         product = self.database.products.find_one({"_id":str(productid)})
         return self.renderpackettemplate('productdetail.html', {'product':product,\
             'prepproduct':self.prepproduct(product),\
-            'r_products':[self.prepproduct(product)]*4, \
+            'r_products':self.recommendations(4), \
             'r_type':list(self.recommendationtypes.keys())[1],\
             'r_string':list(self.recommendationtypes.values())[1]})
 
@@ -268,7 +285,7 @@ class HUWebshop(object):
             product["itemcount"] = tup[1]
             i.append(product)
         return self.renderpackettemplate('shoppingcart.html',{'itemsincart':i,\
-            'r_products':(i*4)[0:4], \
+            'r_products':self.recommendations(4), \
             'r_type':list(self.recommendationtypes.keys())[2],\
             'r_string':list(self.recommendationtypes.values())[2]})
 
