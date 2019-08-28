@@ -6,7 +6,7 @@ Git for the HU Webshop project.
 - [X] Code structure
 - [ ] Documentation (Word document started)
   - [X] Code documentation in huw and huw_recommend
-  - [ ] Word document
+  - [ ] Word document => Replaced by Readme.md, for more coder-like feel!
   - [ ] Instructional video
   - [ ] Expected database structure
 - [ ] Design improvements and tweaks (closer to the real thing)
@@ -22,6 +22,30 @@ Git for the HU Webshop project.
   - [ ] Offset and page relocation pagination
   - [ ] Responsive design
   - [ ] Price calculation and discount rule implementation
+
+## Introduction
+
+This project was created to assist the students of TAAI-V1GP-19 (Group Project) with using the provided database of real-life products, sessions and anonymized profiles. Last year (2018-2019), students were given this same data and asked to create a recommendation service. However, getting the database to a visibly workable state proved to be such a difficult task, that much of the course's runtime was dedicated to that alone. We hope that by removing that roadblock in advance, students can dedicate their time to the actually interesting part of the course.
+
+The project contains the following:
+
+1. **An example webshop**, which can connect to a preconfigured database, either local or remote, and display basic pages such as product listing pages, product detail pages and a rudimentary shopping cart;
+2. **A dummy recommendation service**, which uses the same database to provide recommendations through a REST interface, although at the moment, it simply returns randomly chosen products;
+3. **A sample of the full dataset**, created to work within the constraints of both Github and MongoDB; although these might be useful when setting up a remote MongoDB instance, most students will not use these at all.
+
+In the following sections, we will go into more detail on the requirements for setting up this project on your own device, how to run it, and what it should look like.
+
+The author of this project is Nick Roumimper (nick.roumimper@hu.nl). If there are any questions about this project that this Readme can't answer (which may very well happen), please feel free to contact me.
+
+## Requirements
+
+
+
+## First Run Instructions
+## The Project in Action
+## Design Philosophy
+## Code Structure
+
 
 ## Notes On Future Improvements
 
