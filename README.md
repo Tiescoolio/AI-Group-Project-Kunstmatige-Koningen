@@ -4,11 +4,11 @@ Git for the HU Webshop project.
 ## Todo
 
 - [X] Code structure
-- [ ] Documentation (Word document started)
+- [ ] Documentation
   - [X] Code documentation in huw and huw_recommend
   - [ ] Readme.md
 - [ ] Required changes
-  - [ ] Preprocess dates in the full-sized files to make them parseable by MongoDB
+  - [ ] Preprocess dates in the full-sized files to make them parseable by MongoDB / ask Joost about the current version, since the version on Canvas looks different from the one in the file I own
   - [ ] Test on the own system through mongoimport with new admin credentials
   - [ ] Double-check whether bson is indeed the version included from pymongo
 - [ ] Design improvements and tweaks (closer to the real thing)
@@ -104,6 +104,28 @@ With MongoDB Community Edition installed on your device, ideally including Mongo
     <code>mongoimport --db huwebshop --collection profiles --file profiles.json</code>
 
     with a different filename, if necessary.
+
+And that should do it! You now have a database running on your local system with all three collections necessary to feed both your webshop instance and your recommendation engine.
+
+#### Connecting to a Remote Database
+
+You are expected to have received credentials for a remote MongoDB database cluster, which can be explored in your browser by signing in at https://www.mongodb.com. If you have these credentials, we'll assume you got them from your teacher, and you don't have to set up the collections anymore. This section is primarily dedicated to ensuring that eventually connecting goes smoothly.
+
+Be sure to check the following when you try connecting first:
+
+- **Are you on the network whitelist?** Unless explicitly configured to allow everyone, MongoDB clusters are set to only accept connections from preset IP addresses. Check under Security > Network Access in the web interface to see which applies to you.
+- **Do you have both read and write rights?** Although this webshop code will not change the preexisting data, it may attempt to add a collection called <code>categoryindex</code> if it does not yet exist. Check exactly which rights you have under Security > Database Access in the web interface.
+- **Do you know the cluster's server name?** You presumably have a username and a password, but do you also have the last missing piece, the cluster's server name? This slightly odd identifier is also needed to connect to this cluster. It can be found by navigating to Clusters > Command Line Tools > Connect Instructions > Choose a Connection Method > Connect Your Application, and examining the field under "Connection String Only". This should be in the format of:
+
+    <code>mongodb+srv://{username}:{password}@{server name}/test?retryWrites=true&w=majority</code>
+
+    As you may have guessed, the server name we're referring to is the section between the at sign and the forward slash. If you don't have this, write this down and keep it handy!
+
+### Configure the Environment Variables
+
+### Start the Recommendation Service
+
+### Start the Webshop
 
 ## The Project in Action
 ## Design Philosophy
