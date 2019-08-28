@@ -7,8 +7,6 @@ Git for the HU Webshop project.
 - [ ] Documentation (Word document started)
   - [X] Code documentation in huw and huw_recommend
   - [ ] Readme.md
-  - [ ] Instructional video
-  - [ ] Expected database structure
 - [ ] Required changes
   - [ ] Preprocess dates in the full-sized files to make them parseable by MongoDB
   - [ ] Test on the own system through mongoimport with new admin credentials
@@ -54,6 +52,12 @@ To run this code, you need to have the following programs and libraries installe
 - **Requests** (command line: pip install requests). This code was developed using Requests 2.22.0.
 - **Bson** - questionable? May already be included in Pymongo (see also https://api.mongodb.com/python/current/api/index.html)
 
+## Sources Included in this Repository
+
+- **jQuery v. 3.4.1**, from https://jquery.com
+- **Roboto font files**, Latin and Latin-Extended, downloaded from Google Fonts (https://fonts.google.com)
+- **CSS snippets for responsive buttons**, provided by Federico Dossena (https://fdossena.com/?p=html5cool/buttons/i.frag)
+
 ## First Run Instructions
 
 In order to get this project to run, the following steps need to be completed:
@@ -81,35 +85,46 @@ You are expected to have three files in your possession:
 
 With MongoDB Community Edition installed on your device, ideally including MongoDB Compass, take the following steps:
 
-- **Create a database called "huwebshop"** (alongside the default ones: admin/config/local). In MongoDB Compass, you see this option after connecting to your local database with default settings; if asked for the name of a collection, call it "products". When using the Mongo Daemon, a command such as "use huwebshop" may be required.
-- **Make sure you can access the mongoimport tool** from the folder containing your data. On most computers, that means adding the path to the folder containing the executables (typically something like C:\Program Files\MongoDB\Server\4.2\bin) to your PATH environment variable. If that doesn't work, or you're working off of misbehaving HU employee laptops like us, you can also navigate to this same folder, copy the executable and paste it alongside the three files (yuck).
+- **Create a database called <code>huwebshop</code>** (alongside the default ones: admin/config/local). In MongoDB Compass, you see this option after connecting to your local database with default settings; if asked for the name of a collection, call it "products". When using the Mongo Daemon, a command such as "use huwebshop" may be required.
+- **Make sure you can access the mongoimport tool** from the folder containing your data. On most computers, that means adding the path to the folder containing the executables (typically something like <code>C:\Program Files\MongoDB\Server\4.2\bin</code>) to your PATH environment variable. If that doesn't work, or you're working off of misbehaving HU employee laptops like us, you can also navigate to this same folder, copy the executable and paste it alongside the three files (yuck).
 - **Import products.json to a collection called "products".** A mongoimport command is structured like this:
     
-    mongoimport --db *database name* --collection *collection name* --file *file name*
+    <code>mongoimport --db *database name* --collection *collection name* --file *file name*</code>
+
+    So in this particular case, you would have to execute the following from the command prompt:
+
+    <code>mongoimport --db huwebshop --collection products --file products.json</code>
+- **Import sessions.json/sessions4.json to a collection called "sessions".** In other words, execute the mongoimport command:
+
+    <code>mongoimport --db huwebshop --collection sessions --file sessions.json</code>
+
+    with a different filename, if necessary.
+- **Import profiles.json/visitors.json to a collection called "profiles".** In other words, execute the mongoimport command:
+
+    <code>mongoimport --db huwebshop --collection profiles --file profiles.json</code>
+
+    with a different filename, if necessary.
 
 ## The Project in Action
 ## Design Philosophy
 ## Code Structure
 
-
-## Notes On Future Improvements
-
-MongoDB - alles draaien via mongoimport op het eigen systeem
+<!--
 
 ## Notes On The Project
 
 When testing this project, the following issues arose when trying to work with the full dataset provided:
 
 - The MongoDB Community Edition program, which runs the database service locally, had significant trouble with importing large files on my device.
-	- While returning an error ("Unexpected end of JSON file"), it ceased after importing between 10k and 20k documents.
-	- The documents that were indeed imported were received correctly, but they were far fewer in number than was to be expected. 
-	- When trying the import process multiple times, it failed each time with the same error - but every time with a different number of documents reached. This shows that the error is not in the JSON, regardless of what MongoDB might say.
-	- If students were to use local instances of the datasets and unexpectedly get completely different databases as a result, the risk of confusion and subpar products would be massive.
+    - While returning an error ("Unexpected end of JSON file"), it ceased after importing between 10k and 20k documents.
+    - The documents that were indeed imported were received correctly, but they were far fewer in number than was to be expected. 
+    - When trying the import process multiple times, it failed each time with the same error - but every time with a different number of documents reached. This shows that the error is not in the JSON, regardless of what MongoDB might say.
+    - If students were to use local instances of the datasets and unexpectedly get completely different databases as a result, the risk of confusion and subpar products would be massive.
 - The MongoDB Free Tier Cloud Cluster, which is provided by MongoDB directly, ran into the limits of its Free Tier when trying to handle the full dataset.
-	- The Free Tier allows for 512 MB of storage; the full dataset is approximately 16 GB in size.
-	- The cheapest option MongoDB provides that loads the full dataset (M10 Dedicated Cluster, with 20 GB of storage) costs $0,10/hr to run.
-	- The cost of setting up such a cluster for the duration of the course (10 weeks) would be 10 * 7 * 24 * $0,10 = $168,- = approx. €150,-.
-	- For development and testing purposes, and without agreed-upon compensation, this is fairly costly to run for the employees developing the website - and without a doubt unaffordable for our students individually.
+    - The Free Tier allows for 512 MB of storage; the full dataset is approximately 16 GB in size.
+    - The cheapest option MongoDB provides that loads the full dataset (M10 Dedicated Cluster, with 20 GB of storage) costs $0,10/hr to run.
+    - The cost of setting up such a cluster for the duration of the course (10 weeks) would be 10 * 7 * 24 * $0,10 = $168,- = approx. €150,-.
+    - For development and testing purposes, and without agreed-upon compensation, this is fairly costly to run for the employees developing the website - and without a doubt unaffordable for our students individually.
 
 It deserves the consideration of the Hogeschool to pay for a centrally hosted Cloud cluster when this course is actually taught; this Cluster can then be hailed from both the running example website, and the recommendation engines working with the data, functioning as a single source of truth. However, in the meantime, this repository will be updated to contain a testing subset of all data. This data will be constructed separately, once, based on the following criteria:
 
@@ -130,24 +145,6 @@ The first testing subset has been composed according to the following additional
 
 This first testing subset can now be found in the folder datasets_sample_1/.
 
-## Requirements
-
-- Python 3 -> deprecated after python 3.7 due to deprecated statements in the libraries this code relies on!
-- Flask (includes Jinja and Werkzeug)
-- python-dotenv package (pip install -U python-dotenv)
-- Pymongo package
-- MongoDB Community Edition (for local installs)
-- bson
-- Flask Restful
-- requests
-
-## Included Sources
-
-- jQuery
-- Roboto Font (Google Fonts)
-- Some cool buttons (https://fdossena.com/?p=html5cool/buttons/i.frag)
-
-<!--
 ## Development Questions
 
 - How can I autodeploy my script to the cloud?
