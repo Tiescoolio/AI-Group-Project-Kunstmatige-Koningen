@@ -14,6 +14,7 @@ Git for the HU Webshop project.
   - [ ] Stylize the dynamic shopping cart element
 - [ ] Optional improvements
   - [ ] Test on the own system through mongoimport with new admin credentials
+  - [ ] Double-check whether bson is indeed the version included from pymongo
   - [ ] Sorted category index
   - [ ] Correct pagination redirects
   - [ ] Error pages
@@ -42,7 +43,7 @@ The author of this project is Nick Roumimper (nick.roumimper@hu.nl). If there ar
 To run this code, you need to have the following programs and libraries installed:
 
 - **Python 3** (website: https://www.python.org/). This code was developed using Python 3.7. Some of the libraries used here use methods that are set to become deprecated in Python 3.8; when using any version beyond 3.7, be sure to use the most recent versions possible.
-- **MongoDB Community Edition** (webpage: https://docs.mongodb.com/manual/administration/install-community/). This allows you to run a MongoDB database locally; almost all students will want to do this.
+- **MongoDB Community Edition** (webpage: https://docs.mongodb.com/manual/administration/install-community/). This allows you to run a MongoDB database locally; almost all students will want to do this. It is strongly advised to also include MongoDB Compass (an option that comes up during the installation wizard).
 - **Flask** (command line: pip install Flask). This code was developed using Flask 1.0.3, and automatically included Jinja2 v. 2.10.1 and Werkzeug v. 0.15.4, amongst other things.
 - **Pymongo** (command line: pip install pymongo). This code was developed using Pymongo 3.8.0.
 - **Flask-RESTful** (command line: pip install flask-restful). This code was developed using Flask Restful 0.3.7. This library allows you to run the dummy recommendation service locally; almost all students will want to do this, at least to start out with.
@@ -51,6 +52,32 @@ To run this code, you need to have the following programs and libraries installe
 - **Bson** - questionable? May already be included in Pymongo (see also https://api.mongodb.com/python/current/api/index.html)
 
 ## First Run Instructions
+
+In order to get this project to run, the following steps need to be completed:
+
+1. Set up the database, either locally or remotely;
+2. Configure the environment variables for the local webshop and recommendation service;
+3. Start up the recommendation service;
+4. Start up the webshop.
+
+We will expand upon the process for each of these steps in the upcoming subsections.
+
+### Database Setup
+
+The course's teacher is expected to have provided you with the files that make up the database at this point. Note that these are not included in this project, due to their size. Alternatively, you have received credentials for a remote MongoDB cluster to connect to. If neither apply, please contact your course's teacher.
+
+Please follow the instructions in the subsection applicable to your situation.
+
+#### Setting Up a Local Database
+
+You are expected to have three files in your possession:
+
+1. products.json, containing the full set of products available in the webshop;
+2. sessions.json (sometimes called sessions4.json), containing all applicable sessions for your subset;
+3. profiles.json (sometimes called visitors.json), containing the profiles associated with the sessions (and vice versa).
+
+With MongoDB Community Edition installed on your device, 
+
 ## The Project in Action
 ## Design Philosophy
 ## Code Structure
