@@ -39,7 +39,16 @@ The author of this project is Nick Roumimper (nick.roumimper@hu.nl). If there ar
 
 ## Requirements
 
+To run this code, you need to have the following programs and libraries installed:
 
+- **Python 3** (website: https://www.python.org/). This code was developed using Python 3.7. Some of the libraries used here use methods that are set to become deprecated in Python 3.8; when using any version beyond 3.7, be sure to use the most recent versions possible.
+- **MongoDB Community Edition** (webpage: https://docs.mongodb.com/manual/administration/install-community/). This allows you to run a MongoDB database locally; almost all students will want to do this.
+- **Flask** (command line: pip install Flask). This code was developed using Flask 1.0.3, and automatically included Jinja2 v. 2.10.1 and Werkzeug v. 0.15.4, amongst other things.
+- **Pymongo** (command line: pip install pymongo). This code was developed using Pymongo 3.8.0.
+- **Flask-RESTful** (command line: pip install flask-restful). This code was developed using Flask Restful 0.3.7. This library allows you to run the dummy recommendation service locally; almost all students will want to do this, at least to start out with.
+- **Python-Dotenv** (command line: pip install python-dotenv). This code was developed using Python-Dotenv 0.10.3.
+- **Requests** (command line: pip install requests). This code was developed using Requests 2.22.0.
+- **Bson** - questionable? May already be included in Pymongo (see also https://api.mongodb.com/python/current/api/index.html)
 
 ## First Run Instructions
 ## The Project in Action
