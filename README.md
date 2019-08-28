@@ -33,7 +33,7 @@ The project contains the following:
 
 1. **An example webshop**, which can connect to a preconfigured database, either local or remote, and display basic pages such as product listing pages, product detail pages and a rudimentary shopping cart;
 2. **A dummy recommendation service**, which uses the same database to provide recommendations through a REST interface, although at the moment, it simply returns randomly chosen products;
-3. **A sample of the full dataset**, created to work within the constraints of both Github and MongoDB; although these might be useful when setting up a remote MongoDB instance, most students will not use these at all.
+3. **A sample of the full dataset**, created to work within the constraints of both Github and MongoDB Free Tier clusters; although these might be useful when setting up a remote MongoDB instance, most students will not use these at all.
 
 In the following sections, we will go into more detail on the requirements for setting up this project on your own device, how to run it, and what it should look like.
 
@@ -45,11 +45,11 @@ To run this code, you need to have the following programs and libraries installe
 
 - **Python 3** (website: https://www.python.org/). This code was developed using Python 3.7. Some of the libraries used here use methods that are set to become deprecated in Python 3.8; when using any version beyond 3.7, be sure to use the most recent versions possible.
 - **MongoDB Community Edition** (webpage: https://docs.mongodb.com/manual/administration/install-community/). This allows you to run a MongoDB database locally; almost all students will want to do this. It is strongly advised to also include MongoDB Compass (an option that comes up during the installation wizard).
-- **Flask** (command line: pip install Flask). This code was developed using Flask 1.0.3, and automatically included Jinja2 v. 2.10.1 and Werkzeug v. 0.15.4, amongst other things.
-- **Pymongo** (command line: pip install pymongo). This code was developed using Pymongo 3.8.0.
-- **Flask-RESTful** (command line: pip install flask-restful). This code was developed using Flask Restful 0.3.7. This library allows you to run the dummy recommendation service locally; almost all students will want to do this, at least to start out with.
-- **Python-Dotenv** (command line: pip install python-dotenv). This code was developed using Python-Dotenv 0.10.3.
-- **Requests** (command line: pip install requests). This code was developed using Requests 2.22.0.
+- **Flask** (command line: <code>pip install Flask</code>). This code was developed using Flask 1.0.3, and automatically included Jinja2 v. 2.10.1 and Werkzeug v. 0.15.4, amongst other things.
+- **Pymongo** (command line: <code>pip install pymongo</code>). This code was developed using Pymongo 3.8.0.
+- **Flask-RESTful** (command line: <code>pip install flask-restful</code>). This code was developed using Flask Restful 0.3.7. This library allows you to run the dummy recommendation service locally; almost all students will want to do this, at least to start out with.
+- **Python-Dotenv** (command line: <code>pip install python-dotenv</code>). This code was developed using Python-Dotenv 0.10.3.
+- **Requests** (command line: <code>pip install requests</code>). This code was developed using Requests 2.22.0.
 - **Bson** - questionable? May already be included in Pymongo (see also https://api.mongodb.com/python/current/api/index.html)
 
 ## Sources Included in this Repository
@@ -80,26 +80,26 @@ Please follow the instructions in the subsection applicable to your situation.
 You are expected to have three files in your possession:
 
 1. products.json, containing the full set of products available in the webshop;
-2. sessions.json (sometimes called sessions4.json), containing all applicable sessions for your subset;
-3. profiles.json (sometimes called visitors.json), containing the profiles associated with the sessions (and vice versa).
+2. sessions.json (sometimes called sessions4.json), containing all applicable sessions for our subset of the data;
+3. profiles.json (sometimes called visitors.json), containing the profiles associated with the sessions.
 
 With MongoDB Community Edition installed on your device, ideally including MongoDB Compass, take the following steps:
 
 - **Create a database called <code>huwebshop</code>** (alongside the default ones: admin/config/local). In MongoDB Compass, you see this option after connecting to your local database with default settings; if asked for the name of a collection, call it "products". When using the Mongo Daemon, a command such as "use huwebshop" may be required.
 - **Make sure you can access the mongoimport tool** from the folder containing your data. On most computers, that means adding the path to the folder containing the executables (typically something like <code>C:\Program Files\MongoDB\Server\4.2\bin</code>) to your PATH environment variable. If that doesn't work, or you're working off of misbehaving HU employee laptops like us, you can also navigate to this same folder, copy the executable and paste it alongside the three files (yuck).
-- **Import products.json to a collection called "products".** A mongoimport command is structured like this:
+- **Import products.json to a collection called <code>products</code>.** A mongoimport command is structured like this:
     
     <code>mongoimport --db *database name* --collection *collection name* --file *file name*</code>
 
     So in this particular case, you would have to execute the following from the command prompt:
 
     <code>mongoimport --db huwebshop --collection products --file products.json</code>
-- **Import sessions.json/sessions4.json to a collection called "sessions".** In other words, execute the mongoimport command:
+- **Import sessions.json/sessions4.json to a collection called <code>sessions</code>.** In other words, execute the mongoimport command:
 
     <code>mongoimport --db huwebshop --collection sessions --file sessions.json</code>
 
     with a different filename, if necessary.
-- **Import profiles.json/visitors.json to a collection called "profiles".** In other words, execute the mongoimport command:
+- **Import profiles.json/visitors.json to a collection called <code>profiles</code>.** In other words, execute the mongoimport command:
 
     <code>mongoimport --db huwebshop --collection profiles --file profiles.json</code>
 
