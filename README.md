@@ -6,15 +6,18 @@ Git for the HU Webshop project.
 - [X] Code structure
 - [ ] Documentation (Word document started)
   - [X] Code documentation in huw and huw_recommend
-  - [ ] Word document => Replaced by Readme.md, for more coder-like feel!
+  - [ ] Readme.md
   - [ ] Instructional video
   - [ ] Expected database structure
+- [ ] Required changes
+  - [ ] Preprocess dates in the full-sized files to make them parseable by MongoDB
+  - [ ] Test on the own system through mongoimport with new admin credentials
+  - [ ] Double-check whether bson is indeed the version included from pymongo
 - [ ] Design improvements and tweaks (closer to the real thing)
   - [ ] Product page layout improvements
   - [ ] Stylize the dynamic shopping cart element
 - [ ] Optional improvements
-  - [ ] Test on the own system through mongoimport with new admin credentials
-  - [ ] Double-check whether bson is indeed the version included from pymongo
+  - [ ] Extend documentation to non-Windows systems
   - [ ] Sorted category index
   - [ ] Correct pagination redirects
   - [ ] Error pages
@@ -76,7 +79,13 @@ You are expected to have three files in your possession:
 2. sessions.json (sometimes called sessions4.json), containing all applicable sessions for your subset;
 3. profiles.json (sometimes called visitors.json), containing the profiles associated with the sessions (and vice versa).
 
-With MongoDB Community Edition installed on your device, 
+With MongoDB Community Edition installed on your device, ideally including MongoDB Compass, take the following steps:
+
+- **Create a database called "huwebshop"** (alongside the default ones: admin/config/local). In MongoDB Compass, you see this option after connecting to your local database with default settings; if asked for the name of a collection, call it "products". When using the Mongo Daemon, a command such as "use huwebshop" may be required.
+- **Make sure you can access the mongoimport tool** from the folder containing your data. On most computers, that means adding the path to the folder containing the executables (typically something like C:\Program Files\MongoDB\Server\4.2\bin) to your PATH environment variable. If that doesn't work, or you're working off of misbehaving HU employee laptops like us, you can also navigate to this same folder, copy the executable and paste it alongside the three files (yuck).
+- **Import products.json to a collection called "products".** A mongoimport command is structured like this:
+    
+    mongoimport --db *database name* --collection *collection name* --file *file name*
 
 ## The Project in Action
 ## Design Philosophy
