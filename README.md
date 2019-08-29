@@ -16,6 +16,7 @@ Git for the HU Webshop project.
   - [ ] Stylize the dynamic shopping cart element
 - [ ] Optional improvements
   - [ ] Extend documentation to non-Windows systems
+  - [ ] Create shell scripts for all systems
   - [ ] Sorted category index
   - [ ] Correct pagination redirects
   - [ ] Error pages
@@ -111,7 +112,7 @@ And that should do it! You now have a database running on your local system with
 
 You are expected to have received credentials for a remote MongoDB database cluster, which can be explored in your browser by signing in at https://www.mongodb.com. If you have these credentials, we'll assume you got them from your teacher, and you don't have to set up the collections anymore. This section is primarily dedicated to ensuring that eventually connecting goes smoothly.
 
-Be sure to check the following when you try connecting first:
+Be sure to check the following when you try connecting for the first time:
 
 - **Are you on the network whitelist?** Unless explicitly configured to allow everyone, MongoDB clusters are set to only accept connections from preset IP addresses. Check under Security > Network Access in the web interface to see which applies to you.
 - **Do you have both read and write rights?** Although this webshop code will not change the preexisting data, it may attempt to add a collection called <code>categoryindex</code> if it does not yet exist. Check exactly which rights you have under Security > Database Access in the web interface.
@@ -123,7 +124,26 @@ Be sure to check the following when you try connecting first:
 
 ### Configure the Environment Variables
 
+In order to make running the code easier after it has been set up the first time, we have moved certain settings to a .env file. You will need such a file in the top-level directory of this repository if either of the following two applies:
+
+1. You wish to connect to a remote MongoDB cluster;
+2. You wish to connect to a recommendation service that is not at the default location (which here is http://127.0.0.1:5001). 
+
+If you are trying to connect to your local MongoDB, using the default dummy recommendation service, you don't need to perform this step.
+
+To set this up easily from a Unix shell (which includes the Git Bash included with most distributions of Git), you can run huw_remote_setup.sh (command line: <code>sh huw_remote_setup.sh</code>). However, at its core, the .env file is just a text file containing four variables:
+
+    MONGODBSERVER=*server name for the remote MongoDB cluster*
+    MONGODBUSER=*user name for the remote MongoDB cluster*
+    MONGODBPASSWORD=*password for the remote MongoDB cluster*
+    RECOMADDRESS=*address for the recommendation service*
+
+Any variables you're not using, you can leave blank. (e.g. <code>MONGODBSERVER=</code>)
+Note that the file must be called exactly <code>.env</code>. So technically, the file doesn't have a name, it only has an extension. 
+
 ### Start the Recommendation Service
+
+It's time to actually start up the code! Let's start with the recommendation service, so that
 
 ### Start the Webshop
 
