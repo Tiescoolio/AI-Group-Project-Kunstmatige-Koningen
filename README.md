@@ -188,14 +188,12 @@ If you're going to change parts of this code, it may be helpful to understand th
 - **Dynamic Javascript requests are handled through POST calls.** Several events stemming from the webshop occur "in-page", i.e. without navigating to a different URL. To distinguish between these requests and regular, viewable pages, we have restricted the associated functions to POST calls. You can find these methods at the bottom of the class.
 - **The Jinja templates extend the base template (base.html).** For a webshop this simple, we can use one general template for almost all pages, only changing the center div's content for each page - so that is what we did.
 
-## Code Structure
+Thank you for working with this project! We hope it helps to have this base setup at your disposal.
 
 ## Todo (Reference for the Developers)
 
 - [X] Code structure
-- [ ] Documentation
-  - [X] Code documentation in huw and huw_recommend
-  - [ ] Readme.md
+- [X] Documentation
 - [ ] Required changes
   - [ ] Double-check whether bson is indeed the version included from pymongo
   - [ ] Change the text on the front page
