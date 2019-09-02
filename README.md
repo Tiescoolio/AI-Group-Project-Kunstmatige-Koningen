@@ -1,31 +1,7 @@
 # huwebshop
 Git for the HU Webshop project.
 
-## Todo
 
-- [X] Code structure
-- [ ] Documentation
-  - [X] Code documentation in huw and huw_recommend
-  - [ ] Readme.md
-- [ ] Required changes
-  - [ ] Double-check whether bson is indeed the version included from pymongo
-  - [ ] Preprocess dates in the full-sized files to make them parseable by MongoDB / ask Joost about the current version, since the version on Canvas looks different from the one in the file I own
-  - [ ] Test on the own system through mongoimport with new admin credentials
-- [ ] Design improvements and tweaks (closer to the real thing)
-  - [ ] Product page layout improvements
-  - [ ] Stylize the dynamic shopping cart element
-- [ ] Optional improvements
-  - [ ] Extend documentation to non-Windows systems
-  - [ ] Create shell scripts for all systems
-  - [ ] Packaging?
-  - [ ] Sorted category index
-  - [ ] Correct pagination redirects
-  - [ ] Error pages
-  - [ ] Image generator
-  - [ ] Search function
-  - [ ] Offset and page relocation pagination
-  - [ ] Responsive design
-  - [ ] Price calculation and discount rule implementation
 
 ## Introduction
 
@@ -159,7 +135,7 @@ If this code runs, you can't see it do anything yet. Just be sure to leave this 
 
 ### Start the Webshop
 
-Now, let's run the webshop! You will need to open **another, separate terminal window** and navigate to the top-level directory of this repository. If you have a Unix shell handy, you can run huw_recommend.sh (command line: <code>sh huw_recommend.sh</code>). If not, you need to perform the following commands (written for Windows, Command Prompt specifically):
+Now, let's run the webshop! You will need to open **another, separate terminal window** and navigate to the top-level directory of this repository. If you have a Unix shell handy, you can run huw.sh (command line: <code>sh huw.sh</code>). If not, you need to perform the following commands (written for Windows, Command Prompt specifically):
 
     set FLASK_APP=huw.py
     python -m flask run
@@ -176,11 +152,11 @@ When you're done with this particular session, or you want to stop and restart e
 
 ## The Project in Action
 
-When running, the front page webshop should look something like this:
+When running, the front page of the webshop should look something like this:
 
 ![HU Webshop Front Page Example 02-09-2019](./reference_images/homepage.png)
 
-The text may be different, but the overall layout should remain more or less the same. The bar at the top allows you to change the profile ID you're viewing the site with; it defaults upon restart to the first one it can find. In the database, you will find these IDs in the profiles table, as the \_id property, e.g. ObjectId("5a3a1169a825610001bc0f3a") . This allows you to test your recommendation engine with different profiles.
+The text may be different in future versions, but the overall layout should remain more or less the same. The bar at the top allows you to change the profile ID you're viewing the site with; it defaults upon restart to the first one it can find. In the database, you will find these IDs in the profiles table, as the \_id property, e.g. ObjectId("5a3a1169a825610001bc0f3a") . This allows you to test your recommendation engine with different profiles.
 
 Through the main menu, you can reach the product overview and detail pages. You can tell the recommendation service is working when refreshing the page leads to entirely different random suggestions:
 
@@ -201,7 +177,45 @@ Through the main menu, you can reach the product overview and detail pages. You 
 Feel free to play around and test this webshop (or rather, a shell of a webshop) out! If you run into any errors, or have ideas for improvements that aren't yet listed in this Readme, feel free to contact the author at nick.roumimper@hu.nl.
 
 ## Design Philosophy
+
+If you're going to change parts of this code, it may be helpful to understand the design philosophy behind it. Much of this section goes into the webshop part, seeing as that is the most complex element. You can also review this section if you're interested as to how the project is structured.
+
+- **The recommendation service is as simple as possible.** It is a REST service with one GET method, that takes the profile id and number of recommendations as parameters and returns that number of random products from the database. In fact, it doesn't even use the profile id - this is only to demonstrate how parameters are passed to the service. This is what you'll want to expand on and get creative with.
+- **The project uses default directories for its content.** The Flask default setup stores any static resources (CSS, Javascript, images) in the <code>static</code> folder, and any HTML templates in the <code>templates</code> folder.
+- **The default session mechanism in Flask is used to store user data.** Flask maintains a session mechanism that encrypts its cookies given a special secret key; here, the secret key is randomly generated whenever the webshop is started. In the session object, we store the profile id, shopping cart, number of items per page and so on.
+- **The Python code for the webshop does not render HTML.** Since Jinja, the templating engine behind Flask, can process all kinds of complex objects, the Python code's role is essentially to retrieve the necessary data and pass it along. This also means that the .html files in the templates folder contain a lot of interesting logic.
+- **The Python code uses the add_url_rule method instead of decorators.** If you're used to working with Flask, you may expect to see the @app.route() decorator around. However, we've attempted to keep as much logic as possible inside the single class of this project. You can find the equivalent add_url_rule function calls in the \_\_init\_\_ of huw.py.
+- **Dynamic Javascript requests are handled through POST calls.** Several events stemming from the webshop occur "in-page", i.e. without navigating to a different URL. To distinguish between these requests and regular, viewable pages, we have restricted the associated functions to POST calls. You can find these methods at the bottom of the class.
+- **The Jinja templates extend the base template (base.html).** For a webshop this simple, we can use one general template for almost all pages, only changing the center div's content for each page - so that is what we did.
+
 ## Code Structure
+
+## Todo (Reference for the Developers)
+
+- [X] Code structure
+- [ ] Documentation
+  - [X] Code documentation in huw and huw_recommend
+  - [ ] Readme.md
+- [ ] Required changes
+  - [ ] Double-check whether bson is indeed the version included from pymongo
+  - [ ] Change the text on the front page
+  - [ ] Preprocess dates in the full-sized files to make them parseable by MongoDB / ask Joost about the current version, since the version on Canvas looks different from the one in the file I own
+  - [ ] Test on the own system through mongoimport with new admin credentials
+- [ ] Design improvements and tweaks (closer to the real thing)
+  - [ ] Product page layout improvements
+  - [ ] Stylize the dynamic shopping cart element
+- [ ] Optional improvements
+  - [ ] Extend documentation to non-Windows systems
+  - [ ] Create shell scripts for all systems
+  - [ ] Packaging?
+  - [ ] Sorted category index
+  - [ ] Correct pagination redirects
+  - [ ] Error pages
+  - [ ] Image generator
+  - [ ] Search function
+  - [ ] Offset and page relocation pagination
+  - [ ] Responsive design
+  - [ ] Price calculation and discount rule implementation
 
 <!--
 
