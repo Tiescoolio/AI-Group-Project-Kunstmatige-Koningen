@@ -8,9 +8,9 @@ Git for the HU Webshop project.
   - [X] Code documentation in huw and huw_recommend
   - [ ] Readme.md
 - [ ] Required changes
+  - [ ] Double-check whether bson is indeed the version included from pymongo
   - [ ] Preprocess dates in the full-sized files to make them parseable by MongoDB / ask Joost about the current version, since the version on Canvas looks different from the one in the file I own
   - [ ] Test on the own system through mongoimport with new admin credentials
-  - [ ] Double-check whether bson is indeed the version included from pymongo
 - [ ] Design improvements and tweaks (closer to the real thing)
   - [ ] Product page layout improvements
   - [ ] Stylize the dynamic shopping cart element
@@ -138,14 +138,40 @@ To set this up easily from a Unix shell (which includes the Git Bash included wi
     MONGODBPASSWORD=*password for the remote MongoDB cluster*
     RECOMADDRESS=*address for the recommendation service*
 
-Any variables you're not using, you can leave blank. (e.g. <code>MONGODBSERVER=</code>)
+Any variables you're not using, you can leave blank (e.g. <code>MONGODBSERVER=</code>).
 Note that the file must be called exactly <code>.env</code>. So technically, the file doesn't have a name, it only has an extension. 
 
 ### Start the Recommendation Service
 
-It's time to actually start up the code! Let's start with the recommendation service, so that
+To run the recommendation service, you will need to open a terminal window and navigate to the top-level directory of this repository. If you have a Unix shell handy, you can run huw_recommend.sh (command line: <code>sh huw_recommend.sh</code>). If not, you need to perform the following commands (written for Windows, Command Prompt specifically):
+
+    set FLASK_APP=huw_recommend.py
+    python -m flask run --port 5001
+
+Depending on your system and type of terminal, these commands may need to be slightly different. Refer to the Flask Quickstart for more information on these commands.
+
+You will know if/when the code is running when its terminal shows the following message:
+
+    * Running on http://127.0.0.1:5001/ (Press CTRL+C to quit)
+
+If this code runs, you can't see it do anything yet. Just be sure to leave this terminal window open!
 
 ### Start the Webshop
+
+Now, let's run the webshop! You will need to open **another, separate terminal window** and navigate to the top-level directory of this repository. If you have a Unix shell handy, you can run huw_recommend.sh (command line: <code>sh huw_recommend.sh</code>). If not, you need to perform the following commands (written for Windows, Command Prompt specifically):
+
+    set FLASK_APP=huw.py
+    python -m flask run
+
+When you run this program for the first time, it may take a while to start up. It should be faster on future iterations. You will know if/when the code is running when its terminal shows the following message:
+
+    * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+
+While both terminal windows are running, go to your browser of choice and navigate to <code>http://127.0.0.1:5000</code> (the default location and port for Flask projects). If you see a front page like the one shown below, congratulations! This environment is your test webshop for the Group Project.
+
+### Stopping Either Process
+
+When you're done with this particular session, or you want to stop and restart either service because you've made changes, you can terminate the process by going into the appropriate terminal window and pressing, as suggested, CTRL+C.
 
 ## The Project in Action
 ## Design Philosophy
