@@ -174,6 +174,13 @@ While both terminal windows are running, go to your browser of choice and naviga
 When you're done with this particular session, or you want to stop and restart either service because you've made changes, you can terminate the process by going into the appropriate terminal window and pressing, as suggested, CTRL+C.
 
 ## The Project in Action
+
+When running, the front page webshop should look something like this:
+
+![HU Webshop Front Page Example 02-09-2019](./reference_images/homepage.png)
+
+The text may be different, but the overall layout should remain more or less the same.
+
 ## Design Philosophy
 ## Code Structure
 
