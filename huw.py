@@ -50,7 +50,6 @@ class HUWebshop(object):
         if os.getenv(self.envvals[0]) is not None:
             for val in self.envvals:
                 envdict[val] = str(os.getenv(val))
-            print(envdict)
             if envdict["MONGODBUSER"] and envdict["MONGODBPASSWORD"] and envdict["MONGODBSERVER"]:
                 self.client = MongoClient(self.dbstring.format(envdict["MONGODBUSER"], envdict["MONGODBPASSWORD"], envdict["MONGODBSERVER"]))
             else:
