@@ -184,8 +184,21 @@ The text may be different, but the overall layout should remain more or less the
 
 Through the main menu, you can reach the product overview and detail pages. You can tell the recommendation service is working when refreshing the page leads to entirely different random suggestions:
 
+---
+
 ![HU Webshop Product Page Example 1 02-09-2019](./reference_images/productpage_1.png)
-![HU Webshop Product Page Example 1 02-09-2019](./reference_images/productpage_2.png)
+
+---
+
+...and then, after refreshing...
+
+---
+
+![HU Webshop Product Page Example 2 02-09-2019](./reference_images/productpage_2.png)
+
+---
+
+Feel free to play around and test this webshop (or rather, a shell of a webshop) out! If you run into any errors, or have ideas for improvements that aren't yet listed in this Readme, feel free to contact the author at nick.roumimper@hu.nl.
 
 ## Design Philosophy
 ## Code Structure
