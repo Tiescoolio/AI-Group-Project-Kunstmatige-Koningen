@@ -17,6 +17,7 @@ Git for the HU Webshop project.
 - [ ] Optional improvements
   - [ ] Extend documentation to non-Windows systems
   - [ ] Create shell scripts for all systems
+  - [ ] Packaging?
   - [ ] Sorted category index
   - [ ] Correct pagination redirects
   - [ ] Error pages
@@ -179,7 +180,12 @@ When running, the front page webshop should look something like this:
 
 ![HU Webshop Front Page Example 02-09-2019](./reference_images/homepage.png)
 
-The text may be different, but the overall layout should remain more or less the same.
+The text may be different, but the overall layout should remain more or less the same. The bar at the top allows you to change the profile ID you're viewing the site with; it defaults upon restart to the first one it can find. In the database, you will find these IDs in the profiles table, as the \_id property, e.g. ObjectId("5a3a1169a825610001bc0f3a") . This allows you to test your recommendation engine with different profiles.
+
+Through the main menu, you can reach the product overview and detail pages. You can tell the recommendation service is working when refreshing the page leads to entirely different random suggestions:
+
+![HU Webshop Product Page Example 1 02-09-2019](./reference_images/productpage_1.png)
+![HU Webshop Product Page Example 1 02-09-2019](./reference_images/productpage_2.png)
 
 ## Design Philosophy
 ## Code Structure
