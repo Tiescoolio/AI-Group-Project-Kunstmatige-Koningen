@@ -1,8 +1,6 @@
 # huwebshop
 Git for the HU Webshop project.
 
-
-
 ## Introduction
 
 This project was created to assist the students of TAAI-V1GP-19 (Group Project) with using the provided database of real-life products, sessions and anonymized profiles. Last year (2018-2019), students were given this same data and asked to create a recommendation service. However, getting the database to a visibly workable state proved to be such a difficult task, that much of the course's runtime was dedicated to that alone. We hope that by removing that roadblock in advance, students can dedicate their time to the actually interesting part of the course.
@@ -28,7 +26,6 @@ To run this code, you need to have the following programs and libraries installe
 - **Flask-RESTful** (command line: <code>pip install flask-restful</code>). This code was developed using Flask Restful 0.3.7. This library allows you to run the dummy recommendation service locally; almost all students will want to do this, at least to start out with.
 - **Python-Dotenv** (command line: <code>pip install python-dotenv</code>). This code was developed using Python-Dotenv 0.10.3.
 - **Requests** (command line: <code>pip install requests</code>). This code was developed using Requests 2.22.0.
-- **Bson** - questionable? May already be included in Pymongo (see also https://api.mongodb.com/python/current/api/index.html)
 
 ## Sources Included in this Repository
 
@@ -195,8 +192,8 @@ Thank you for working with this project! We hope it helps to have this base setu
 - [X] Code structure
 - [X] Documentation
 - [ ] Required changes
-  - [ ] Double-check whether bson is indeed the version included from pymongo
-  - [ ] Change the text on the front page
+  - [X] Double-check whether bson is indeed the version included from pymongo
+  - [X] Change the text on the front page
   - [ ] Preprocess dates in the full-sized files to make them parseable by MongoDB / ask Joost about the current version, since the version on Canvas looks different from the one in the file I own
   - [ ] Test on the own system through mongoimport with new admin credentials
 - [ ] Design improvements and tweaks (closer to the real thing)
