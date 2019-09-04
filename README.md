@@ -191,13 +191,6 @@ Thank you for working with this project! We hope it helps to have this base setu
 
 ## Todo (Reference for the Developers)
 
-- [X] Code structure
-- [X] Documentation
-- [ ] Required changes
-  - [X] Double-check whether bson is indeed the version included from pymongo
-  - [X] Change the text on the front page
-  - [X] Preprocess dates in the full-sized files to make them parseable by MongoDB / ask Joost about the current version, since the version on Canvas looks different from the one in the file I own
-  - [ ] Test on the own system through mongoimport with new admin credentials
 - [ ] Design improvements and tweaks (closer to the real thing)
   - [ ] Product page layout improvements
   - [ ] Stylize the dynamic shopping cart element
