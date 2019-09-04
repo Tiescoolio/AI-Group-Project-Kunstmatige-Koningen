@@ -64,19 +64,21 @@ With MongoDB Community Edition installed on your device, ideally including Mongo
 - **Make sure you can access the mongoimport tool** from the folder containing your data. On most computers, that means adding the path to the folder containing the executables (typically something like <code>C:\Program Files\MongoDB\Server\4.2\bin</code>) to your PATH environment variable. If that doesn't work, or you're working off of misbehaving HU employee laptops like us, you can also navigate to this same folder, copy the executable and paste it alongside the three files (yuck).
 - **Import products.json to a collection called <code>products</code>.** A mongoimport command is structured like this:
     
-    <code>mongoimport --db *database name* --collection *collection name* --file *file name*</code>
+    <code>mongoimport --db *database name* --collection *collection name* --file *file name* --legacy</code>
+
+    The legacy flag is required when using mongoimport version 4.2 or beyond, because the files are in the old Extended JSON format (v1). Anyone who has recently installed mongoimport will have a version of 4.2 or beyond; if you have an older version (command line: <code>mongoimport --version</code>), consider leaving off the legacy flag. 
 
     So in this particular case, you would have to execute the following from the command prompt:
 
-    <code>mongoimport --db huwebshop --collection products --file products.json</code>
+    <code>mongoimport --db huwebshop --collection products --file products.json --legacy</code>
 - **Import sessions.json/sessions4.json to a collection called <code>sessions</code>.** In other words, execute the mongoimport command:
 
-    <code>mongoimport --db huwebshop --collection sessions --file sessions.json</code>
+    <code>mongoimport --db huwebshop --collection sessions --file sessions.json --legacy</code>
 
     with a different filename, if necessary.
 - **Import profiles.json/visitors.json to a collection called <code>profiles</code>.** In other words, execute the mongoimport command:
 
-    <code>mongoimport --db huwebshop --collection profiles --file profiles.json</code>
+    <code>mongoimport --db huwebshop --collection profiles --file profiles.json --legacy</code>
 
     with a different filename, if necessary.
 
@@ -194,7 +196,7 @@ Thank you for working with this project! We hope it helps to have this base setu
 - [ ] Required changes
   - [X] Double-check whether bson is indeed the version included from pymongo
   - [X] Change the text on the front page
-  - [ ] Preprocess dates in the full-sized files to make them parseable by MongoDB / ask Joost about the current version, since the version on Canvas looks different from the one in the file I own
+  - [X] Preprocess dates in the full-sized files to make them parseable by MongoDB / ask Joost about the current version, since the version on Canvas looks different from the one in the file I own
   - [ ] Test on the own system through mongoimport with new admin credentials
 - [ ] Design improvements and tweaks (closer to the real thing)
   - [ ] Product page layout improvements
