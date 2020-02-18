@@ -9,7 +9,6 @@ The project contains the following:
 
 1. **An example webshop**, which can connect to a preconfigured database, either local or remote, and display basic pages such as product listing pages, product detail pages and a rudimentary shopping cart;
 2. **A dummy recommendation service**, which uses the same database to provide recommendations through a REST interface, although at the moment, it simply returns randomly chosen products;
-3. **A sample of the full dataset**, created to work within the constraints of both Github and MongoDB Free Tier clusters; although these might be useful when setting up a remote MongoDB instance, most students will not use these at all.
 
 In the following sections, we will go into more detail on the requirements for setting up this project on your own device, how to run it, and what it should look like.
 
