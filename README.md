@@ -1,6 +1,10 @@
 # huwebshop
 Git for the HU Webshop project.
 
+Groepsleden Data Wizards:
+Ties Smid: 1850208
+Kyle Regacho, Studentnummer: 1838993
+Tom van de Kruijk: 1836129
 ## Introduction
 
 This project was created to assist the students of TAAI-V1GP-19 (Group Project) with using the provided database of real-life products, sessions and anonymized profiles. Last year (2018-2019), students were given this same data and asked to create a recommendation service. However, getting the database to a visibly workable state proved to be such a difficult task, that much of the course's runtime was dedicated to that alone. We hope that by removing that roadblock in advance, students can dedicate their time to the actually interesting part of the course.
