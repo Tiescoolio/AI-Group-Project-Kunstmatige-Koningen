@@ -54,3 +54,11 @@ profiles_tabel = """CREATE TABLE IF NOT EXISTS profiles (
                     ordered_id INT,
                     FOREIGN KEY(ordered_id) REFERENCES ordered(id)
                     )"""
+
+cur.execute(products_tabel)
+cur.execute(similars_tabel)
+cur.execute(viewed_before_tabel)
+cur.execute(ordered_tabel)
+cur.execute(profiles_tabel)
+con.commit()
+con.close()
