@@ -17,7 +17,8 @@ def turn_mongo_to_sql():
 def get_mongo():
     collectie = "products"
     database = connect_to_mongo("localhost", 27017, "huwebshop")
-    cursor = database[collectie].find({}, {"_id": 1, "name": 1, "category": 1, "brand": 1})
+    cursor = database[collectie].find({}, {"_id":0, "name":1, "category":1, "brand":1})
+    #alfabetische volgorde
     print(cursor)
     data = pandas.DataFrame(list(cursor))
     return data
