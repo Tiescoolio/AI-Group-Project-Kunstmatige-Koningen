@@ -38,19 +38,19 @@ profiles_tabel = """CREATE TABLE IF NOT EXISTS profiles (
                     )"""
 
 viewed_before_tabel = """CREATE TABLE IF NOT EXISTS viewed_before (
-                    id INT NOT NULL PRIMARY KEY,
+                    id INT NOT NULL,
                     profile_id INT NOT NULL,
                     FOREIGN KEY(profile_id) REFERENCES profiles(id)
                     )"""
 
 similars_tabel = """CREATE TABLE IF NOT EXISTS similars (
-                    id INT NOT NULL PRIMARY KEY,
+                    id INT NOT NULL,
                     profile_id INT NOT NULL,
                     FOREIGN KEY(profile_id) REFERENCES profiles(id)
                     )"""
 
 ordered_tabel = """CREATE TABLE IF NOT EXISTS ordered (
-                    id INT NOT NULL PRIMARY KEY,
+                    id INT NOT NULL,
                     profile_id INT NOT NULL,
                     FOREIGN KEY(profile_id) REFERENCES profiles(id)
                     )"""
