@@ -33,32 +33,33 @@ products_tabel = """CREATE TABLE IF NOT EXISTS products (
                 recommendable BOOLEAN
                 )"""
 
-
-viewed_before_tabel = """CREATE TABLE IF NOT EXISTS viewed_before (
+profiles_tabel = """CREATE TABLE IF NOT EXISTS profiles (
                     id INT NOT NULL PRIMARY KEY
                     )"""
 
-similars_tabel = """CREATE TABLE IF NOT EXISTS similars(
-                    id INT NOT NULL PRIMARY KEY
+viewed_before_tabel = """CREATE TABLE IF NOT EXISTS viewed_before (
+                    id INT NOT NULL PRIMARY KEY,
+                    profile_id INT NOT NULL,
+                    FOREIGN KEY(profile_id) REFERENCES profiles(id)
+                    )"""
+
+similars_tabel = """CREATE TABLE IF NOT EXISTS similars (
+                    id INT NOT NULL PRIMARY KEY,
+                    profile_id INT NOT NULL,
+                    FOREIGN KEY(profile_id) REFERENCES profiles(id)
                     )"""
 
 ordered_tabel = """CREATE TABLE IF NOT EXISTS ordered (
-                    id INT NOT NULL PRIMARY KEY)"""
-
-profiles_tabel = """CREATE TABLE IF NOT EXISTS profiles (
                     id INT NOT NULL PRIMARY KEY,
-                    viewed_before_id INT,
-                    FOREIGN KEY(viewed_before_id) REFERENCES viewed_before(id),
-                    similars_id INT, 
-                    FOREIGN KEY(similars_id) REFERENCES similars(id),
-                    ordered_id INT,
-                    FOREIGN KEY(ordered_id) REFERENCES ordered(id)
+                    profile_id INT NOT NULL,
+                    FOREIGN KEY(profile_id) REFERENCES profiles(id)
                     )"""
 
 cur.execute(products_tabel)
+cur.execute(profiles_tabel)
 cur.execute(similars_tabel)
 cur.execute(viewed_before_tabel)
 cur.execute(ordered_tabel)
-cur.execute(profiles_tabel)
+
 con.commit()
 con.close()
