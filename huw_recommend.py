@@ -15,7 +15,7 @@ dbstring = 'mongodb+srv://{0}:{1}@{2}/test?retryWrites=true&w=majority'
 # Since we are asked to pass a class rather than an instance of the class to the
 # add_resource method, we open the connection to the database outside of the 
 # Recom class.
-load_dotenv()
+# load_dotenv()
 if os.getenv(envvals[0]) is not None:
     envvals = list(map(lambda x: str(os.getenv(x)), envvals))
     client = MongoClient(dbstring.format(*envvals))
