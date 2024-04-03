@@ -38,4 +38,6 @@ def get_mongo():
         if len(indices) == 13:
             templist.append(indices)
     return templist
-turn_mongo_to_sql()
+
+if __name__ == '__main__':
+    turn_mongo_to_sql()
