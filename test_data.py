@@ -7,7 +7,7 @@ client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client["huwebshop"]
 
 # Collection Name
-col = db["sessions_modified"]
+col = db["sessions"]
 
 x = col.find_one()
 pprint.pprint(x)

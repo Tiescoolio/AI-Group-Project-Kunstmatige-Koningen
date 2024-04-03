@@ -1,10 +1,10 @@
 import psycopg2 as ps
 
 hostname = "localhost"
-database = "AI Group Project"
+database = "Group_Project_AI_2024_C"
 username = "postgres"
-pwd = ""
-port_id = 5432
+pwd = "pgadmin"
+port_id = 5434
 #variabelen aanmaken om makkelijker in een keer pycharm te verbinden met postgres
 con = ps.connect(
     host = hostname,
@@ -12,6 +12,9 @@ con = ps.connect(
     user = username,
     password= pwd,
     port = port_id)
+
+
+
 #dit verbind pycharm met postgres
 cur = con.cursor()
 
