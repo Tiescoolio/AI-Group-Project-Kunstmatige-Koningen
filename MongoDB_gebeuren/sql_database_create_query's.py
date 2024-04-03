@@ -15,45 +15,21 @@ con = ps.connect(
 #dit verbind pycharm met postgres
 cur = con.cursor()
 
-products_tabel = """CREATE TABLE IF NOT EXISTS products (
-                id INT NOT NULL PRIMARY KEY,
-                name VARCHAR(255),
-                brand VARCHAR(100), 
-                category VARCHAR(100),
-                sub_category VARCHAR(100),
-                sub_sub_category VARCHAR(100),
-                sub_sub_sub_category VARCHAR(100),
-                gender VARCHAR(50),
-                target_audience VARCHAR(100),
-                selling_price  INT,
-                mrsp  INT,
-                price_discount    INT,
-                availability  INT,
-                aanbiedingen  VARCHAR(255),
-                recommendable BOOLEAN
-                )"""
+with open("queries/products_query.sql") as f:
+    products_tabel = f.read()
 
-profiles_tabel = """CREATE TABLE IF NOT EXISTS profiles (
-                    id INT NOT NULL PRIMARY KEY
-                    )"""
+with open("queries/profiles_query.sql") as f:
+    profiles_tabel = f.read()
 
-viewed_before_tabel = """CREATE TABLE IF NOT EXISTS viewed_before (
-                    id INT NOT NULL,
-                    profile_id INT NOT NULL,
-                    FOREIGN KEY(profile_id) REFERENCES profiles(id)
-                    )"""
+with open("queries/viewed_before_query.sql") as f:
+    viewed_before_tabel = f.read()
 
-similars_tabel = """CREATE TABLE IF NOT EXISTS similars (
-                    id INT NOT NULL,
-                    profile_id INT NOT NULL,
-                    FOREIGN KEY(profile_id) REFERENCES profiles(id)
-                    )"""
+with open("queries/similars_query.sql") as f:
+    similars_tabel = f.read()
 
-ordered_tabel = """CREATE TABLE IF NOT EXISTS ordered (
-                    id INT NOT NULL,
-                    profile_id INT NOT NULL,
-                    FOREIGN KEY(profile_id) REFERENCES profiles(id)
-                    )"""
+with open("queries/ordered_query.sql") as f:
+    ordered_tabel = f.read()
+
 
 cur.execute(products_tabel)
 cur.execute(profiles_tabel)
