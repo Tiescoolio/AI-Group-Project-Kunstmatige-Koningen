@@ -11,9 +11,6 @@ def connect_to_mongo(host, port, db):
     conn = MongoClient(host,port)
     return conn[db]
 
-def turn_mongo_to_sql():
-    data = get_mongo()
-
 def get_mongo():
     collectie = "products"
     database = connect_to_mongo("localhost", 27017, "huwebshop")
@@ -40,4 +37,4 @@ def get_mongo():
     return templist
 
 if __name__ == '__main__':
-    turn_mongo_to_sql()
+    get_mongo()
