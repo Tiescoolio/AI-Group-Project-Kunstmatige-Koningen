@@ -53,8 +53,8 @@ def get_mongo():
         for j in opties:
             if i[0] == j:
                 products.append(i)
+    print(len(products))
     return products
 
-get_mongo()
 if __name__ == '__main__':
     get_mongo()
