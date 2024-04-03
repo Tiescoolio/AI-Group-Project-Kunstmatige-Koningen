@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS products (
-    id INT NOT NULL PRIMARY KEY,
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
     name VARCHAR(255),
     brand VARCHAR(100),
     category VARCHAR(100),
