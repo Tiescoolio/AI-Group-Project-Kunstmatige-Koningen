@@ -3,10 +3,6 @@ from pymongo import MongoClient
 import time
 
 
-pandas.set_option('display.max_rows', None)
-pandas.set_option('display.max_columns', None)
-pandas.set_option('display.width', None)
-
 def connect_to_mongo(host, port, db):
     conn = MongoClient(host,port)
     return conn[db]

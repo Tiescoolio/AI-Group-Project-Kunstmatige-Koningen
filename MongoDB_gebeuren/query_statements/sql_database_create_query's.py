@@ -18,19 +18,19 @@ con = ps.connect(
 #dit verbind pycharm met postgres
 cur = con.cursor()
 
-with open("queries/products_query.sql") as f:
+with open("../create_queries/products_query.sql") as f:
     products_tabel = f.read()
 
-with open("queries/profiles_query.sql") as f:
+with open("../create_queries/profiles_query.sql") as f:
     profiles_tabel = f.read()
 
-with open("queries/viewed_before_query.sql") as f:
+with open("../create_queries/viewed_before_query.sql") as f:
     viewed_before_tabel = f.read()
 
-with open("queries/similars_query.sql") as f:
+with open("../create_queries/similars_query.sql") as f:
     similars_tabel = f.read()
 
-with open("queries/ordered_query.sql") as f:
+with open("../create_queries/ordered_query.sql") as f:
     ordered_tabel = f.read()
 
 
