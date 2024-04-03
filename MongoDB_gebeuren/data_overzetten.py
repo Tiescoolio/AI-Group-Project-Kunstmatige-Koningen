@@ -1,4 +1,3 @@
-from IPython.display import display
 import pandas
 from pymongo import MongoClient
 
@@ -14,7 +13,6 @@ def connect_to_mongo(host, port, db):
 
 def turn_mongo_to_sql():
     data = get_mongo()
-    display(data)
 
 def get_mongo():
     collectie = "products"
@@ -40,31 +38,3 @@ def get_mongo():
             templist.append(indices)
     return templist
 turn_mongo_to_sql()
-
-
-
-#--------------------------------------------
-import psycopg2 as ps
-
-hostname = "localhost"
-database = "Group_Project_AI_2024_C"
-username = "postgres"
-pwd = "pgadmin"
-port_id = 5434
-#variabelen aanmaken om makkelijker in een keer pycharm te verbinden met postgres
-con = ps.connect(
-    host = hostname,
-    dbname = database,
-    user = username,
-    password= pwd,
-    port = port_id)
-#dit verbind pycharm met postgres
-cur = con.cursor()
-
-def sql_insert():
-    data = get_mongo()
-    to_add = """INSERT INTO products (id, name, brand, category, sub_category, sub_sub_category, sub_sub_sub_category, target_audience, selling_price, mrsp, price_discount, availability, aanbiedingen, recommendable)VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-    for i in data:
-        print(i)
-        #cur.execute(to_add, i)
-        #con.commit()
