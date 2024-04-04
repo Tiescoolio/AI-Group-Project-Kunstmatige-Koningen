@@ -21,11 +21,11 @@ def get_mongo():
     data = pandas.DataFrame(list(cursor))
     data = data.where(pandas.notnull(data), None)
 
-    #_ID, ORDER, Recommendations
     templist = []
     for index, row in data.iterrows():
         indices = []
         for i in row.values:
+
             if i == row.values[0]:
                 indices.append(row.values[0])
             else:
@@ -35,7 +35,9 @@ def get_mongo():
                 else:
                     indices.append(i)
         templist.append(indices)
+    for i in templist:
+        if len(i) == 3:
+            i.append(None)
     return templist
 turn_mongo_to_sql()
 
-print("KLAAR")
