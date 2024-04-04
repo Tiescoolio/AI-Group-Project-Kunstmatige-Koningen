@@ -9,7 +9,7 @@ for product in producten:
 hostname = "localhost"
 database = "AI Group Project"
 username = "postgres"
-pwd = "Gymhond11"
+pwd = ""
 port_id = 5432
 #variabelen aanmaken om makkelijker in een keer pycharm te verbinden met postgres
 con = ps.connect(
@@ -19,9 +19,10 @@ con = ps.connect(
     password= pwd,
     port = port_id)
 cur = con.cursor()
+
 products_insert_query = """INSERT INTO products (id, name, brand, category, sub_category, sub_sub_category, gender, target_audience, selling_price, mrsp, price_discount, aanbiedingen, recommendable)
 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-
-for product in producten:
-    cur.execute(products_insert_query, product)
+# for product in producten:
+#     cur.execute(products_insert_query, product)
 con.commit()
+con.close()
