@@ -24,4 +24,5 @@ def get_mongo():
     print(templist)
     return templist
 #turn_mongo_to_sql()
-import time
+
+
