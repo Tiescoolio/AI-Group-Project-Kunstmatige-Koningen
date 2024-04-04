@@ -13,16 +13,27 @@ def turn_mongo_to_sql():
     data = get_mongo()
     display(data)
 
+import time
 def get_mongo():
     collectie = "profiles"
     database = connect_to_mongo("localhost", 27017, "huwebshop")
-    cursor = database[collectie].find({}, {"_id":1})
+    cursor = database[collectie].find({}, {"_id": 1, "order.ids":1, "recommendations.viewed_before":1, "recommendations.similars":1})
     data = pandas.DataFrame(list(cursor))
-    templist = []
-    for i, temp in data.iterrows():
-        templist.append(i)
-    print(templist)
-    return templist
-#turn_mongo_to_sql()
+    data = data.where(pandas.notnull(data), None)
 
+    templist = []
+    for index, row in data.iterrows():
+        indices = []
+        for i in row.values:
+            if isinstance(i, dict):
+                for j in i.values():
+                    indices.append(j)
+            else:
+                indices.append(i)
+        templist.append(indices)
+    for i in templist:
+        if len(i) == 3:
+            i.append(None)
+    return templist
+turn_mongo_to_sql()
 
