@@ -109,7 +109,7 @@ class HUWebshop(object):
         self.app.add_url_rule('/productdetail/<productid>/', 'productdetail', self.productdetail)
         self.app.add_url_rule('/winkelmand/', 'winkelmand', self.shoppingcart)
         self.app.add_url_rule('/categorieoverzicht/', 'categorieoverzicht', self.category_overview)
-        self.app.add_url_rule('/change-profile-id', 'profielid', self.changeprofile_id, methods=['POST'])
+        self.app.add_url_rule('/change-profile-id', 'profielid', self.change_profile_id, methods=['POST'])
         self.app.add_url_rule('/add-to-shopping-cart', 'toevoegenaanwinkelmand', self.add_to_shopping_cart, methods=['POST'])
         self.app.add_url_rule('/producten/pagination-change', 'aantalperpaginaaanpassen', self.change_pagination_count, methods=['POST'])
 
@@ -231,14 +231,16 @@ class HUWebshop(object):
 
     """ ..:: Recommendation Functions ::.. """
 
-    def recommendations(self, count, rec_type):
+    def recommendations(self, count, r_type):
         """ This function returns the recommendations from the provided page
         and context, by sending a request to the designated recommendation
         service. At the moment, it only transmits the profile ID and the number
         of expected recommendations; to have more user information in the REST
         request, this function would have to change."""
+        pp.pp(session)
         resp = requests.get(self.rec_ser_address + "/" + session['profile_id'] + "/" + str(count))
-
+        print(resp)
+        print(self.rec_ser_address)
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
             queryfilter = {"_id": {"$in": recs}}
@@ -269,7 +271,7 @@ class HUWebshop(object):
 
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
-        pp.pp(prod_list)
+        # pp.pp(prod_list)
         if len(nononescats) > 1:
             page_path = "/producten/"+("/".join(nononescats))+"/"
         else:
@@ -320,7 +322,7 @@ class HUWebshop(object):
 
     """ ..:: Dynamic AJAX Endpoints ::.. """
 
-    def changeprofile_id(self):
+    def change_profile_id(self):
         """ This function checks whether the provided session ID actually exists
         and stores it in the session if it does. """
         try:
