@@ -25,3 +25,4 @@ VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 for product in producten:
     cur.execute(products_insert_query, product)
 con.commit()
+con.close()
