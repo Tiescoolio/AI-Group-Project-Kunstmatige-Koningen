@@ -3,6 +3,7 @@ import random, os, json, urllib.parse, requests
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
+import pprint as pp
 
 # The secret key used for session encryption is randomly generated every time
 # the server is started up. This means all session data (including the 
@@ -18,22 +19,28 @@ class HUWebshop(object):
     client = None
     database = None
 
-    envvals = ["MONGODBUSER","MONGODBPASSWORD","MONGODBSERVER","RECOMADDRESS"]
-    dbstring = 'mongodb+srv://{0}:{1}@{2}/test?retryWrites=true&w=majority'
-    recseraddress = "http://127.0.0.1:5001"
+    env_vals = ["MONGODBUSER", "MONGODBPASSWORD", "MONGODBSERVER", "RECOMADDRESS"]
+    db_string = 'mongodb+srv://{0}:{1}@{2}/test?retryWrites=true&w=majority'
+    rec_ser_address = "http://127.0.0.1:5001"
 
     categoryindex = None
-    catlevels = ["category","sub_category","sub_sub_category","sub_sub_sub_category"]
-    catencode = {}
-    catdecode = {}
-    mainmenucount = 8
-    mainmenuitems = None
+    cat_levels = ["category", "sub_category", "sub_sub_category", "sub_sub_sub_category"]
+    cat_encode = {}
+    cat_decode = {}
+    main_menu_count = 8
+    main_menu_items = None
 
-    paginationcounts = [8, 16, 32, 0]
+    pagination_counts = [8, 16, 32, 0]
 
-    productfields = ["name", "price.selling_price", "properties.discount", "images"]
+    product_fields = ["name", "price.selling_price", "properties.discount", "images"]
 
-    recommendationtypes = {'popular':"Anderen kochten ook",'similar':"Soortgelijke producten",'combination':'Combineert goed met','behaviour':'Passend bij uw gedrag','personal':'Persoonlijk aanbevolen'}
+    recommendation_types = {
+        'popular':"Anderen kochten ook",
+        'similar':"Soortgelijke producten",
+        'combination':'Combineert goed met',
+        'behaviour':'Passend bij uw gedrag',
+        'personal':'Persoonlijk aanbevolen'
+    }
 
     """ ..:: Initialization and Category Index Functions ::.. """
 
@@ -46,16 +53,16 @@ class HUWebshop(object):
         # to a local or remote instance of MongoDB, and a default or non-default
         # external recommendation service.
         load_dotenv()
-        envdict = {}
-        if os.getenv(self.envvals[0]) is not None:
-            for val in self.envvals:
-                envdict[val] = str(os.getenv(val))
-            if envdict["MONGODBUSER"] and envdict["MONGODBPASSWORD"] and envdict["MONGODBSERVER"]:
-                self.client = MongoClient(self.dbstring.format(envdict["MONGODBUSER"], envdict["MONGODBPASSWORD"], envdict["MONGODBSERVER"]))
+        env_dict = {}
+        if os.getenv(self.env_vals[0]) is not None:
+            for val in self.env_vals:
+                env_dict[val] = str(os.getenv(val))
+            if env_dict["MONGODBUSER"] and env_dict["MONGODBPASSWORD"] and env_dict["MONGODBSERVER"]:
+                self.client = MongoClient(self.db_string.format(env_dict["MONGODBUSER"], env_dict["MONGODBPASSWORD"], env_dict["MONGODBSERVER"]))
             else:
                 self.client = MongoClient()
-            if envdict["RECOMADDRESS"]:
-                self.recseraddress = envdict["RECOMADDRESS"]
+            if env_dict["RECOMADDRESS"]:
+                self.rec_ser_address = env_dict["RECOMADDRESS"]
         else:
             self.client = MongoClient()
         self.database = self.client.huwebshop 
@@ -63,7 +70,7 @@ class HUWebshop(object):
         # Once we have a connection to the database, we check to see whether it
         # has a category index prepared; if not, we have a function to make it.
         if "categoryindex" not in self.database.list_collection_names() or self.database.categoryindex.count_documents({}) == 0:
-            self.createcategoryindex()
+            self.create_category_index()
 
         # We retrieve the categoryindex from the database when it is set.
         self.categoryindex = self.database.categoryindex.find_one({}, {'_id' : 0})
@@ -71,25 +78,25 @@ class HUWebshop(object):
         # In order to save time in future, we flatten the category index once,
         # and translate all values to and from an encoded, URL-friendly, legible
         # format.
-        catlist = self.flattendict(self.categoryindex)
+        catlist = self.flatten_dict(self.categoryindex)
         for cat in catlist:
-            enc_cat = self.encodecategory(cat)
-            self.catencode[cat] = enc_cat
-            self.catdecode[enc_cat] = cat
+            enc_cat = self.encode_category(cat)
+            self.cat_encode[cat] = enc_cat
+            self.cat_decode[enc_cat] = cat
 
         # Since the main menu can't show all the category options at once in a
         # legible manner, we choose to display a set number with the greatest 
         # number of associated products.
         countlist = list(map(lambda x, y: (y['_count'], x), self.categoryindex.keys(), self.categoryindex.values()))
         countlist.sort(reverse=True)
-        self.mainmenuitems = [x[1] for x in countlist[0:self.mainmenucount]]
+        self.main_menu_items = [x[1] for x in countlist[0:self.main_menu_count]]
 
         # Finally, we here attach URL rules to all pages we wish to render, to
         # make the code self-contained; although the more common decorators do
         # the same thing, we wish to have this class contain as much logic as
         # possible.
-        self.app.before_request(self.checksession)
-        self.app.add_url_rule('/', 'index', self.renderpackettemplate)
+        self.app.before_request(self.check_session)
+        self.app.add_url_rule('/', 'index', self.render_packet_template)
         self.app.add_url_rule('/producten/', 'producten-0', self.productpage)
         self.app.add_url_rule('/producten/<cat1>/', 'producten-1', self.productpage)
         self.app.add_url_rule('/producten/<cat1>/<cat2>/', 'producten-2', self.productpage)
@@ -101,36 +108,36 @@ class HUWebshop(object):
         self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/<cat4>/<int:page>/', 'producten-8', self.productpage)
         self.app.add_url_rule('/productdetail/<productid>/', 'productdetail', self.productdetail)
         self.app.add_url_rule('/winkelmand/', 'winkelmand', self.shoppingcart)
-        self.app.add_url_rule('/categorieoverzicht/', 'categorieoverzicht', self.categoryoverview)
-        self.app.add_url_rule('/change-profile-id', 'profielid', self.changeprofileid, methods=['POST'])
-        self.app.add_url_rule('/add-to-shopping-cart', 'toevoegenaanwinkelmand', self.addtoshoppingcart, methods=['POST'])
-        self.app.add_url_rule('/producten/pagination-change', 'aantalperpaginaaanpassen', self.changepaginationcount, methods=['POST'])
+        self.app.add_url_rule('/categorieoverzicht/', 'categorieoverzicht', self.category_overview)
+        self.app.add_url_rule('/change-profile-id', 'profielid', self.changeprofile_id, methods=['POST'])
+        self.app.add_url_rule('/add-to-shopping-cart', 'toevoegenaanwinkelmand', self.add_to_shopping_cart, methods=['POST'])
+        self.app.add_url_rule('/producten/pagination-change', 'aantalperpaginaaanpassen', self.change_pagination_count, methods=['POST'])
 
-    def createcategoryindex(self):
+    def create_category_index(self):
         """ Within this function, we compose a nested dictionary of all 
         categories that occur within the database's products collection, and 
         save it to the categoryindex collection. """
-        pcatentries = self.database.products.find({},self.catlevels)
+        pcat_entries = self.database.products.find({}, self.cat_levels)
         index = {}
-        for entry in pcatentries:
-            self.reccatindex(index, entry, 0, len(self.catlevels)-1)
+        for entry in pcat_entries:
+            self.reccat_index(index, entry, 0, len(self.cat_levels) - 1)
         for k, v in index.items():
-            self.reccatcount(k, v, 0, len(self.catlevels)-1)
+            self.reccat_count(k, v, 0, len(self.cat_levels) - 1)
         self.database.categoryindex.insert_one(index)
 
-    def reccatindex(self,d,e,l,m):
+    def reccat_index(self, d, e, l, m):
         """ This subfunction of createcategoryindex() sets up the base structure
         (tree) of the categories and subcategories, leaving leaves as empty 
         dicts."""
         if l > m:
             return
-        t = self.catlevels[l]
+        t = self.cat_levels[l]
         if t in e and e[t] is not None and type(e[t]) != list and e[t] not in d:
             d[e[t]] = {}
         if t in e and e[t] is not None and type(e[t]) != list and e[t] in d:
-            self.reccatindex(d[e[t]],e,l+1,m)
+            self.reccat_index(d[e[t]], e, l + 1, m)
 
-    def reccatcount(self,k,v,l,m):
+    def reccat_count(self, k, v, l, m):
         """ This subfunction of createcategoryindex() adds the number of 
         documents associated with any (sub)category to its dictionary as the
         _count property. """
@@ -138,13 +145,13 @@ class HUWebshop(object):
             return
         if isinstance(v, dict):
             for k2, v2 in v.items():
-                self.reccatcount(k2, v2, l+1, m)
+                self.reccat_count(k2, v2, l + 1, m)
         if k[:1] != "_":
-            v['_count'] = self.database.products.count_documents({self.catlevels[l]:k})
+            v['_count'] = self.database.products.count_documents({self.cat_levels[l]:k})
 
     """ ..:: Helper Functions ::.. """
 
-    def flattendict(self,d,s=[]):
+    def flatten_dict(self, d, s=[]):
         """ This helper function provides a list of all keys that exist within a
         nested dictionary. """
         for k, v in d.items():
@@ -153,10 +160,10 @@ class HUWebshop(object):
             if k[:1] != "_":
                 s.append(k)
                 if isinstance(v, dict) and v:
-                    s = self.flattendict(v, s)
+                    s = self.flatten_dict(v, s)
         return s
 
-    def encodecategory(self,c):
+    def encode_category(self, c):
         """ This helper function encodes any category name into a URL-friendly
         string, making sensible and human-readable substitutions. """
         c = c.lower()
@@ -171,9 +178,11 @@ class HUWebshop(object):
         c = urllib.parse.quote(c)
         return c
 
-    def prepproduct(self,p):
+    def prep_product(self, p):
         """ This helper function flattens and rationalizes the values retrieved
         for a product block element. """
+        # pp.pp(p)
+
         r = {}
         r['name'] = p['name']
         r['price'] = p['price']['selling_price']
@@ -182,59 +191,60 @@ class HUWebshop(object):
             r['price'] = "0"+r['price']
         if p['properties']['discount'] is not None:
             r['discount'] = p['properties']['discount'] 
-        r['smallimage'] = "" # TODO: replace this with actual images!
-        r['bigimage'] = "" # TODO: replace this with actual images!
+        r['smallimage'] = p['images'][0][0] # TODO: replace this with actual images!
+        r['bigimage'] = p['images'][0][1]  # TODO: replace this with actual images!
         r['id'] = p['_id']
         return r
 
-    def shoppingcartcount(self):
+    def shopping_cart_count(self):
         """ This function returns the number of items in the shopping cart. """
         return sum(list(map(lambda x: x[1], session['shopping_cart'])))
 
     """ ..:: Session and Templating Functions ::.. """
 
-    def checksession(self):
+    def check_session(self):
         """ This function sets certain generally used session variables when
         those have not yet been set. This executes before every request, but
         will most likely only make changes once. """
         if ('session_valid' not in session) or (session['session_valid'] != 1):
             session['shopping_cart'] = []
-            session['items_per_page'] = self.paginationcounts[0]
+            session['items_per_page'] = self.pagination_counts[0]
             session['session_id'] = self.database.sessions.find_one({})['buid'][0]
             session['profile_id'] = str(self.database.profiles.find_one({})['_id'])
             session['session_valid'] = 1
 
-    def renderpackettemplate(self, template="homepage.html", packet={}):
+    def render_packet_template(self, template="homepage.html", packet={}):
         """ This helper function adds all generally important variables to the
         packet sent to the templating engine, then calss upon Flask to forward
         the rendering to Jinja. """
         packet['categoryindex'] = self.categoryindex
-        packet['mainmenulist'] = self.mainmenuitems
-        packet['categories_encode'] = self.catencode
-        packet['categories_decode'] = self.catdecode
-        packet['paginationcounts'] = self.paginationcounts
+        packet['mainmenulist'] = self.main_menu_items
+        packet['categories_encode'] = self.cat_encode
+        packet['categories_decode'] = self.cat_decode
+        packet['paginationcounts'] = self.pagination_counts
         packet['items_per_page'] = session['items_per_page']
         packet['session_id'] = session['session_id']
         packet['profile_id'] = session['profile_id']
         packet['shopping_cart'] = session['shopping_cart']
-        packet['shopping_cart_count'] = self.shoppingcartcount()
+        packet['shopping_cart_count'] = self.shopping_cart_count()
         return render_template(template, packet=packet)
 
     """ ..:: Recommendation Functions ::.. """
 
-    def recommendations(self, count):
+    def recommendations(self, count, rec_type):
         """ This function returns the recommendations from the provided page
         and context, by sending a request to the designated recommendation
         service. At the moment, it only transmits the profile ID and the number
         of expected recommendations; to have more user information in the REST
         request, this function would have to change."""
-        resp = requests.get(self.recseraddress+"/"+session['profile_id']+"/"+str(count))
+        resp = requests.get(self.rec_ser_address + "/" + session['profile_id'] + "/" + str(count))
+
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
             queryfilter = {"_id": {"$in": recs}}
-            querycursor = self.database.products.find(queryfilter, self.productfields)
-            resultlist = list(map(self.prepproduct, list(querycursor)))
-            return resultlist
+            query_cursor = self.database.products.find(queryfilter, self.product_fields)
+            result_list = list(map(self.prep_product, list(query_cursor)))
+            return result_list
         return []
 
     """ ..:: Full Page Endpoints ::.. """
@@ -243,88 +253,99 @@ class HUWebshop(object):
         """ This function renders the product page template with the products it
         can retrieve from the database, based on the URL path provided (which
         corresponds to product categories). """
-        catlist = [cat1, cat2, cat3, cat4]
+        cat_list = [cat1, cat2, cat3, cat4]
         queryfilter = {}
         nononescats = []
-        for k, v in enumerate(catlist):
+        for k, v in enumerate(cat_list):
             if v is not None:
-                queryfilter[self.catlevels[k]] = self.catdecode[v]
+                queryfilter[self.cat_levels[k]] = self.cat_decode[v]
                 nononescats.append(v)
-        querycursor = self.database.products.find(queryfilter, self.productfields)
-        prodcount = self.database.products.count_documents(queryfilter)
-        skipindex = session['items_per_page']*(page-1)
-        querycursor.skip(skipindex)
-        querycursor.limit(session['items_per_page'])
-        prodlist = list(map(self.prepproduct, list(querycursor)))
+
+        query_cursor = self.database.products.find(queryfilter, self.product_fields)
+        prod_count = self.database.products.count_documents(queryfilter)
+        skip_index = session['items_per_page']*(page-1)
+        query_cursor.skip(skip_index)
+        query_cursor.limit(session['items_per_page'])
+
+        prod_list = list(map(self.prep_product, list(query_cursor)))
+        recommendation_type = list(self.recommendation_types.keys())[0]
+        pp.pp(prod_list)
         if len(nononescats) > 1:
-            pagepath = "/producten/"+("/".join(nononescats))+"/"
+            page_path = "/producten/"+("/".join(nononescats))+"/"
         else:
-            pagepath = "/producten/"
-        return self.renderpackettemplate('products.html', {'products': prodlist, \
-            'productcount': prodcount, \
-            'pstart': skipindex + 1, \
-            'pend': skipindex + session['items_per_page'] if session['items_per_page'] > 0 else prodcount, \
-            'prevpage': pagepath+str(page-1) if (page > 1) else False, \
-            'nextpage': pagepath+str(page+1) if (session['items_per_page']*page < prodcount) else False, \
-            'r_products':self.recommendations(4), \
-            'r_type':list(self.recommendationtypes.keys())[0],\
-            'r_string':list(self.recommendationtypes.values())[0]\
+            page_path = "/producten/"
+        return self.render_packet_template('products.html', {
+            'products': prod_list,
+            'productcount': prod_count, \
+            'pstart': skip_index + 1, \
+            'pend': skip_index + session['items_per_page'] if session['items_per_page'] > 0 else prod_count, \
+            'prevpage': page_path+str(page-1) if (page > 1) else False, \
+            'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
+            'r_products':self.recommendations(4, recommendation_type), \
+            'r_type':recommendation_type,\
+            'r_string':list(self.recommendation_types.values())[0]\
             })
 
     def productdetail(self, productid):
         """ This function renders the product detail page based on the product
         id provided. """
         product = self.database.products.find_one({"_id":str(productid)})
-        return self.renderpackettemplate('productdetail.html', {'product':product,\
-            'prepproduct':self.prepproduct(product),\
-            'r_products':self.recommendations(4), \
-            'r_type':list(self.recommendationtypes.keys())[1],\
-            'r_string':list(self.recommendationtypes.values())[1]})
+        recommendation_type = list(self.recommendation_types.keys())[1]
+        return self.render_packet_template('productdetail.html', {
+            'product':product,\
+            'prepproduct':self.prep_product(product),\
+            'r_products':self.recommendations(4, recommendation_type), \
+            'r_type':recommendation_type,\
+            'r_string':list(self.recommendation_types.values())[1]
+        })
 
     def shoppingcart(self):
         """ This function renders the shopping cart for the user."""
         i = []
+        recommendation_type = list(self.recommendation_types.keys())[2]
         for tup in session['shopping_cart']:
-            product = self.prepproduct(self.database.products.find_one({"_id":str(tup[0])}))
+            product = self.prep_product(self.database.products.find_one({"_id":str(tup[0])}))
             product["itemcount"] = tup[1]
             i.append(product)
-        return self.renderpackettemplate('shoppingcart.html',{'itemsincart':i,\
-            'r_products':self.recommendations(4), \
-            'r_type':list(self.recommendationtypes.keys())[2],\
-            'r_string':list(self.recommendationtypes.values())[2]})
+        return self.render_packet_template('shoppingcart.html', {
+            'itemsincart':i,\
+            'r_products':self.recommendations(4, recommendation_type), \
+            'r_type':recommendation_type,\
+            'r_string':list(self.recommendation_types.values())[2]
+            })
 
-    def categoryoverview(self):
+    def category_overview(self):
         """ This subpage shows all top-level categories in its main menu. """
-        return self.renderpackettemplate('categoryoverview.html')
+        return self.render_packet_template('categoryoverview.html')
 
     """ ..:: Dynamic AJAX Endpoints ::.. """
 
-    def changeprofileid(self):
+    def changeprofile_id(self):
         """ This function checks whether the provided session ID actually exists
         and stores it in the session if it does. """
         try:
-            newprofileid = request.form.get('profile_id')
-            profidexists = self.database.profiles.find_one({'_id': ObjectId(newprofileid)})
-            if profidexists:
-                session['profile_id'] = newprofileid
+            new_profile_id = request.form.get('profile_id')
+            prof_id_exists = self.database.profiles.find_one({'_id': ObjectId(new_profile_id)})
+            if prof_id_exists:
+                session['profile_id'] = new_profile_id
                 return '{"success":true}'
             return '{"success":false}'
         except:
             return '{"success":false}'
 
-    def addtoshoppingcart(self):
+    def add_to_shopping_cart(self):
         """ This function adds one object to the shopping cart. """
-        productid = request.form.get('product_id')
-        cartids = list(map(lambda x: x[0], session['shopping_cart']))
-        if productid in cartids:
-            ind = cartids.index(productid)
+        product_id = request.form.get('product_id')
+        cart_ids = list(map(lambda x: x[0], session['shopping_cart']))
+        if product_id in cart_ids:
+            ind = cart_ids.index(product_id)
             session['shopping_cart'][ind] = (session['shopping_cart'][ind][0], session['shopping_cart'][ind][1]+1)
         else:
-            session['shopping_cart'].append((productid, 1))
+            session['shopping_cart'].append((product_id, 1))
         session['shopping_cart'] = session['shopping_cart']
-        return '{"success":true, "itemcount":'+str(self.shoppingcartcount())+'}'
+        return '{"success":true, "itemcount":'+str(self.shopping_cart_count())+ '}'
 
-    def changepaginationcount(self):
+    def change_pagination_count(self):
         """ This function changes the number of items displayed on the product 
         listing pages. """
         session['items_per_page'] = int(request.form.get('items_per_page'))
