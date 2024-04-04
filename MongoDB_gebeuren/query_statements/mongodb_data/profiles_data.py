@@ -25,15 +25,11 @@ def get_mongo():
     for index, row in data.iterrows():
         indices = []
         for i in row.values:
-
-            if i == row.values[0]:
-                indices.append(row.values[0])
+            if isinstance(i, dict):
+                for j in i.values():
+                    indices.append(j)
             else:
-                if isinstance(i, dict):
-                    for j in i.values():
-                        indices.append(j)
-                else:
-                    indices.append(i)
+                indices.append(i)
         templist.append(indices)
     for i in templist:
         if len(i) == 3:
