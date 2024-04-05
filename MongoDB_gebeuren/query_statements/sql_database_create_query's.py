@@ -31,13 +31,10 @@ with open("../create_queries/viewed_before_query.sql") as f:
 with open("../create_queries/similars_query.sql") as f:
     similars_tabel = f.read()
 
-with open("../create_queries/ordered_query.sql") as f:
-    ordered_tabel = f.read()
-
 with open("../create_queries/sessions_query.sql") as f:
     sessions_tabel = f.read()
 
-with open("../create_queries/sessions_producten_query.sql") as f:
+with open("../create_queries/sessions_products_query.sql") as f:
     sesssions_producten_tabel = f.read()
 
 
