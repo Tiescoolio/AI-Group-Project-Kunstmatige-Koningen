@@ -1,9 +1,9 @@
 import psycopg2 as ps
 
 hostname = "localhost"
-database = "hu_webshop"
+database = "AI Group Project"
 username = "postgres"
-pwd = "Whynow3421!"
+pwd = "Gymhond11"
 port_id = 5434
 #variabelen aanmaken om makkelijker in een keer pycharm te verbinden met postgres
 con = ps.connect(
@@ -11,7 +11,7 @@ con = ps.connect(
     dbname = database,
     user = username,
     password= pwd,
-    # port = port_id
+    port = port_id
     )
 
 
@@ -34,12 +34,20 @@ with open("../create_queries/similars_query.sql") as f:
 with open("../create_queries/ordered_query.sql") as f:
     ordered_tabel = f.read()
 
+with open("../create_queries/sessions_query.sql") as f:
+    sessions_tabel = f.read()
+
+with open("../create_queries/sessions_producten_query.sql") as f:
+    sesssions_producten_tabel = f.read()
+
 
 cur.execute(products_tabel)
 cur.execute(profiles_tabel)
 cur.execute(similars_tabel)
 cur.execute(viewed_before_tabel)
 cur.execute(ordered_tabel)
+cur.execute(sessions_tabel)
+cur.execute(sesssions_producten_tabel)
 
 con.commit()
 con.close()
