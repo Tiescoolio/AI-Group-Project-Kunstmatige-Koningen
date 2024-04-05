@@ -26,7 +26,7 @@ for data in x2:
     for key in data:
         if len(key) > 1:
             print(key)
-            pprint.pprint(data.get(key))
+            # pprint.pprint(data.get(key))
 
     data_to_filter.append(data)
     count += 1

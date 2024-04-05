@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from mongodb_data.products_data import get_mongo
 from mongodb_data.products_data import get_mongo
 import psycopg2 as ps
@@ -6,11 +8,12 @@ for product in producten:
     product[0], product[1], product[2], product[3], product[4], product[5], product[6], product[7], product[8], product[9], product[10], product[11], product[12] \
         =  product[0], product[4], product[1], product[2], product[11], product[12], product[3], product[9], product[6], product[5], product[7], product[8], product[10]
 
+load_dotenv()
 
 hostname = "localhost"
-database = "AI Group Project"
+database = "hu_webshop"
 username = "postgres"
-pwd = ""
+pwd = os.getenv("db_password")
 port_id = 5432
 #variabelen aanmaken om makkelijker in een keer pycharm te verbinden met postgres
 con = ps.connect(
@@ -18,7 +21,8 @@ con = ps.connect(
     dbname = database,
     user = username,
     password= pwd,
-    port = port_id)
+    # port = port_id
+)
 cur = con.cursor()
 
 def products():

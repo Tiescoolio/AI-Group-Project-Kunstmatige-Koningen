@@ -35,7 +35,7 @@ class HUWebshop(object):
     product_fields = ["name", "price.selling_price", "properties.discount", "images"]
 
     recommendation_types = {
-        'popular':"Anderen kochten ook",
+        'popular':"populaire producten zoals deze",
         'similar':"Soortgelijke producten",
         'combination':'Combineert goed met',
         'behaviour':'Passend bij uw gedrag',
@@ -97,16 +97,16 @@ class HUWebshop(object):
         # possible.
         self.app.before_request(self.check_session)
         self.app.add_url_rule('/', 'index', self.render_packet_template)
-        self.app.add_url_rule('/producten/', 'producten-0', self.productpage)
-        self.app.add_url_rule('/producten/<cat1>/', 'producten-1', self.productpage)
-        self.app.add_url_rule('/producten/<cat1>/<cat2>/', 'producten-2', self.productpage)
-        self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/', 'producten-3', self.productpage)
-        self.app.add_url_rule('/producten/<int:page>/', 'producten-4', self.productpage)
-        self.app.add_url_rule('/producten/<cat1>/<int:page>/', 'producten-5', self.productpage)
-        self.app.add_url_rule('/producten/<cat1>/<cat2>/<int:page>/', 'producten-6', self.productpage)
-        self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/<int:page>/', 'producten-7', self.productpage)
-        self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/<cat4>/<int:page>/', 'producten-8', self.productpage)
-        self.app.add_url_rule('/productdetail/<productid>/', 'productdetail', self.productdetail)
+        self.app.add_url_rule('/producten/', 'producten-0', self.product_page)
+        self.app.add_url_rule('/producten/<cat1>/', 'producten-1', self.product_page)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/', 'producten-2', self.product_page)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/', 'producten-3', self.product_page)
+        self.app.add_url_rule('/producten/<int:page>/', 'producten-4', self.product_page)
+        self.app.add_url_rule('/producten/<cat1>/<int:page>/', 'producten-5', self.product_page)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/<int:page>/', 'producten-6', self.product_page)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/<int:page>/', 'producten-7', self.product_page)
+        self.app.add_url_rule('/producten/<cat1>/<cat2>/<cat3>/<cat4>/<int:page>/', 'producten-8', self.product_page)
+        self.app.add_url_rule('/productdetail/<product_id>/', 'productdetail', self.product_detail)
         self.app.add_url_rule('/winkelmand/', 'winkelmand', self.shoppingcart)
         self.app.add_url_rule('/categorieoverzicht/', 'categorieoverzicht', self.category_overview)
         self.app.add_url_rule('/change-profile-id', 'profielid', self.change_profile_id, methods=['POST'])
@@ -231,16 +231,16 @@ class HUWebshop(object):
 
     """ ..:: Recommendation Functions ::.. """
 
-    def recommendations(self, count, r_type):
+    def recommendations(self, count, r_type, page_path=None):
         """ This function returns the recommendations from the provided page
         and context, by sending a request to the designated recommendation
         service. At the moment, it only transmits the profile ID and the number
         of expected recommendations; to have more user information in the REST
         request, this function would have to change."""
         pp.pp(session)
-        resp = requests.get(self.rec_ser_address + "/" + session['profile_id'] + "/" + str(count))
-        print(resp)
-        print(self.rec_ser_address)
+        id_count = session['profile_id'] + "/" + str(count)
+        resp = requests.get(
+            self.rec_ser_address + "/" + id_count + "/" + r_type + "/" + str(page_path))
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
             queryfilter = {"_id": {"$in": recs}}
@@ -251,7 +251,7 @@ class HUWebshop(object):
 
     """ ..:: Full Page Endpoints ::.. """
 
-    def productpage(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
+    def product_page(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
         """ This function renders the product page template with the products it
         can retrieve from the database, based on the URL path provided (which
         corresponds to product categories). """
@@ -262,17 +262,18 @@ class HUWebshop(object):
             if v is not None:
                 queryfilter[self.cat_levels[k]] = self.cat_decode[v]
                 nononescats.append(v)
-
         query_cursor = self.database.products.find(queryfilter, self.product_fields)
         prod_count = self.database.products.count_documents(queryfilter)
         skip_index = session['items_per_page']*(page-1)
         query_cursor.skip(skip_index)
         query_cursor.limit(session['items_per_page'])
 
+        print(nononescats, cat_list)
+
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
         # pp.pp(prod_list)
-        if len(nononescats) > 1:
+        if len(nononescats) >= 1:
             page_path = "/producten/"+("/".join(nononescats))+"/"
         else:
             page_path = "/producten/"
@@ -283,15 +284,15 @@ class HUWebshop(object):
             'pend': skip_index + session['items_per_page'] if session['items_per_page'] > 0 else prod_count, \
             'prevpage': page_path+str(page-1) if (page > 1) else False, \
             'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
-            'r_products':self.recommendations(4, recommendation_type), \
+            'r_products':self.recommendations(4, recommendation_type, page_path), \
             'r_type':recommendation_type,\
             'r_string':list(self.recommendation_types.values())[0]\
             })
 
-    def productdetail(self, productid):
+    def product_detail(self, product_id):
         """ This function renders the product detail page based on the product
         id provided. """
-        product = self.database.products.find_one({"_id":str(productid)})
+        product = self.database.products.find_one({"_id":str(product_id)})
         recommendation_type = list(self.recommendation_types.keys())[1]
         return self.render_packet_template('productdetail.html', {
             'product':product,\

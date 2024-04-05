@@ -4,9 +4,8 @@ from dotenv import load_dotenv
 
 
 def connect_to_db():
-    # Prompting for the database password
+    """This function establishes a connection with the webshop database"""
     load_dotenv()
-
     try:
         # db_password = input("DB password: ")
 
