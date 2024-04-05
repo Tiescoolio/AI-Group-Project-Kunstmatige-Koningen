@@ -1,4 +1,3 @@
-from IPython.display import display
 from pymongo import MongoClient
 import pandas
 pandas.set_option('display.max_rows', None)
@@ -9,11 +8,6 @@ def connect_to_mongo(host, port, db):
     conn = MongoClient(host,port)
     return conn[db]
 
-def turn_mongo_to_sql():
-    data = get_mongo()
-    display(data)
-
-import time
 def get_mongo():
     collectie = "profiles"
     database = connect_to_mongo("localhost", 27017, "huwebshop")
@@ -35,5 +29,7 @@ def get_mongo():
         if len(i) == 3:
             i.append(None)
     return templist
-turn_mongo_to_sql()
+
+if __name__ == "__main__":
+    get_mongo()
 
