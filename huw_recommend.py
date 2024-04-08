@@ -6,7 +6,7 @@ import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from huw import HUWebshop as hu
-from urllib.parse import unquote
+import urllib.parse
 import pprint
 
 app = Flask(__name__)
@@ -36,31 +36,30 @@ class Recom(Resource):
     the webshop. At the moment, the API simply returns a random set of products
     to recommend."""
     url = "http://127.0.0.1:5000"
-    page_path = ""
-    r_type = ""
-    count = 0
 
     def __init__(self):
         self.cursor = connect_to_db().cursor()
 
     def decode_category(self, c) -> str:
-        return unquote(c)
+        return urllib.parse.unquote_plus(c)
 
-    def format_page_path(self, path):
-        pass
+    def format_page_path(self, path) -> tuple:
+        # paths = path.replace("producten/", "")[:-1]
+        cats = path.split("/")[:-1]
+        return tuple([self.decode_category(c) for c in cats[1:]])
 
     def get(self, profile_id, count, r_type, page_path):
         """ This function represents the handler for GET requests coming in
         through the API. It currently returns a random sample of products. """
-        if self.r_type == "popar":  # change this plz to popular
-            cats = self.decode_category(self.page_path)
+        cats = self.format_page_path(page_path)
+        if r_type == "popular":  # change this plz to popular
+
+            cats = self.format_page_path(page_path)
             pop_app = PopularityAlgorithm(count, self.cursor, cats)
             prod_ids = pop_app.popularity_algorithm()
         else:
-            rand_cursor = database.products.aggregate([{'$sample': {'size': self.count}}])
+            rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
             prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
-
-        print(page_path)
         return prod_ids, 200
 
 # This method binds the Recom class to the REST API, to parse specifically

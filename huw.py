@@ -78,7 +78,6 @@ class HUWebshop(object):
 
         # We retrieve the categoryindex from the database when it is set.
         self.category_index = self.database.category_index.find_one({}, {'_id' : 0})
-        pprint.pp(self.category_index)
 
         # In order to save time in future, we flatten the category index once,
         # and translate all values to and from an encoded, URL-friendly, legible
@@ -266,22 +265,21 @@ class HUWebshop(object):
         """ This function renders the product page template with the products it
         can retrieve from the database, based on the URL path provided (which
         corresponds to product categories). """
-        print(self.cat_levels)
         cat_list = [cat1, cat2, cat3, cat4]
-        print(cat_list)
         queryfilter = {}
         nononescats = []
         for k, v in enumerate(cat_list):
             if v is not None:
                 queryfilter[self.cat_levels[k]] = self.cat_decode[v]
-                nononescats.append(v)
+                nononescats.append(self.cat_urllib_encode[v])
+
         query_cursor = self.database.products.find(queryfilter, self.product_fields)
         prod_count = self.database.products.count_documents(queryfilter)
         skip_index = session['items_per_page']*(page-1)
         query_cursor.skip(skip_index)
         query_cursor.limit(session['items_per_page'])
 
-        # print(nononescats, cat_list)
+        print(nononescats, cat_list)
 
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
