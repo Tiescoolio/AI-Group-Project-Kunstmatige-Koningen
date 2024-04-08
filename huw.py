@@ -4,6 +4,7 @@ from flask_restful import Api, Resource
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
+# from urllib.parse import quote
 import pprint
 
 
@@ -30,6 +31,7 @@ class HUWebshop(object):
     cat_levels = ["category", "sub_category", "sub_sub_category", "sub_sub_sub_category"]
     cat_encode = {}
     cat_decode = {}
+    cat_urllib_encode = {}
     main_menu_count = 8
     main_menu_items = None
 
@@ -38,11 +40,11 @@ class HUWebshop(object):
     product_fields = ["name", "price.selling_price", "properties.discount", "images"]
 
     recommendation_types = {
-        'popular':"populaire producten zoals deze",
-        'similar':"Soortgelijke producten",
-        'combination':'Combineert goed met',
-        'behaviour':'Passend bij uw gedrag',
-        'personal':'Persoonlijk aanbevolen'
+        'popular': "populaire producten zoals deze",
+        'similar': "Soortgelijke producten",
+        'combination': 'Combineert goed met',
+        'behaviour': 'Passend bij uw gedrag',
+        'personal': 'Persoonlijk aanbevolen'
     }
 
     """ ..:: Initialization and Category Index Functions ::.. """
@@ -76,6 +78,7 @@ class HUWebshop(object):
 
         # We retrieve the categoryindex from the database when it is set.
         self.category_index = self.database.category_index.find_one({}, {'_id' : 0})
+        pprint.pp(self.category_index)
 
         # In order to save time in future, we flatten the category index once,
         # and translate all values to and from an encoded, URL-friendly, legible
@@ -85,6 +88,7 @@ class HUWebshop(object):
             enc_cat = self.encode_category(cat)
             self.cat_encode[cat] = enc_cat
             self.cat_decode[enc_cat] = cat
+            self.cat_urllib_encode[enc_cat] = self.encode_cat_urllib(cat)
 
         # Since the main menu can't show all the category options at once in a
         # legible manner, we choose to display a set number with the greatest 
@@ -181,6 +185,11 @@ class HUWebshop(object):
         c = urllib.parse.quote(c)
         return c
 
+    def encode_cat_urllib(self, c) -> str:
+        """ This helper function encodes any category with urllib,
+        so it can later be decoded"""
+        return urllib.parse.quote_plus(c)
+
     def prep_product(self, p):
         """ This helper function flattens and rationalizes the values retrieved
         for a product block element. """
@@ -240,7 +249,7 @@ class HUWebshop(object):
         service. At the moment, it only transmits the profile ID and the number
         of expected recommendations; to have more user information in the REST
         request, this function would have to change."""
-        pprint.pp(session)
+        # pprint.pp(session)
         url = f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}"
         resp = requests.get(url)
         if resp.status_code == 200:
@@ -257,7 +266,9 @@ class HUWebshop(object):
         """ This function renders the product page template with the products it
         can retrieve from the database, based on the URL path provided (which
         corresponds to product categories). """
+        print(self.cat_levels)
         cat_list = [cat1, cat2, cat3, cat4]
+        print(cat_list)
         queryfilter = {}
         nononescats = []
         for k, v in enumerate(cat_list):
@@ -270,7 +281,7 @@ class HUWebshop(object):
         query_cursor.skip(skip_index)
         query_cursor.limit(session['items_per_page'])
 
-        print(nononescats, cat_list)
+        # print(nononescats, cat_list)
 
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
@@ -296,7 +307,6 @@ class HUWebshop(object):
         id provided. """
         product = self.database.products.find_one({"_id":str(product_id)})
         recommendation_type = list(self.recommendation_types.keys())[1]
-        print(self.prep_product(product))
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
