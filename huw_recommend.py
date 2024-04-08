@@ -6,7 +6,7 @@ import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from huw import HUWebshop as hu
-from urllib.parse import parse_qs
+from urllib.parse import unquote
 import pprint
 
 app = Flask(__name__)
@@ -43,43 +43,25 @@ class Recom(Resource):
     def __init__(self):
         self.cursor = connect_to_db().cursor()
 
-    def decode_category(self, page_path ,cats_decode) -> tuple:
-        page_path = page_path.replace("producten/", "")[:-1]
-        cats = page_path.split("/")
-        # decoded_cats = tuple([self.cat_decoded[cat] for cat in cats])
-        print(cats, cats_decode)
-        print()
+    def decode_category(self, c) -> str:
+        return unquote(c)
+
+    def format_page_path(self, path):
+        pass
 
     def get(self, profile_id, count, r_type, page_path):
         """ This function represents the handler for GET requests coming in
         through the API. It currently returns a random sample of products. """
-        self.r_type = r_type
-        self.count = count
-        self.page_path = page_path
-        prod_ids = self.run_recommendations()
-        return prod_ids, 200
-
-    def put(self, profile_id, count, r_type, page_path):
-        args = request.form["decoded"]
-        print(args)
-        self.decode_category(page_path, args)
-        # pprint.pprint(request.form.to_dict())
-        prod_ids = self.run_recommendations()
-        return {}
-
-    def run_recommendations(self):
-        # cats = self.decode_category(self.page_path)
-        cats = {}
         if self.r_type == "popar":  # change this plz to popular
-            # cats = self.decode_category(self.page_path)
-
-            pop_app = PopularityAlgorithm(self.count, self.cursor, cats)
+            cats = self.decode_category(self.page_path)
+            pop_app = PopularityAlgorithm(count, self.cursor, cats)
             prod_ids = pop_app.popularity_algorithm()
         else:
             rand_cursor = database.products.aggregate([{'$sample': {'size': self.count}}])
             prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
 
-        return prod_ids
+        print(page_path)
+        return prod_ids, 200
 
 # This method binds the Recom class to the REST API, to parse specifically
 # requests in the format described below.
