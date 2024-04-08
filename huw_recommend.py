@@ -53,10 +53,8 @@ class Recom(Resource):
         through the API. It currently returns a random sample of products. """
         cats = self.format_page_path(page_path)
         if r_type == "popular":  # change this plz to popular
-
-            cats = self.format_page_path(page_path)
             pop_app = PopularityAlgorithm(count, self.cursor, cats)
-            prod_ids = pop_app.popularity_algorithm()
+            prod_ids = pop_app.popularity_algorithm(cats[0], cats[1])
         else:
             rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
             prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
