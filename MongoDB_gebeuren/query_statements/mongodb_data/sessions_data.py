@@ -1,1 +1,0 @@
-#we moeten de _id, has_sale en order.products(kunnen er meerdere of geen zijn) hebben

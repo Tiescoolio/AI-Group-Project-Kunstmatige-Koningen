@@ -1,6 +1,7 @@
 import pandas
 from pymongo import MongoClient
 
+
 def connect_to_mongo(host, port, db):
     conn = MongoClient(host,port)
     return conn[db]
@@ -23,6 +24,7 @@ def get_availability():
                         templist.append(key)
     return templist
 
+get_availability()
 def get_mongo():
     collectie = "products"
     database = connect_to_mongo("localhost", 27017, "huwebshop")
