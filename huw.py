@@ -1,14 +1,17 @@
-from flask import Flask, request, session, render_template, redirect, url_for, g
+from flask import Flask, request, session, render_template, redirect, url_for, g, jsonify
 import random, os, json, urllib.parse, requests
+from flask_restful import Api, Resource
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
-import pprint as pp
+import pprint
+
 
 # The secret key used for session encryption is randomly generated every time
 # the server is started up. This means all session data (including the 
 # shopping cart) is erased between server instances.
 app = Flask(__name__)
+api = Api(app)
 app.secret_key = os.urandom(16)
 
 class HUWebshop(object):
@@ -23,7 +26,7 @@ class HUWebshop(object):
     db_string = 'mongodb+srv://{0}:{1}@{2}/test?retryWrites=true&w=majority'
     rec_ser_address = "http://127.0.0.1:5001"
 
-    categoryindex = None
+    category_index = None
     cat_levels = ["category", "sub_category", "sub_sub_category", "sub_sub_sub_category"]
     cat_encode = {}
     cat_decode = {}
@@ -48,7 +51,6 @@ class HUWebshop(object):
         """ Within this constructor, we establish a connection with the database
         and perform necessary setup of the database (if applicable) and menu."""
         self.app = app
-
         # Depending on whether environment variables have been set, we connect
         # to a local or remote instance of MongoDB, and a default or non-default
         # external recommendation service.
@@ -69,17 +71,17 @@ class HUWebshop(object):
 
         # Once we have a connection to the database, we check to see whether it
         # has a category index prepared; if not, we have a function to make it.
-        if "categoryindex" not in self.database.list_collection_names() or self.database.categoryindex.count_documents({}) == 0:
+        if "categoryindex" not in self.database.list_collection_names() or self.database.category_index.count_documents({}) == 0:
             self.create_category_index()
 
         # We retrieve the categoryindex from the database when it is set.
-        self.categoryindex = self.database.categoryindex.find_one({}, {'_id' : 0})
+        self.category_index = self.database.category_index.find_one({}, {'_id' : 0})
 
         # In order to save time in future, we flatten the category index once,
         # and translate all values to and from an encoded, URL-friendly, legible
         # format.
-        catlist = self.flatten_dict(self.categoryindex)
-        for cat in catlist:
+        cat_list = self.flatten_dict(self.category_index)
+        for cat in cat_list:
             enc_cat = self.encode_category(cat)
             self.cat_encode[cat] = enc_cat
             self.cat_decode[enc_cat] = cat
@@ -87,9 +89,9 @@ class HUWebshop(object):
         # Since the main menu can't show all the category options at once in a
         # legible manner, we choose to display a set number with the greatest 
         # number of associated products.
-        countlist = list(map(lambda x, y: (y['_count'], x), self.categoryindex.keys(), self.categoryindex.values()))
-        countlist.sort(reverse=True)
-        self.main_menu_items = [x[1] for x in countlist[0:self.main_menu_count]]
+        count_list = list(map(lambda x, y: (y['_count'], x), self.category_index.keys(), self.category_index.values()))
+        count_list.sort(reverse=True)
+        self.main_menu_items = [x[1] for x in count_list[0:self.main_menu_count]]
 
         # Finally, we here attach URL rules to all pages we wish to render, to
         # make the code self-contained; although the more common decorators do
@@ -120,12 +122,13 @@ class HUWebshop(object):
         pcat_entries = self.database.products.find({}, self.cat_levels)
         index = {}
         for entry in pcat_entries:
-            self.reccat_index(index, entry, 0, len(self.cat_levels) - 1)
+            self.rec_cat_index(index, entry, 0, len(self.cat_levels) - 1)
+            pprint.pp(self.rec_cat_index(index, entry, 0, len(self.cat_levels) - 1))
         for k, v in index.items():
-            self.reccat_count(k, v, 0, len(self.cat_levels) - 1)
-        self.database.categoryindex.insert_one(index)
+            self.rec_cat_count(k, v, 0, len(self.cat_levels) - 1)
+        self.database.category_index.insert_one(index)
 
-    def reccat_index(self, d, e, l, m):
+    def rec_cat_index(self, d, e, l, m):
         """ This subfunction of createcategoryindex() sets up the base structure
         (tree) of the categories and subcategories, leaving leaves as empty 
         dicts."""
@@ -135,9 +138,9 @@ class HUWebshop(object):
         if t in e and e[t] is not None and type(e[t]) != list and e[t] not in d:
             d[e[t]] = {}
         if t in e and e[t] is not None and type(e[t]) != list and e[t] in d:
-            self.reccat_index(d[e[t]], e, l + 1, m)
+            self.rec_cat_index(d[e[t]], e, l + 1, m)
 
-    def reccat_count(self, k, v, l, m):
+    def rec_cat_count(self, k, v, l, m):
         """ This subfunction of createcategoryindex() adds the number of 
         documents associated with any (sub)category to its dictionary as the
         _count property. """
@@ -145,7 +148,7 @@ class HUWebshop(object):
             return
         if isinstance(v, dict):
             for k2, v2 in v.items():
-                self.reccat_count(k2, v2, l + 1, m)
+                self.rec_cat_count(k2, v2, l + 1, m)
         if k[:1] != "_":
             v['_count'] = self.database.products.count_documents({self.cat_levels[l]:k})
 
@@ -217,7 +220,7 @@ class HUWebshop(object):
         """ This helper function adds all generally important variables to the
         packet sent to the templating engine, then calss upon Flask to forward
         the rendering to Jinja. """
-        packet['categoryindex'] = self.categoryindex
+        packet['categoryindex'] = self.category_index
         packet['mainmenulist'] = self.main_menu_items
         packet['categories_encode'] = self.cat_encode
         packet['categories_decode'] = self.cat_decode
@@ -237,11 +240,14 @@ class HUWebshop(object):
         service. At the moment, it only transmits the profile ID and the number
         of expected recommendations; to have more user information in the REST
         request, this function would have to change."""
-        pp.pp(session)
-        id_count = session['profile_id'] + "/" + str(count)
-        resp = requests.get(
-            self.rec_ser_address + "/" + id_count + "/" + r_type + "/" + str(page_path))
+        pprint.pp(session)
+        url = f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}"
+        resp = requests.get(url)
+        requests.put(url, {"decoded": self.cat_decode})
+        # print(resp1)
         if resp.status_code == 200:
+            print("PUT request successful")
+
             recs = eval(resp.content.decode())
             queryfilter = {"_id": {"$in": recs}}
             query_cursor = self.database.products.find(queryfilter, self.product_fields)
@@ -294,10 +300,11 @@ class HUWebshop(object):
         id provided. """
         product = self.database.products.find_one({"_id":str(product_id)})
         recommendation_type = list(self.recommendation_types.keys())[1]
+        print(self.prep_product(product))
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
-            'r_products':self.recommendations(4, recommendation_type), \
+            'r_products':self.recommendations(4, recommendation_type, f"productdetail/{product_id}"), \
             'r_type':recommendation_type,\
             'r_string':list(self.recommendation_types.values())[1]
         })

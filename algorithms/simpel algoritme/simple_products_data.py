@@ -11,6 +11,7 @@ def insert_prod_data(data, cur) -> None:
     INSERT INTO products (id, brand, category, sub_category, sub_sub_category, aanbiedingen, recommendable)
     VALUES (%s, %s, %s, %s, %s, %s, %s);
     """
+    available = 0
     for num, prod in enumerate(data):
         keys = prod.keys()
 
@@ -22,6 +23,14 @@ def insert_prod_data(data, cur) -> None:
         else:
             discount = properties.get("discount")
             discount = None if discount == "none" else discount
+
+            availability = properties.get("availability")
+            availability = None if availability == "none" else availability
+
+            if availability == "0" or properties == {}:
+                continue
+
+        available += 1
 
         brand = prod["brand"] if "brand" in keys else None
         category = prod["category"] if "category" in keys else None
@@ -43,6 +52,8 @@ def insert_prod_data(data, cur) -> None:
         print(num, query_data)
         # print(f"{category}, {sub_category}, {sub_sub_category}")
         cur.execute(sql_query, query_data)
+
+
 
 if __name__ == '__main__':
     client = pymongo.MongoClient("mongodb://localhost:27017/")
