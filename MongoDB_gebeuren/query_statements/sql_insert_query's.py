@@ -16,7 +16,7 @@ for product in producten:
 hostname = "localhost"
 database = "AI Group Project"
 username = "postgres"
-pwd = "Gymhond11"
+pwd = ""
 port_id = 5432
 #variabelen aanmaken om makkelijker in een keer pycharm te verbinden met postgres
 con = ps.connect(
