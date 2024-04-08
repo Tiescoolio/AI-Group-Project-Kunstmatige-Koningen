@@ -243,11 +243,7 @@ class HUWebshop(object):
         pprint.pp(session)
         url = f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}"
         resp = requests.get(url)
-        requests.put(url, {"decoded": self.cat_decode})
-        # print(resp1)
         if resp.status_code == 200:
-            print("PUT request successful")
-
             recs = eval(resp.content.decode())
             queryfilter = {"_id": {"$in": recs}}
             query_cursor = self.database.products.find(queryfilter, self.product_fields)
@@ -304,7 +300,7 @@ class HUWebshop(object):
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
-            'r_products':self.recommendations(4, recommendation_type, f"productdetail/{product_id}"), \
+            'r_products':self.recommendations(4, recommendation_type, f"productdetail/{product_id}/"), \
             'r_type':recommendation_type,\
             'r_string':list(self.recommendation_types.values())[1]
         })
@@ -312,14 +308,19 @@ class HUWebshop(object):
     def shoppingcart(self):
         """ This function renders the shopping cart for the user."""
         i = []
+        page_path = "shoppingcart/"
         recommendation_type = list(self.recommendation_types.keys())[2]
         for tup in session['shopping_cart']:
             product = self.prep_product(self.database.products.find_one({"_id":str(tup[0])}))
             product["itemcount"] = tup[1]
+            prod_id = product["id"]
             i.append(product)
+            # page_path += f"{prod_id}-{product['itemcount']}/" if prod_id not in page_path else "" #
+            page_path += f"{prod_id}/" if prod_id not in page_path else ""
+
         return self.render_packet_template('shoppingcart.html', {
             'itemsincart':i,\
-            'r_products':self.recommendations(4, recommendation_type), \
+            'r_products':self.recommendations(4, recommendation_type, page_path), \
             'r_type':recommendation_type,\
             'r_string':list(self.recommendation_types.values())[2]
             })
