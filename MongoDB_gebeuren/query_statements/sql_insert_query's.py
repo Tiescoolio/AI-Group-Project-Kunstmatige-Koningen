@@ -1,11 +1,17 @@
 from mongodb_data.products_data import get_mongo
 from mongodb_data.profiles_data import get_mongo as profiles_data
+# from mongodb_data.sessions_data import get_mongo as sessions_data
+def sessions_data():
+    return "blablabla"
 import psycopg2 as ps
-producten = get_mongo()
+
+#data overzetten vanuit de gemaakte functies
+producten, profielen, sesssies = get_mongo(), profiles_data(), sessions_data()
+#producten op volgorde zetten op basis van de alfabetische volgorde van de mongodb info
 for product in producten:
     product[0], product[1], product[2], product[3], product[4], product[5], product[6], product[7], product[8], product[9], product[10], product[11], product[12] \
         =  product[0], product[4], product[1], product[2], product[11], product[12], product[3], product[9], product[6], product[5], product[7], product[8], product[10]
-profielen = profiles_data()
+
 
 hostname = "localhost"
 database = "AI Group Project"
@@ -72,6 +78,7 @@ def viewed_before(profiles):
             for bekeken in viewed_before:
                 cur.execute(viewed_before_insert_query, bekeken)
 
+
 def session_products(sessies):
     sessions_products_insert = """INSERT INTO sessions_products (sessions_buid, id) VALUES (%s, %s)"""
     sessions = []
@@ -85,5 +92,10 @@ def session_products(sessies):
                 cur.execute(sessions_products_insert, session)
 
 viewed_before(profielen)
+print("geexecute viewed_before")
+similar(profielen)
+print("Geexecute similar")
+sessions(profielen)
+print("Geexecute sessions")
 con.commit()
 con.close()
