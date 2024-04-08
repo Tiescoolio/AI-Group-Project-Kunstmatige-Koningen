@@ -52,12 +52,16 @@ class Recom(Resource):
         """ This function represents the handler for GET requests coming in
         through the API. It currently returns a random sample of products. """
         cats = self.format_page_path(page_path)
-        if r_type == "popular":  # change this plz to popular
+        if r_type == "popular":  # simple alg
             pop_app = PopularityAlgorithm(count, self.cursor, cats)
-            prod_ids = pop_app.popularity_algorithm(cats[0], cats[1])
-        else:
-            rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
-            prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
+            return pop_app.popularity_algorithm(cats[0], cats[1])
+        elif r_type == "similiar": # alg 1
+            pass
+        elif r_type == "combination": # alg 2
+            pass
+
+        rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
+        prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
         return prod_ids, 200
 
 # This method binds the Recom class to the REST API, to parse specifically
