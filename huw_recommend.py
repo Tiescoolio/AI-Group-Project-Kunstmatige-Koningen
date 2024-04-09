@@ -46,7 +46,10 @@ class Recom(Resource):
     def format_page_path(self, path) -> tuple:
         # paths = path.replace("producten/", "")[:-1]
         cats = path.split("/")[:-1]
-        return tuple([self.decode_category(c) for c in cats[1:]])
+        cats = [self.decode_category(c) for c in cats[1:]]
+        for i in range(4 - len(cats)):
+            cats.append(None)
+        return tuple(cats)
 
     def get(self, profile_id, count, r_type, page_path):
         """ This function represents the handler for GET requests coming in
