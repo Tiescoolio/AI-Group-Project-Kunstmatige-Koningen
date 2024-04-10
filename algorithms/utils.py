@@ -14,7 +14,8 @@ def connect_to_db():
             host=os.getenv("db_host"),
             database=os.getenv("db_name"),
             user=os.getenv("db_user"),
-            password=os.getenv("db_password")
+            password=os.getenv("db_password"),
+            port=os.getenv("db_port")
         )
         return connection
     except psycopg2.OperationalError as error:
