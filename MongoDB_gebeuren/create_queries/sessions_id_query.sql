@@ -1,4 +1,0 @@
-CREATE TABLE IF NOT EXISTS session_id (
-    id VARCHAR(255) PRIMARY KEY,
-    session_buid VARCHAR(255) NOT NULL
-)
