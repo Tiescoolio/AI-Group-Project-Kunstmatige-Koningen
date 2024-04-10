@@ -59,6 +59,7 @@ def get_mongo():
                     temptest.append(j)
             temp.append(temptest)
             buid_list.append(temp)
+    print(buid_list)
     return buid_list
 
 turn_mongo_to_sql()
