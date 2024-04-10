@@ -1,22 +1,6 @@
-import psycopg2 as ps
+from algorithms.utils import connect_to_db as connect
 
-hostname = "localhost"
-database = ""
-username = "postgres"
-pwd = ""
-port_id =
-#variabelen aanmaken om makkelijker in een keer pycharm te verbinden met postgres
-con = ps.connect(
-    host = hostname,
-    dbname = database,
-    user = username,
-    password= pwd,
-    port = port_id
-    )
-
-
-
-#dit verbind pycharm met postgres
+con = connect()
 cur = con.cursor()
 
 with open("../create_queries/products_query.sql") as f:

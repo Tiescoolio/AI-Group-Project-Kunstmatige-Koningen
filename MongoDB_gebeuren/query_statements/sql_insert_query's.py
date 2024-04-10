@@ -1,33 +1,27 @@
 from mongodb_data.products_data import get_mongo
 from mongodb_data.profiles_data import get_mongo as profiles_data
-# from mongodb_data.sessions_data import get_mongo as sessions_data
-def sessions_data():
-    return "blablabla"
-import psycopg2 as ps
+from mongodb_data.sessions_id_data import get_mongo as sessions_id_data
+from mongodb_data.session_products_data import get_mongo as sessions_products_data
+from algorithms.utils import connect_to_db as connect
+
 
 #data overzetten vanuit de gemaakte functies
-producten, profielen, sesssies = get_mongo(), profiles_data(), sessions_data()
+# producten, profielen, sessies_ids, sessie_products = get_mongo(), profiles_data(), sessions_id_data(), sessions_products_data()
+sessies_ids = sessions_id_data()
+# sessie_products = sessions_products_data()
 #producten op volgorde zetten op basis van de alfabetische volgorde van de mongodb info
-for product in producten:
-    product[0], product[1], product[2], product[3], product[4], product[5], product[6], product[7], product[8], product[9], product[10], product[11], product[12] \
-        =  product[0], product[4], product[1], product[2], product[11], product[12], product[3], product[9], product[6], product[5], product[7], product[8], product[10]
+# if producten:
+#     for product in producten:
+#         product[0], product[1], product[2], product[3], product[4], product[5], product[6], product[7], product[8], product[9], product[10], product[11], product[12] \
+#         =  product[0], product[4], product[1], product[2], product[11], product[12], product[3], product[9], product[6], product[5], product[7], product[8], product[10]
 
+#inloggen bij postgres
 
-hostname = "localhost"
-database = "AI Group Project"
-username = "postgres"
-pwd = ""
-port_id = 5432
-#variabelen aanmaken om makkelijker in een keer pycharm te verbinden met postgres
-con = ps.connect(
-    host = hostname,
-    dbname = database,
-    user = username,
-    password= pwd,
-    port = port_id)
+con = connect()
 cur = con.cursor()
 
-def products():
+
+def products(producten):
     products_insert_query = """INSERT INTO products (id, name, brand, category, sub_category, sub_sub_category, gender, target_audience, selling_price, mrsp, price_discount, aanbiedingen, recommendable)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
     for product in producten:
@@ -74,9 +68,10 @@ def viewed_before(profiles):
                 cur.execute(viewed_before_insert_query, [viewed_id, profiel_id])
 
 
-def session_products(sessies):
+
+def session_products(sessie_producten):
     sessions_products_insert = """INSERT INTO sessions_products (sessions_buid, id) VALUES (%s, %s)"""
-    for sessie in sessies:
+    for sessie in sessie_producten:
         if sessie[1] == None:
             continue
         else:
@@ -84,11 +79,21 @@ def session_products(sessies):
                 cur.execute(sessions_products_insert, [sessie[0], product])
 
 
-viewed_before(profielen)
-print("geexecute viewed_before")
-similar(profielen)
-print("Geexecute similar")
-sessions(profielen)
-print("Geexecute sessions")
+# products(producten)
+# print("geexecute producten")
+
+# profiles(profielen)
+# print("geexecute profielen")
+
+# viewed_before(profielen)
+# print("geexecute viewed_before")
+# similar(profielen)
+# print("Geexecute similar")
+# sessions(profielen)
+# print("Geexecute sessions")
+
+# session_products(sessie_products)
+# print("geexecute sessions_products")
+
 con.commit()
 con.close()
