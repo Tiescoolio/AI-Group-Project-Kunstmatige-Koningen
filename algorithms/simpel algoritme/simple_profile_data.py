@@ -7,21 +7,23 @@ import time
 
 def insert_prof_data(data, cur, conn) -> None:
     # Truncate existing data to avoid duplicate data
-    cur.execute("TRUNCATE TABLE ordered, viewed_before, similars, profiles")
+    # cur.execute("TRUNCATE TABLE ordered, viewed_before, similars, profiles")
 
     viewed_count = 0
-    ordered_count = 0
+    orders = 0
 
     count = 0
+    freq_ids = {}
     for num, prof in enumerate(data):
-        keys = prof.keys()
-        if "recommendations" and "order" not in keys:
+        keys = list(prof.keys())
+        if "recommendations" not in keys and "order" not in keys:
             continue
+
         count += 1
         # print(count, keys)
 
         prof_id = str(prof["_id"])
-        cur.execute("INSERT INTO profiles (id) VALUES (%s)", (prof_id,))
+        # cur.execute("INSERT INTO profiles (id) VALUES (%s)", (prof_id,))
 
         order = prof.get("order")
         if order:
@@ -34,9 +36,9 @@ def insert_prof_data(data, cur, conn) -> None:
                 if "dd:20" in p_id:
                     continue
                 else:
-                    cur.execute("""INSERT INTO ordered (id, profile_id) VALUES (%s, %s)""", (p_id, prof_id))
+                    # cur.execute("""INSERT INTO ordered (id, profile_id) VALUES (%s, %s)""", (p_id, prof_id))
                     count += 1
-                    ordered_count += 1
+                    orders += 1
 
         rec = prof.get("recommendations", {})
         if rec:
@@ -46,17 +48,22 @@ def insert_prof_data(data, cur, conn) -> None:
 
             # Send each individual product viewed to a table with a foreign to the profile.
             for p_id in viewed:
-                cur.execute("INSERT INTO viewed_before (id, profile_id) VALUES (%s, %s)", (p_id, prof_id))
+                # cur.execute("INSERT INTO viewed_before (id, profile_id) VALUES (%s, %s)", (p_id, prof_id))
                 count += 1
                 viewed_count += 1
-
+                if p_id not in freq_ids:
+                    freq_ids[p_id] = 1
+                else:
+                    freq_ids[p_id] += 1
         # Commit data every 10_000 elements to increase integrity.
         if count % 10**4 == 0:
-            conn.commit()
+            # conn.commit()
+            pass
 
+    pprint.pp(freq_ids)
     print(f"tab les created = {count}")
     print(f"products viewed = {viewed_count}")
-    print(f"products ordered = {ordered_count}")
+    print(f"products ordered = {orders}")
 
 
 if __name__ == '__main__':
@@ -72,7 +79,7 @@ if __name__ == '__main__':
 
     with (connect_to_db() as conn, conn.cursor() as cursor):
         insert_prof_data(all_profiles, cursor, conn)
-    # conn.commit()
+    conn.commit()
 
     end = time.time()
     print(f"data transfer time = {end - start:.4f}s")
@@ -83,6 +90,6 @@ if __name__ == '__main__':
     # Time for skipping all useless data = 17.6500s, amount of profiles left = 102_712
 
     # Time for sending all data = 29.6744s,
-    # Total tables created = 166_837
-    # Total products viewed = 43_927
-    # Total products ordered = 20_198
+    # Total tables created = 2_562_626
+    # Total products viewed = 1_385_482
+    # Total products ordered = 20198
