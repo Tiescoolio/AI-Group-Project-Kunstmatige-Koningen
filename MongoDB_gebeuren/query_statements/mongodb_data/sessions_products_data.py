@@ -22,10 +22,6 @@ def connect_to_mongo(host, port, db):
     conn = MongoClient(host, port)
     return conn[db]
 
-def turn_mongo_to_sql():
-    data = get_mongo()
-    display(data)
-
 import time
 def get_mongo():
     collectie = "sessions"
@@ -59,7 +55,7 @@ def get_mongo():
                     temptest.append(j)
             temp.append(temptest)
             buid_list.append(temp)
-
     return buid_list
 
-turn_mongo_to_sql()
+if __name__ == "__main__":
+    get_mongo()
