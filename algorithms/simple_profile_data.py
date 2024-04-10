@@ -7,13 +7,10 @@ import time
 
 def insert_prof_data(data, cur, conn) -> None:
     # Truncate existing data to avoid duplicate data
-    # cur.execute("""TRUNCATE TABLE public.profiles""")
+    cur.execute("TRUNCATE TABLE ordered, viewed_before, similars, profiles")
 
-    sql_query_profile = """
-    INSERT INTO profiles (id)
-    VALUES (%s);
-    """
-
+    viewed_count = 0
+    ordered_count = 0
 
     count = 0
     for num, prof in enumerate(data):
@@ -21,33 +18,45 @@ def insert_prof_data(data, cur, conn) -> None:
         if "recommendations" and "order" not in keys:
             continue
         count += 1
+        # print(count, keys)
 
-        print(count, keys)
-        # Set discount to None to insert correct NULL value
-        # Checks for some weird products.
         prof_id = str(prof["_id"])
-        # cur.execute("""INSERT INTO profiles (id) VALUES (%s)""", prof_id)
+        cur.execute("INSERT INTO profiles (id) VALUES (%s)", (prof_id,))
 
-        order = prof.get("order", {})
+        order = prof.get("order")
         if order:
             ids = order.get("ids")
-            # print(ids, order)
+            if ids is None:
+                continue
 
-        prev_rec = prof["previously_recommended"] if "previously_recommended" in keys else None
+            # Send each individual product to a table with a foreign to the profile.
+            for p_id in ids:
+                if "dd:20" in p_id:
+                    continue
+                else:
+                    cur.execute("""INSERT INTO ordered (id, profile_id) VALUES (%s, %s)""", (p_id, prof_id))
+                    count += 1
+                    ordered_count += 1
 
-        # category = prof["category"] if "category" in keys else None
-        # sub_category = prof["sub_category"] if "sub_category" in keys else None
-        # sub_sub_category = prof["sub_sub_category"] if "sub_sub_category" in keys else None
-        # recommendable = prof["recommendable"] if "recommendable" in keys else None
-        # category = category[0] if type(category) == list else category
+        rec = prof.get("recommendations", {})
+        if rec:
+            viewed = rec.get("viewed_before")
+            if viewed is None:
+                continue
 
-        # Init data
+            # Send each individual product viewed to a table with a foreign to the profile.
+            for p_id in viewed:
+                cur.execute("INSERT INTO viewed_before (id, profile_id) VALUES (%s, %s)", (p_id, prof_id))
+                count += 1
+                viewed_count += 1
 
-        # print(num, query_data)
-        # print(f"{category}, {sub_category}, {sub_sub_category}")
-        # cur.execute(sql_query, query_data)
-        if count % 10**6 == 0:
+        # Commit data every 10_000 elements to increase integrity.
+        if count % 10**4 == 0:
             conn.commit()
+
+    print(f"tab les created = {count}")
+    print(f"products viewed = {viewed_count}")
+    print(f"products ordered = {ordered_count}")
 
 
 if __name__ == '__main__':
@@ -66,7 +75,14 @@ if __name__ == '__main__':
     # conn.commit()
 
     end = time.time()
-    print(f"data transfer time = {end - start:.4f}s")  # Last time is 6.5784s, 6.8136s
-    # Time for all looping all elements = 34.5722s, amount of profiles = 2_081_649
-    # Time for skipping useles data = 33.1787s, amount of profiles = 2_017_935
-    # Time for skipping all useles data = 17.6500s, amount of profiles = 102_712
+    print(f"data transfer time = {end - start:.4f}s")
+
+    # Notation for this programs performance (ran on a beefy computer).
+    # Time looping all elements = 34.5722s, amount of profiles left = 2_081_649
+    # Time for skipping useless data = 33.1787s, amount of profiles left = 2_017_935
+    # Time for skipping all useless data = 17.6500s, amount of profiles left = 102_712
+
+    # Time for sending all data = 29.6744s,
+    # Total tables created = 166_837
+    # Total products viewed = 43_927
+    # Total products ordered = 20_198
