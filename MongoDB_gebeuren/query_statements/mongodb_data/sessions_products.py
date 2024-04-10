@@ -27,6 +27,7 @@ def turn_mongo_to_sql():
     display(data)
 
 import time
+import string
 def get_mongo():
     collectie = "sessions"
     database = connect_to_mongo("localhost", 27017, "huwebshop")
@@ -49,16 +50,22 @@ def get_mongo():
     for i in templist:
         temp = []
         if i[2] is not None:
-            temp.append(i[1])
-            temptest = []
-            for j in i[2]:
-                if isinstance(j, dict):
-                    for k in j.values():
-                        temptest.append(k)
-                else:
-                    temptest.append(j)
-            temp.append(temptest)
-            buid_list.append(temp)
+            #temptemp = string(i)i[]
+            if len(i[1]) != 1:
+                continue
+            else:
+                temp.append(i[1])
+
+                temptest = []
+                for j in i[2]:
+                    if isinstance(j, dict):
+                        for k in j.values():
+                            temptest.append(k)
+                    else:
+                        temptest.append(j)
+                temp.append(temptest)
+                buid_list.append(temp)
+
 
     return buid_list
 
