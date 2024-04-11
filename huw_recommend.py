@@ -1,4 +1,4 @@
-from algorithms.algorithm_popularity import PopularityAlgorithm
+from algorithms.simple_algorithm.algorithm_popularity import PopularityAlgorithm
 from algorithms.utils import connect_to_db
 from flask import Flask, request, session, render_template, redirect, url_for, g, jsonify
 from flask_restful import Api, Resource, reqparse
