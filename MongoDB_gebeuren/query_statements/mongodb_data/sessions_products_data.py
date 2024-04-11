@@ -1,9 +1,4 @@
 #_ID & ProductID
-
-
-
-
-
 #RETURN = BUID & PRODUCTEN BIJ DIE BUID
 #LIJST met [[BUID] - [ALLE producten]]
 # Van alles dat has sale heeft
@@ -18,11 +13,18 @@ pandas.set_option('display.max_rows', None)
 pandas.set_option('display.max_columns', None)
 pandas.set_option('display.width', None)
 
+
 def connect_to_mongo(host, port, db):
     conn = MongoClient(host, port)
     return conn[db]
 
-import time
+
+def turn_mongo_to_sql():
+    data = get_mongo()
+    display(data)
+
+
+# Functie die de data uit de mongoDB haalt
 def get_mongo():
     collectie = "sessions"
     database = connect_to_mongo("localhost", 27017, "huwebshop")
@@ -30,7 +32,9 @@ def get_mongo():
 
     data = pandas.DataFrame(list(cursor))
     data = data.where(pandas.notnull(data), None)
-    templist = []
+
+    # Zorg ervoor dat de dictionaries uit de lijst worden gehaald en alleen de values overblijven en zorgt ervoor dat de data in de juiste format overblijft
+    workable_list = []
     for index, row in data.iterrows():
         indices = []
         for i in row.values:
@@ -39,23 +43,25 @@ def get_mongo():
                     indices.append(j)
             else:
                 indices.append(i)
-        templist.append(indices)
+        workable_list.append(indices)
 
-    buid_list = []
-    for i in templist:
-        temp = []
+    # Zorgt ervoor dat de juiste data overblijft
+    final_list = []
+    for i in workable_list:
+        small_list = []
         if i[2] is not None:
-            temp.append(i[1])
-            temptest = []
+            small_list.append(i[1])
+            smaller_list = []
             for j in i[2]:
                 if isinstance(j, dict):
                     for k in j.values():
-                        temptest.append(k)
+                        smaller_list.append(k)
                 else:
-                    temptest.append(j)
-            temp.append(temptest)
-            buid_list.append(temp)
-    return buid_list
+                    smaller_list.append(j)
+            small_list.append(smaller_list)
+            final_list.append(small_list)
 
-if __name__ == "__main__":
-    get_mongo()
+    return final_list
+
+
+turn_mongo_to_sql()
