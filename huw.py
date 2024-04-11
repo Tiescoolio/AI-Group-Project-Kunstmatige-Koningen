@@ -241,7 +241,9 @@ class HUWebshop(object):
         if template == "homepage.html":
             packet['r_type'] = list(self.recommendation_types.keys())[4]
             packet['r_string'] = list(self.recommendation_types.values())[4]
-            packet['r_products'] = self.recommendations(4, list(self.recommendation_types.keys())[4], "viewed-before/")
+            packet['r_products'] = self.recommendations(4,
+                                                        list(self.recommendation_types.keys())[4],
+                                                        "viewed-before/")
         return render_template(template, packet=packet)
 
     """ ..:: Recommendation Functions ::.. """
@@ -252,7 +254,6 @@ class HUWebshop(object):
         service. At the moment, it only transmits the profile ID and the number
         of expected recommendations; to have more user information in the REST
         request, this function would have to change."""
-        # pprint.pp(session)
         url = f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}"
         resp = requests.get(url)
         if resp.status_code == 200:
@@ -289,9 +290,9 @@ class HUWebshop(object):
         recommendation_type = list(self.recommendation_types.keys())[0]
         # pp.pp(prod_list)
         if len(nononescats) >= 1:
-            page_path = "/producten/"+("/".join(nononescats))+"/"
+            page_path = "producten/"+("/".join(nononescats))+"/"
         else:
-            page_path = "/producten/"
+            page_path = "producten/"
         return self.render_packet_template('products.html', {
             'products': prod_list,
             'productcount': prod_count, \
@@ -320,7 +321,7 @@ class HUWebshop(object):
     def shoppingcart(self):
         """ This function renders the shopping cart for the user."""
         i = []
-        page_path = "shoppingcart/"
+        page_path = "/shoppingcart/"
         recommendation_type = list(self.recommendation_types.keys())[2]
         for tup in session['shopping_cart']:
             product = self.prep_product(self.database.products.find_one({"_id":str(tup[0])}))
