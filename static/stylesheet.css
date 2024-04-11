@@ -181,11 +181,12 @@ a.button:hover{
 	margin-left:9px;
 	margin-right:9px;
 	margin-bottom:10px;
-	width:130px;
+	width:150px;
 	height:130px;
 	display:block;
 	float:left;
 	font-size:12px;
+	position: relative;
 }
 
 .productname {
@@ -214,11 +215,24 @@ a.button:hover{
 	font-weight:bold;
 }
 
+.button-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.product-details {
+    position: relative;
+}
+
 /* ..:: Products Overview Styling ::.. */
 
 #products, #recommendedproducts {
 	text-align:center;
-	width:600px;
+	width:680px;
 	margin-left:auto;
 	margin-right:auto;
 	overflow:auto;

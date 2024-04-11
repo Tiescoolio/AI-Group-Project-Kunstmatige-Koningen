@@ -5,11 +5,13 @@
 {% for product in packet.products %}
 	<div class="productpageblock hublueborder">
 		<a href="/productdetail/{{ product.id }}">
-			<div class="productname">{{ product.name }}</div>
-			<div class="productprice">{{ product.price }}</div>
-			<div class="productdiscount hublue">{{ product.discount }}</div>
+            <div class="productname">{{ product.name }}</div>
+            <div class="productprice">{{ product.price }}</div>
+            <div class="productdiscount hublue">{{ product.discount }}</div>
 		</a>
-		<a href="#" function="add-to-shopping-cart" class="productpage-addtocart button hured" productid="{{ product.id }}">In winkelmand</a>
+        <div class="button-container">
+		    <a href="#" function="add-to-shopping-cart" class="productpage-addtocart button hured" productid="{{ product.id }}">In winkelmand</a>
+	    </div>
 	</div>
 {% endfor %}
 </div>
