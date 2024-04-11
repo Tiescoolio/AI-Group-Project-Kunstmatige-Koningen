@@ -1,8 +1,8 @@
 from algorithms.utils import connect_to_db as connect
 from producten_van_profiel import producten_van_profiel as product_query
 con = connect()
-
 cur = con.cursor()
+
 def vergelijkbare_profiel_ids(profiel_id):
     producten = product_query(profiel_id)  # voorbeeld producten
 
