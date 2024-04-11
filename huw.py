@@ -238,9 +238,10 @@ class HUWebshop(object):
         packet['profile_id'] = session['profile_id']
         packet['shopping_cart'] = session['shopping_cart']
         packet['shopping_cart_count'] = self.shopping_cart_count()
-        packet['r_type'] = list(self.recommendation_types.keys())[4]
-        packet['r_string'] = list(self.recommendation_types.values())[4]
-        packet['r_products'] = self.recommendations(4, list(self.recommendation_types.keys())[4], "viewed-before/")
+        if template == "homepage.html":
+            packet['r_type'] = list(self.recommendation_types.keys())[4]
+            packet['r_string'] = list(self.recommendation_types.values())[4]
+            packet['r_products'] = self.recommendations(4, list(self.recommendation_types.keys())[4], "viewed-before/")
         return render_template(template, packet=packet)
 
     """ ..:: Recommendation Functions ::.. """
