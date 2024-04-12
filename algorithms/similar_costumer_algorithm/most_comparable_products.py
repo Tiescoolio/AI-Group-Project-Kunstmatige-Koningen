@@ -1,12 +1,12 @@
 
 from algorithms.utils import connect_to_db as connect
-from relatable_profile_ids import vergelijkbare_profiel_ids as profiel_ids
+from relatable_profile_ids import vergelijkbare_profiel_ids as profile_ids
 con = connect()
 cur = con.cursor()
 
-def meest_vergelijkbare_producten(profiel_id):
-    profielen, producten = profiel_ids(profiel_id)
-    meest_vergelijkbare_producten = f"""
+def most_comparable_products(profile_id):
+    profielen, producten = profile_ids(profile_id)
+    most_comparable_products_query = f"""
         SELECT id, SUM(count) as total_count
         FROM (
             SELECT id, COUNT(id) as count
@@ -21,15 +21,15 @@ def meest_vergelijkbare_producten(profiel_id):
         LIMIT 4;
     """
 
-    cur.execute(meest_vergelijkbare_producten)
-    meest_gekochte_producten = cur.fetchall()
+    cur.execute(most_comparable_products_query)
+    most_purchased_products = cur.fetchall()
 
-    aanbevolen_producten = []
+    recommended_products = []
 
-    for rij in meest_gekochte_producten:
-        aanbevolen_producten.append(rij[0])
-    return aanbevolen_producten
+    for rij in most_purchased_products:
+        recommended_products.append(rij[0])
+    return recommended_products
 if __name__ == "__main__":
-    meest_vergelijkbare_producten('5a393d68ed295900010384ca')
+    print(most_comparable_products('5a393d68ed295900010384ca'))
 cur.close()
 con.close()
