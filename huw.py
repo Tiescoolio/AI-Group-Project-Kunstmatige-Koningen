@@ -321,7 +321,7 @@ class HUWebshop(object):
     def shoppingcart(self):
         """ This function renders the shopping cart for the user."""
         i = []
-        page_path = "/shoppingcart/"
+        page_path = "/winkelmand/"
         recommendation_type = list(self.recommendation_types.keys())[2]
         for tup in session['shopping_cart']:
             product = self.prep_product(self.database.products.find_one({"_id":str(tup[0])}))

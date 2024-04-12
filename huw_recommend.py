@@ -30,6 +30,7 @@ database = client.huwebshop
 decode_args = reqparse.RequestParser()
 decode_args.add_argument("codes", type=dict, help="plz work")
 
+
 class Recom(Resource):
     """ This class represents the REST API that provides the recommendations for
     the webshop. At the moment, the API simply returns a random set of products
@@ -53,11 +54,20 @@ class Recom(Resource):
             tuple: Tuple containing up to four categories, with missing categories filled with None.
         """
         # paths = path.replace("producten/", "")[:-1]
-        cats = path.split("/")[:-1]
-        cats = [self.decode_category(c) for c in cats[1:]]
-        for i in range(4 - len(cats)):
-            cats.append(None)
-        return tuple(cats)
+        split_path = path.split("/")
+        page_type = split_path[0]
+        if split_path[0] == "winkelmand":
+            prod_ids = split_path[1:-1]
+            return tuple(prod_ids)
+        elif page_type == "producten":
+            cats = split_path[:-1]
+            cats = [self.decode_category(c) for c in cats[1:]]
+            for i in range(4 - len(cats)):
+                cats.append(None)
+            return tuple(cats)
+        elif page_type == "productdetail":
+            prod_id = split_path[1:-1]
+            return tuple(prod_id)
 
     def get(self, profile_id, count, r_type, page_path):
         """ This function represents the handler for GET requests coming in
@@ -85,7 +95,8 @@ class Recom(Resource):
             return "Not Implemented", 501
         elif r_type == "personal":  # alg 3 for the homepage
             # Not implemented
-            return "Not Implemented", 501
+            # return "Not Implemented", 501
+            pass
 
         # Return random products IDs for testing pages.
         rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
