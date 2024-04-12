@@ -1,11 +1,8 @@
 from algorithms.utils import connect_to_db as connect
-from products_from_profile import products_from_profile
 con = connect()
 cur = con.cursor()
 
-def vergelijkbare_profiel_ids(profiel_id):
-    products = products_from_profile(profiel_id)  # voorbeeld producten
-
+def vergelijkbare_profiel_ids(products):
     # pakt de 5 profiel_ids die de meeste producten uit de producten lijst gekocht hebben
     select_relatable_purchased_products_profiles_query = f"""
     SELECT profile_id, COUNT(profile_id) AS count
