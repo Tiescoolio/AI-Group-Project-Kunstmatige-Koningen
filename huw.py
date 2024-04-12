@@ -31,7 +31,7 @@ class HUWebshop(object):
     cat_levels = ["category", "sub_category", "sub_sub_category", "sub_sub_sub_category"]
     cat_encode = {}
     cat_decode = {}
-    cat_urllib_encode = {}
+    cat_encode_urllib = {}
     main_menu_count = 8
     main_menu_items = None
 
@@ -44,7 +44,7 @@ class HUWebshop(object):
         'similar': "Soortgelijke producten",
         'combination': 'Combineert goed met',
         'behaviour': 'Passend bij uw gedrag',
-        'personal': 'Persoonlijk aanbevolen'
+        'personal': 'Producten die je al eerder hebt bekeken'
     }
 
     """ ..:: Initialization and Category Index Functions ::.. """
@@ -87,7 +87,7 @@ class HUWebshop(object):
             enc_cat = self.encode_category(cat)
             self.cat_encode[cat] = enc_cat
             self.cat_decode[enc_cat] = cat
-            self.cat_urllib_encode[enc_cat] = self.encode_cat_urllib(cat)
+            self.cat_encode_urllib[enc_cat] = self.encode_category_urllib(cat)
 
         # Since the main menu can't show all the category options at once in a
         # legible manner, we choose to display a set number with the greatest 
@@ -184,7 +184,7 @@ class HUWebshop(object):
         c = urllib.parse.quote(c)
         return c
 
-    def encode_cat_urllib(self, c) -> str:
+    def encode_category_urllib(self, c) -> str:
         """ This helper function encodes any category with urllib,
         so it can later be decoded"""
         return urllib.parse.quote_plus(c)
@@ -276,7 +276,7 @@ class HUWebshop(object):
         for k, v in enumerate(cat_list):
             if v is not None:
                 queryfilter[self.cat_levels[k]] = self.cat_decode[v]
-                nononescats.append(self.cat_urllib_encode[v])
+                nononescats.append(self.cat_encode_urllib[v])
 
         query_cursor = self.database.products.find(queryfilter, self.product_fields)
         prod_count = self.database.products.count_documents(queryfilter)

@@ -5,7 +5,6 @@ from flask_restful import Api, Resource, reqparse
 import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from huw import HUWebshop as hu
 import urllib.parse
 import pprint
 
@@ -41,9 +40,18 @@ class Recom(Resource):
         self.cursor = connect_to_db().cursor()
 
     def decode_category(self, c) -> str:
+        """ This helper function decodes any category with urllib"""
         return urllib.parse.unquote_plus(c)
 
     def format_page_path(self, path) -> tuple:
+        """Formats the page path into a tuple of up to four categories.
+
+        Args:
+            path (str): The path of the page.
+
+        Returns:
+            tuple: Tuple containing up to four categories, with missing categories filled with None.
+        """
         # paths = path.replace("producten/", "")[:-1]
         cats = path.split("/")[:-1]
         cats = [self.decode_category(c) for c in cats[1:]]
@@ -53,18 +61,33 @@ class Recom(Resource):
 
     def get(self, profile_id, count, r_type, page_path):
         """ This function represents the handler for GET requests coming in
-        through the API. It currently returns a random sample of products. """
+        through the API. It currently returns a random sample of products.
+
+        Args:
+            profile_id (int): The ID of the user's profile.
+            count (int): The number of products to return.
+            r_type (str): The type of recommendation.
+            page_path (str): The path of the page.
+
+        Returns:
+            tuple : Depending on the recommendation type, it returns different values.
+                A tuple containing product IDs (amount defined by count) and status code 200
+        """
         cats = self.format_page_path(page_path)
         if r_type == "popular":  # simple alg for the products categories
             pop_app = PopularityAlgorithm(count, self.cursor, cats)
-            return pop_app.popularity_algorithm(cats[0], cats[1])
-        elif r_type == "similiar":  # alg 1 for the product details
-            pass
-        elif r_type == "combination":  # alg 2 for the shoppingcart
-            pass
-        elif r_type == "personal":  # alg for the homepage
-            pass
+            return pop_app.popularity_algorithm(cats[0], cats[1]), 200
+        elif r_type == "similar":  # alg 1 for the product details
+            # Not implemented
+            return "Not Implemented", 501
+        elif r_type == "combination":  # alg 2 for the shopping cart
+            # Not implemented
+            return "Not Implemented", 501
+        elif r_type == "personal":  # alg 3 for the homepage
+            # Not implemented
+            return "Not Implemented", 501
 
+        # Return random products IDs for testing pages.
         rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
         prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
         return prod_ids, 200
