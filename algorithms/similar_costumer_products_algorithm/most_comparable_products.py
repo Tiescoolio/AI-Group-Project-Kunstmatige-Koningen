@@ -29,6 +29,6 @@ def most_comparable_products(products):
         recommended_products.append(rij[0])
     return recommended_products
 if __name__ == "__main__":
-    print(most_comparable_products('5a393d68ed295900010384ca'))
+    print(most_comparable_products([8532, 2554]))
 cur.close()
 con.close()
