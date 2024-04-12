@@ -2,7 +2,6 @@ from algorithms.utils import connect_to_db as connect
 from relatable_profile_ids import vergelijkbare_profiel_ids as profile_ids
 con = connect()
 cur = con.cursor()
-
 def most_comparable_products(products):
     profiles, products = profile_ids(products)
     most_comparable_products_query = f"""
