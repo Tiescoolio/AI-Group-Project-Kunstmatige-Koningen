@@ -26,4 +26,4 @@ def vergelijkbare_profiel_ids(profiel_id):
     return profiles, products
 
 if __name__ == "__main__":
-    vergelijkbare_profiel_ids('5a393d68ed295900010384ca')
+    print(vergelijkbare_profiel_ids('5a393d68ed295900010384ca'))
