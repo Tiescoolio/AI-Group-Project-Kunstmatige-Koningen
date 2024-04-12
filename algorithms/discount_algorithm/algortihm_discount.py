@@ -69,6 +69,7 @@ Smart analyse
 
     Het algoritme is binnen de tijd haalbaar met de beschikbare data en implementatietijd.
 """
+
 # kijkt naar wat de gebruiker bekeken heeft, en geeft een aanbeveling als er een aanbieding is op die producten.
 #
 # Als een gebruiker, wil ik aanbevelingen ontvangen voor producten waar ik interesse in heb getoond, zodat ik op de hoogte ben van eventuele aanbiedingen op die producten en kan profiteren van mogelijke kortingen.
@@ -80,43 +81,63 @@ Smart analyse
 #     Als er aanbiedingen beschikbaar zijn, moeten deze worden opgenomen in de aanbevelingen aan de gebruiker.
 #     Het systeem moet de aanbiedingen presenteren op een duidelijke en aantrekkelijke manier.
 
+#
+# SELECT id
+#                     FROM products
+#                     --JOIN profiles AS t2 ON t1.profile_id = t2.id
+#                     INNER JOIN products on similars.id = products.id
+#                     WHERE t1.viewed_before = %s
+#                     OR t1.similars = %s
+#                     ORDER BY t2.aanbiedingen IS NOT NULL DESC
+#                     LIMIT %s;
+from algorithms.utils import connect_to_db as connect
 
 
-def get_correct_query():
-    popular_query = """
-                    SELECT t1.id
-                    FROM products AS t1
-                    JOIN profiles AS t2 ON t1.profile_id = t2.id
-                    WHERE t1.category = %s
-                    AND t1.viewed_before = %s 
-                    AND t1.similars = %s
-                    ORDER BY t2.aanbiedingen IS NOT NULL DESC
-                    LIMIT %s;
+
+con = connect()
+cur = con.cursor()
+def get_correct_query(profiel_id):
+
+    # Query to get similars items
+    similars_query = f"""
+                    SELECT similars.id, aanbiedingen, selling_price, price_discount FROM similars
+                    INNER JOIN products on similars.id = products.id
+                    WHERE aanbiedingen IS NOT NULL
+                    AND profile_id = '{profiel_id}'
+                    ORDER BY aanbiedingen DESC;
                 """
-    return popular_query
+    cur.execute(similars_query)
+    similars_values = cur.fetchall()
+
+    # Query to get viewed_before items
+    viewed_before_query = f"""
+                        SELECT viewed_before.id, aanbiedingen, selling_price, price_discount FROM viewed_before
+                        INNER JOIN products on viewed_before.id = products.id
+                        WHERE aanbiedingen IS NOT NULL
+                        AND profile_id = '{profiel_id}'
+                        ORDER BY aanbiedingen DESC;
+                    """
+
+    cur.execute(viewed_before_query)
+    viewed_before_values = cur.fetchall()
+
+    return similars_values, viewed_before_values
+
+#Functie om de lijst te sorteren op de beste aanbiedingen
+def get_correct_kwewie(profiel_id):
+    # Get the values from the query
+    similars_values, viewed_before_values = get_correct_query(profiel_id)
+
+    print(similars_values[0:5], "\n")
+    print(viewed_before_values[0:5])
 
 
-def get_recommendations(cursor, count: int) -> tuple:
 
-    # Query to get recommended items
-    query = get_correct_query()
+    return similars_values, viewed_before_values
 
-    #De data is ongefilterd op beschikbaarheid van similars en viewed_before, dus moet het via de get_availibity functie nog gecheckt worden
+get_correct_kwewie("5e1f350dbb0c7a1b7f5e5d1f")
+def main():
+    pass
 
-    query_prod_ids = """select products id from products"""
-    prod_ids = cursor.fetchall()
+    # Calculates the ranking
 
-
-
-    #MongoDB_gebeuren/query_statements/mongodb_data/products_data.py
-    from MongoDB_gebeuren import get_availability
-    get_availability()
-
-    # Execute the SQL query with the given value as parameters
-    cursor.execute(query)
-
-    # Fetch all the rows returned by the query
-    ids = cursor.fetchall()
-    recommended_products = tuple([_id[0] for _id in ids])
-
-    return recommended_products[:count]
