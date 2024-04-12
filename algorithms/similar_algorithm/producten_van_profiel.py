@@ -1,3 +1,4 @@
+
 from algorithms.utils import connect_to_db as connect
 con = connect()
 cur = con.cursor()

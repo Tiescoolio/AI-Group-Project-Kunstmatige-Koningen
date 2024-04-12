@@ -1,3 +1,4 @@
+
 from algorithms.utils import connect_to_db as connect
 from producten_van_profiel import producten_van_profiel as product_query
 con = connect()

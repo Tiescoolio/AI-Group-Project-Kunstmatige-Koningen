@@ -1,3 +1,4 @@
+
 from algorithms.utils import connect_to_db as connect
 from vergelijkbare_profiel_ids import vergelijkbare_profiel_ids as profiel_ids
 con = connect()
