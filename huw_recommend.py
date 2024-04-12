@@ -56,15 +56,18 @@ class Recom(Resource):
         # paths = path.replace("producten/", "")[:-1]
         split_path = path.split("/")
         page_type = split_path[0]
+        # Return all the products IDs if the page "winkelmand/"
         if split_path[0] == "winkelmand":
             prod_ids = split_path[1:-1]
             return tuple(prod_ids)
+        # Return all the categories if the page "producten/"
         elif page_type == "producten":
             cats = split_path[:-1]
             cats = [self.decode_category(c) for c in cats[1:]]
             for i in range(4 - len(cats)):
                 cats.append(None)
             return tuple(cats)
+        # Return the product ID if the page "productdetail/"
         elif page_type == "productdetail":
             prod_id = split_path[1:-1]
             return tuple(prod_id)
