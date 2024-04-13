@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import urllib.parse
 import sys
-import pprint
+import pprint, timeit
 
 app = Flask(__name__)
 api = Api(app)
@@ -36,8 +36,9 @@ class Recom(Resource):
     """ This class represents the REST API that provides the recommendations for
     the webshop. At the moment, the API simply returns a random set of products
     to recommend."""
-    url = "http://127.0.0.1:5000"
+
     pop_app = PopularityAlgorithm()
+    pop_alg_time = []
 
     def __init__(self):
         self.cursor = connect_to_db().cursor()
@@ -91,7 +92,15 @@ class Recom(Resource):
         cats = self.format_page_path(page_path)
         if r_type == "popular":  # simple alg for the products categories
             print(sys.getsizeof(self.pop_app))
-            return self.pop_app.popularity_algorithm(cats, self.cursor, count), 200
+            start = timeit.default_timer()
+
+            prod_ids = self.pop_app.popularity_algorithm(cats, self.cursor, count)
+
+            end = timeit.default_timer()
+            time = end - start
+            print(f"time for alg pop = {time:.4f}s")
+            self.pop_alg_time.append(time)
+            return prod_ids, 200
         elif r_type == "similar":  # alg 1 for the product details
             # Not implemented
             return "Not Implemented", 501

@@ -1,11 +1,23 @@
 import pprint
 
-
 class PopularityAlgorithm:
+    query = """SELECT COUNT(*) AS count_prod, t1.id, t2.category, t2.sub_category
+                        FROM sessions_products AS t1
+                        JOIN products AS t2 ON t1.id = t2.id
+                        WHERE t2.category = %s
+                        GROUP BY t1.id, t2.category, t2.sub_category
+                        ORDER BY count_prod DESC"""
+
     def __init__(self):
+        self.prod_ids_cache = {}  # Cache for storing retrieved product IDs
+
+
+    def check_cache(self, cat, sub_cat):
         pass
 
     def get_top_sub_cat(self, data, count, sub_cat) -> tuple:
+        """ This function gets the most popular products per for a subcategory,
+        if none are found it will return the most popular items for that category"""
         prod_ids = []
         _data = []
         for i, prod in enumerate(data):
@@ -13,7 +25,7 @@ class PopularityAlgorithm:
             # Returns the list if t
             if len(prod_ids) >= count:
                 return tuple(prod_ids)
-            if prod[4] == sub_cat:
+            if prod[3] == sub_cat:
                 prod_ids.append(prod_id)
                 _data.append(prod_id)
 
@@ -28,29 +40,24 @@ class PopularityAlgorithm:
                 if prod_id not in prod_ids and prod not in _data:
                     prod_ids.append(prod_id)
 
-
     def popularity_algorithm(self, cats, cursor, count) -> tuple:
         """The popularity algorithm, this algorithm could be considered a similar algorithm,
         however for now it will seen as a popular algorithm."""
         cat, sub_cat = cats[0], cats[1]
-        # Query to get recommended items filtered by categories
 
-        query_popular_prods = """SELECT COUNT(*) AS count_prod, t1.id, t2.category, t2.sub_category
-                FROM sessions_products AS t1
-                JOIN products AS t2 ON t1.id = t2.id
-                WHERE t2.category = %s
-                GROUP BY t1.id, t2.category, t2.sub_category
-                ORDER BY count_prod DESC"""
+        # Fetch all products from the given category
+        cursor.execute(self.query, (cat,))
+        popular_prods = cursor.fetchall()
+        print(f"len pop list = {len(popular_prods)}")
 
-        cursor.execute(query_popular_prods, (cat,))
-        rows1 = cursor.fetchall()
-        pprint.pprint(rows1)
+        if sub_cat:
+            prod_ids = self.get_top_sub_cat(popular_prods, count, sub_cat)
+        else:
+            # Return the popular products if no sub_cat is given.
+            prods = popular_prods[:4]
+            prod_ids = tuple([p[1] for p in prods])
 
-        cursor.execute("""SELECT products.id FROM products""")
-        rows = cursor.fetchall()
-        ids = [pid[0] for pid in rows]
-
-        print(self.get_top_sub_cat(rows1, count, sub_cat))
+        print(prod_ids)
         # Execute the SQL query with the given value as parameters
         # Return random products IDs for testing pages.
-        return ('31811', '30984-wit-3942', '31810', '33731')
+        return prod_ids
