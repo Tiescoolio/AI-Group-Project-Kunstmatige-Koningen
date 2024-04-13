@@ -11,9 +11,23 @@ class PopularityAlgorithm:
     def __init__(self):
         self.prod_ids_cache = {}  # Cache for storing retrieved product IDs
 
-
     def check_cache(self, cat, sub_cat):
-        pass
+        """ This function returns prod IDs if they are cached"""
+        if cat in self.prod_ids_cache and sub_cat is None:
+            print("yurr")
+            return self.prod_ids_cache[cat]["value"]
+        elif cat in self.prod_ids_cache and sub_cat in self.prod_ids_cache[cat]:
+            print("yurr2")
+            return self.prod_ids_cache[cat][sub_cat]
+        else:
+            return False
+
+    def add_to_cache(self, cat, sub_cat, prod_ids):
+        """ This function adds product IDs to the cache"""
+        if cat and sub_cat is None:
+            self.prod_ids_cache[cat] = {"value": prod_ids}
+        elif cat and sub_cat:
+            self.prod_ids_cache[cat] = {sub_cat: prod_ids}
 
     def get_top_sub_cat(self, data, count, sub_cat) -> tuple:
         """ This function gets the most popular products per for a subcategory,
@@ -44,6 +58,12 @@ class PopularityAlgorithm:
         """The popularity algorithm, this algorithm could be considered a similar algorithm,
         however for now it will seen as a popular algorithm."""
         cat, sub_cat = cats[0], cats[1]
+        pprint.pp(self.prod_ids_cache)
+
+        checked_cache = self.check_cache(cat, sub_cat)
+        if checked_cache is not False:
+            return checked_cache
+
 
         # Fetch all products from the given category
         cursor.execute(self.query, (cat,))
@@ -56,6 +76,9 @@ class PopularityAlgorithm:
             # Return the popular products if no sub_cat is given.
             prods = popular_prods[:4]
             prod_ids = tuple([p[1] for p in prods])
+
+        # Adds the product IDs to the cache
+        self.add_to_cache(cat, sub_cat, prod_ids)
 
         print(prod_ids)
         # Execute the SQL query with the given value as parameters

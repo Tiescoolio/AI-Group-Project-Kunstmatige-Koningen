@@ -99,6 +99,7 @@ class Recom(Resource):
             end = timeit.default_timer()
             time = end - start
             print(f"time for alg pop = {time:.4f}s")
+            print(time)
             self.pop_alg_time.append(time)
             return prod_ids, 200
         elif r_type == "similar":  # alg 1 for the product details
