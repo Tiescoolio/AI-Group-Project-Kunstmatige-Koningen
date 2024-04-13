@@ -6,6 +6,7 @@ import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import urllib.parse
+import sys
 import pprint
 
 app = Flask(__name__)
@@ -36,6 +37,7 @@ class Recom(Resource):
     the webshop. At the moment, the API simply returns a random set of products
     to recommend."""
     url = "http://127.0.0.1:5000"
+    pop_app = PopularityAlgorithm()
 
     def __init__(self):
         self.cursor = connect_to_db().cursor()
@@ -88,8 +90,8 @@ class Recom(Resource):
         """
         cats = self.format_page_path(page_path)
         if r_type == "popular":  # simple alg for the products categories
-            pop_app = PopularityAlgorithm(count, self.cursor, cats)
-            return pop_app.popularity_algorithm(cats[0], cats[1]), 200
+            print(sys.getsizeof(self.pop_app))
+            return self.pop_app.popularity_algorithm(cats, self.cursor, count), 200
         elif r_type == "similar":  # alg 1 for the product details
             # Not implemented
             return "Not Implemented", 501
