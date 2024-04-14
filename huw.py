@@ -262,8 +262,12 @@ class HUWebshop(object):
         of expected recommendations; to have more user information in the REST
         request, this function would have to change."""
         shopping_cart_ids = [i[0] for i in session['shopping_cart']]
-        shopping_cart = "/"+("/".join(shopping_cart_ids))+"/"
-        url = (f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart}")
+        if len(shopping_cart_ids) >= 1:
+            shopping_cart_path = ("/".join(shopping_cart_ids))+"/"
+        else:
+            shopping_cart_path = ""
+
+        url = (f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart_path}")
         resp = requests.get(url)
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
@@ -339,7 +343,7 @@ class HUWebshop(object):
     def shoppingcart(self):
         """ This function renders the shopping cart for the user."""
         i = []
-        page_path = "/winkelmand/"
+        page_path = "winkelmand/"
         recommendation_type = list(self.recommendation_types.keys())[2]
         for tup in session['shopping_cart']:
             product = self.prep_product(self.database.products.find_one({"_id":str(tup[0])}))
