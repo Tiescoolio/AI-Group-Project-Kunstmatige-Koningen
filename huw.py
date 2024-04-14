@@ -261,7 +261,9 @@ class HUWebshop(object):
         service. At the moment, it only transmits the profile ID and the number
         of expected recommendations; to have more user information in the REST
         request, this function would have to change."""
-        url = f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}"
+        shopping_cart_ids = [i[0] for i in session['shopping_cart']]
+        shopping_cart = "/"+("/".join(shopping_cart_ids))+"/"
+        url = (f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart}")
         resp = requests.get(url)
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
@@ -279,11 +281,11 @@ class HUWebshop(object):
         corresponds to product categories). """
         cat_list = [cat1, cat2, cat3, cat4]
         queryfilter = {}
-        nononescats = []
+        no_nones_cats = []
         for k, v in enumerate(cat_list):
             if v is not None:
                 queryfilter[self.cat_levels[k]] = self.cat_decode[v]
-                nononescats.append(self.cat_encode_urllib[v])
+                no_nones_cats.append(self.cat_encode_urllib[v])
 
         query_cursor = self.database.products.find(queryfilter, self.product_fields)
         prod_count = self.database.products.count_documents(queryfilter)
@@ -294,8 +296,8 @@ class HUWebshop(object):
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
         # pp.pp(prod_list)
-        if len(nononescats) >= 1:
-            page_path = "producten/"+("/".join(nononescats))+"/"
+        if len(no_nones_cats) >= 1:
+            page_path = "producten/"+("/".join(no_nones_cats))+"/"
         else:
             page_path = "producten/"
         return self.render_packet_template('products.html', {
@@ -314,15 +316,22 @@ class HUWebshop(object):
         """ This function renders the product detail page based on the product
         id provided. """
         product = self.database.products.find_one({"_id":str(product_id)})
-        cat = self.cat_encode_urllib2[product['category']]
-        sub_cat = self.cat_encode_urllib2[product['sub_category']]
-        sub_sub_cat = self.cat_encode_urllib2[product['sub_sub_category']]
-        product_detail = f"{cat}/{sub_cat}/{sub_sub_cat}/"
+        cat = self.cat_encode_urllib2.get(product.get('category'), None)
+        sub_cat = self.cat_encode_urllib2.get(product.get('sub_category'), None)
+        sub_sub_cat = self.cat_encode_urllib2.get(product.get('sub_sub_category'), None)
+
+        cat_list = [cat, sub_cat, sub_sub_cat]
+        no_nones_cats = [cat for cat in cat_list if cat is not None]
+
+        if len(cat_list) >= 1:
+            page_path = f"productdetail/{product_id}/" + ("/".join(no_nones_cats)) + "/"
+        else:
+            page_path = f"productdetail/{product_id}/"
         recommendation_type = list(self.recommendation_types.keys())[1]
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
-            'r_products':self.recommendations(4, recommendation_type, f"productdetail/{product_id}/{product_detail}"), \
+            'r_products':self.recommendations(4, recommendation_type, page_path), \
             'r_type':recommendation_type,\
             'r_string':list(self.recommendation_types.values())[1]
         })
@@ -335,10 +344,9 @@ class HUWebshop(object):
         for tup in session['shopping_cart']:
             product = self.prep_product(self.database.products.find_one({"_id":str(tup[0])}))
             product["itemcount"] = tup[1]
-            prod_id = product["id"]
             i.append(product)
-            # page_path += f"{prod_id}-{product['itemcount']}/" if prod_id not in page_path else "" #
-            page_path += f"{prod_id}/" if prod_id not in page_path else ""
+            # prod_id = product["id"]
+            # page_path += f"{prod_id}/" if prod_id not in page_path else ""
 
         return self.render_packet_template('shoppingcart.html', {
             'itemsincart':i,\
