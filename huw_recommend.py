@@ -1,6 +1,7 @@
 from algorithms.simple_algorithm.algorithm_popularity import PopularityAlgorithm
 from algorithms.similar_costumer_products_algorithm.most_comparable_products import most_comparable_products as combination_alg
-from algorithms.utils import connect_to_db
+from algorithms.similar_brand_algorithm.algorithm_similiar import SimilarBrand
+from algorithms.utils import connect_to_db, time_function
 from algorithms.algorithms_analysis.plot_performance import plot_avg
 from flask import Flask, request, session, render_template, redirect, url_for, g, jsonify
 from flask_restful import Api, Resource, reqparse
@@ -37,12 +38,13 @@ class Recom(Resource):
     the webshop. At the moment, the API simply returns a random set of products
     to recommend."""
 
-    pop_app = PopularityAlgorithm()
     pop_alg_time = []
     comb_alg_time = []
 
     def __init__(self):
         self.cursor = connect_to_db().cursor()
+        self.pop_app = PopularityAlgorithm()
+        self.brand_app = SimilarBrand()
 
     def decode_category(self, c) -> str:
         """ This helper function decodes any category with urllib"""
@@ -92,34 +94,25 @@ class Recom(Resource):
         """
         # if len(self.comb_alg_time) > 2 and len(self.pop_alg_time) > 2:
         #     plot_avg(self.pop_alg_time, self.comb_alg_time)
-        print(self.pop_alg_time, self.comb_alg_time)
+        # print(self.pop_alg_time, self.comb_alg_time)
 
         page_data = self.format_page_path(page_path)
+        print(page_data)
         if r_type == "popular":  # simple alg for the products categories
-            start = time.perf_counter_ns()
-            prod_ids = self.pop_app.popularity_algorithm(page_data, self.cursor, count)
-            end = time.perf_counter_ns()
-            time_pop = (end - start) / (1.0 * 10**6)
+            prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data, self.cursor, count)
             self.pop_alg_time.append(time_pop)
-            print(f"time for alg pop = {time_pop}ms")
             return prod_ids, 200
         elif r_type == "similar":  # alg 1 for the product details
-            # Not implemented
-            return "Not Implemented", 501
+            prod_ids = self.brand_app.similar_brand(page_data[0], self.cursor)
+            # return prod_ids, 200
+            pass
         elif r_type == "combination":  # alg 2 for the shopping cart
-            start = time.perf_counter_ns()
-            prod_ids = combination_alg(page_data, self.cursor)
-            end = time.perf_counter_ns()
-
-            time_comb = (end - start) / (1.0 * 10**6)
+            prod_ids, time_comb = time_function(combination_alg, page_data, self.cursor)
             self.comb_alg_time.append(time_comb)
-            print(f"time for alg comb = {time_comb}ms")
-
             return prod_ids, 200
         elif r_type == "personal":  # alg 3 for the homepage
             # Not implemented
-            # return "Not Implemented", 501
-            pass
+            return "Not Implemented", 501
 
         # Return random products IDs for testing pages.
         rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
