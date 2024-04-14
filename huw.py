@@ -263,11 +263,10 @@ class HUWebshop(object):
         request, this function would have to change."""
         shopping_cart_ids = [i[0] for i in session['shopping_cart']]
         if len(shopping_cart_ids) >= 1:
-            shopping_cart_path = "ids/"+("/".join(shopping_cart_ids))+"/"
+            shopping_cart_path = "ids-"+("-".join(shopping_cart_ids))
         else:
-            shopping_cart_path = "ids/"
-
-        url = (f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart_path}")
+            shopping_cart_path = "ids"
+        url = (f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart_path}/")
         resp = requests.get(url)
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
@@ -289,7 +288,7 @@ class HUWebshop(object):
         for k, v in enumerate(cat_list):
             if v is not None:
                 queryfilter[self.cat_levels[k]] = self.cat_decode[v]
-                no_nones_cats.append(self.cat_encode_urllib[v])
+                no_nones_cats.append(self.cat_decode[v])
 
         query_cursor = self.database.products.find(queryfilter, self.product_fields)
         prod_count = self.database.products.count_documents(queryfilter)
@@ -320,17 +319,18 @@ class HUWebshop(object):
         """ This function renders the product detail page based on the product
         id provided. """
         product = self.database.products.find_one({"_id":str(product_id)})
-        cat = self.cat_encode_urllib2.get(product.get('category'), None)
-        sub_cat = self.cat_encode_urllib2.get(product.get('sub_category'), None)
-        sub_sub_cat = self.cat_encode_urllib2.get(product.get('sub_sub_category'), None)
+        brand = product.get('brand', None)
+        cat = product.get('category', None)
+        sub_cat = product.get('sub_category', None)
+        sub_sub_cat = product.get('sub_sub_category', None)
 
         cat_list = [cat, sub_cat, sub_sub_cat]
         no_nones_cats = [cat for cat in cat_list if cat is not None]
 
         if len(cat_list) >= 1:
-            page_path = f"productdetail/{product_id}/" + ("/".join(no_nones_cats)) + "/"
+            page_path = f"productdetail/{product_id}/{brand}/" + ("/".join(no_nones_cats)) + "/"
         else:
-            page_path = f"productdetail/{product_id}/"
+            page_path = f"productdetail/{product_id}/{brand}/"
         recommendation_type = list(self.recommendation_types.keys())[1]
         return self.render_packet_template('productdetail.html', {
             'product':product,\
