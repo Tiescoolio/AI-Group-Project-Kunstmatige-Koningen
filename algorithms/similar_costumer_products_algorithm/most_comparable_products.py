@@ -3,6 +3,7 @@ from algorithms.similar_costumer_products_algorithm.relatable_profile_ids import
 
 def most_comparable_products(products, cursor):
     profiles, products = profile_ids(products, cursor)
+    print(products)
     most_comparable_products_query = f"""
         SELECT id, SUM(count) as total_count
         FROM (
@@ -26,7 +27,6 @@ def most_comparable_products(products, cursor):
     for row in most_purchased_products:
         recommended_products.append(row[0])
 
-    print(recommended_products)
     return recommended_products
 
 
