@@ -1,4 +1,5 @@
 from algorithms.simple_algorithm.algorithm_popularity import PopularityAlgorithm
+from algorithms.similar_costumer_products_algorithm.most_comparable_products import most_comparable_products as combination_alg
 from algorithms.utils import connect_to_db
 from flask import Flask, request, session, render_template, redirect, url_for, g, jsonify
 from flask_restful import Api, Resource, reqparse
@@ -6,7 +7,6 @@ import os
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import urllib.parse
-import sys
 import pprint, timeit
 
 app = Flask(__name__)
@@ -89,10 +89,11 @@ class Recom(Resource):
             tuple : Depending on the recommendation type, it returns different values.
                 A tuple containing product IDs (amount defined by count) and status code 200
         """
-        cats = self.format_page_path(page_path)
+        page_data = self.format_page_path(page_path)
+        print(page_data)
         if r_type == "popular":  # simple alg for the products categories
             start = timeit.default_timer()
-            prod_ids = self.pop_app.popularity_algorithm(cats, self.cursor, count)
+            prod_ids = self.pop_app.popularity_algorithm(page_data, self.cursor, count)
             end = timeit.default_timer()
 
             time = end - start
@@ -104,8 +105,7 @@ class Recom(Resource):
             # Not implemented
             return "Not Implemented", 501
         elif r_type == "combination":  # alg 2 for the shopping cart
-            # Not implemented
-            return "Not Implemented", 501
+            return combination_alg(page_data, self.cursor), 200
         elif r_type == "personal":  # alg 3 for the homepage
             # Not implemented
             # return "Not Implemented", 501

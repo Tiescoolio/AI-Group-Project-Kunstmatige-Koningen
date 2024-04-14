@@ -1,5 +1,3 @@
-import pprint
-import sys
 
 class PopularityAlgorithm:
     query = """SELECT COUNT(*) AS count_prod, t1.id, t2.category, t2.sub_category
@@ -59,10 +57,23 @@ class PopularityAlgorithm:
                     prod_ids.append(prod_id)
 
     def popularity_algorithm(self, cats, cursor, count) -> tuple:
-        """The popularity algorithm, this algorithm could be considered a similar algorithm,
-        however for now it will seen as a popular algorithm."""
+        """
+        The popularity algorithm retrieves popular products based on categories and subcategories.
+        If cached data is available, it returns it. Otherwise, it fetches data from the database,
+        applies the popularity algorithm, caches the result, and returns it.
+
+        Args:
+            cats (tuple): Tuple containing category and subcategory.
+            cursor: Cursor object for database query execution.
+            count (int): Number of popular products to retrieve.
+
+        Returns:
+            tuple: Tuple containing the popular product IDs.
+        """
+        # Extract category and subcategory from the input tuple
         cat, sub_cat = cats[0], cats[1]
 
+        # Check if cached data is available
         checked_cache = self.check_cache(cat, sub_cat)
         if checked_cache is not False:
             return checked_cache
