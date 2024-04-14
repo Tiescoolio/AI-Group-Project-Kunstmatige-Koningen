@@ -64,10 +64,9 @@ class Recom(Resource):
         split_path = path.split("/")
         page_type = split_path[0]
         # Return all the products IDs if the page "winkelmand/"
-        if split_path[0] == "winkelmand":
-            prod_ids = split_path[1:-1]
-            self.shopping_cart = prod_ids
-            return tuple(prod_ids)
+        if page_type == "winkelmand":
+            self.shopping_cart = split_path[1:-1]
+            return tuple(self.shopping_cart)
         # Return all the categories if the page "producten/"
         elif page_type == "producten":
             cats = split_path[:-1]
@@ -77,8 +76,9 @@ class Recom(Resource):
             return tuple(cats)
         # Return the product ID if the page "productdetail/"
         elif page_type == "productdetail":
-            prod_id = split_path[1:-1]
-            return tuple(prod_id)
+            return tuple(split_path[1:-1])
+
+        return (None, None, None, None)
 
     def get(self, profile_id, count, r_type, page_path):
         """ This function represents the handler for GET requests coming in
@@ -99,13 +99,12 @@ class Recom(Resource):
         # print(self.pop_alg_time, self.comb_alg_time)
 
         page_data = self.format_page_path(page_path)
-        print(page_data, self.shopping_cart)
         if r_type == "popular":  # simple alg for the products categories
             prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data, self.cursor, count)
             self.pop_alg_time.append(time_pop)
             return prod_ids, 200
         elif r_type == "similar":  # alg 1 for the product details
-            prod_ids, time_sim = time_function(self.brand_app.similar_brand, page_data[0], self.cursor)
+            prod_ids, time_sim = time_function(self.brand_app.similar_brand, page_data[0], self.shopping_cart, self.cursor)
             # return prod_ids, 200
             pass
         elif r_type == "combination":  # alg 2 for the shopping cart
