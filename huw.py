@@ -32,6 +32,8 @@ class HUWebshop(object):
     cat_encode = {}
     cat_decode = {}
     cat_encode_urllib = {}
+    cat_encode_urllib2 = {}
+    cat_decode_urllib = {}
     main_menu_count = 8
     main_menu_items = None
 
@@ -87,7 +89,12 @@ class HUWebshop(object):
             enc_cat = self.encode_category(cat)
             self.cat_encode[cat] = enc_cat
             self.cat_decode[enc_cat] = cat
-            self.cat_encode_urllib[enc_cat] = self.encode_category_urllib(cat)
+
+            enc_cat_urllib = self.encode_category_urllib(cat)
+            self.cat_encode_urllib[enc_cat] = enc_cat_urllib
+
+            self.cat_encode_urllib2[cat] = enc_cat_urllib
+            self.cat_decode_urllib[enc_cat_urllib] = cat
 
         # Since the main menu can't show all the category options at once in a
         # legible manner, we choose to display a set number with the greatest 
@@ -284,8 +291,6 @@ class HUWebshop(object):
         query_cursor.skip(skip_index)
         query_cursor.limit(session['items_per_page'])
 
-        print(nononescats, cat_list)
-
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
         # pp.pp(prod_list)
@@ -309,11 +314,15 @@ class HUWebshop(object):
         """ This function renders the product detail page based on the product
         id provided. """
         product = self.database.products.find_one({"_id":str(product_id)})
+        cat = self.cat_encode_urllib2[product['category']]
+        sub_cat = self.cat_encode_urllib2[product['sub_category']]
+        sub_sub_cat = self.cat_encode_urllib2[product['sub_sub_category']]
+        product_detail = f"{cat}/{sub_cat}/{sub_sub_cat}/"
         recommendation_type = list(self.recommendation_types.keys())[1]
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
-            'r_products':self.recommendations(4, recommendation_type, f"productdetail/{product_id}/"), \
+            'r_products':self.recommendations(4, recommendation_type, f"productdetail/{product_id}/{product_detail}"), \
             'r_type':recommendation_type,\
             'r_string':list(self.recommendation_types.values())[1]
         })
