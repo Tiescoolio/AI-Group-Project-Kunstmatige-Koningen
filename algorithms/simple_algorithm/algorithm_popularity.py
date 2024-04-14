@@ -38,21 +38,23 @@ class PopularityAlgorithm:
         _data = []
         for i, prod in enumerate(data):
             prod_id = prod[1]
-            # Returns the list if t
+            # Check if the count of popular product IDs reaches the given count.
             if len(prod_ids) >= count:
                 return tuple(prod_ids)
+            # Check if the product belongs to the specified subcategory.
             if prod[3] == sub_cat:
                 prod_ids.append(prod_id)
                 _data.append(prod_id)
 
-        # If there are not enough popular items with the same sub_cat.
-        # Then add the most popular of the same category.
+        # If there are not enough popular items with the same subcategory
+        # Then add the most popular items of the same category.
         if len(prod_ids) < count:
             for prod in data:
                 prod_id = prod[1]
+                # Check if the count of popular product IDs reaches the given count.
                 if len(prod_ids) >= count:
                     return tuple(prod_ids)
-
+                # Check if the product ID is not already in the list of popular IDs and not in _data
                 if prod_id not in prod_ids and prod not in _data:
                     prod_ids.append(prod_id)
 
@@ -60,7 +62,6 @@ class PopularityAlgorithm:
         """The popularity algorithm, this algorithm could be considered a similar algorithm,
         however for now it will seen as a popular algorithm."""
         cat, sub_cat = cats[0], cats[1]
-        pprint.pp(self.prod_ids_cache)
 
         checked_cache = self.check_cache(cat, sub_cat)
         if checked_cache is not False:
@@ -69,7 +70,6 @@ class PopularityAlgorithm:
         # Fetch all products from the given category
         cursor.execute(self.query, (cat,))
         popular_prods = cursor.fetchall()
-        print(f"len pop list = {len(popular_prods)}")
 
         if sub_cat:
             prod_ids = self.get_top_sub_cat(popular_prods, count, sub_cat)
@@ -81,7 +81,4 @@ class PopularityAlgorithm:
         # Adds the product IDs to the cache
         self.add_to_cache(cat, sub_cat, prod_ids)
 
-        print(prod_ids)
-        # Execute the SQL query with the given value as parameters
-        # Return random products IDs for testing pages.
         return prod_ids
