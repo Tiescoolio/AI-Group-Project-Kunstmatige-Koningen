@@ -1,12 +1,13 @@
 from algorithms.simple_algorithm.algorithm_popularity import PopularityAlgorithm
+from algorithms.similar_costumer_products_algorithm.most_comparable_products import most_comparable_products as combination_alg
 from algorithms.utils import connect_to_db
+from algorithms.algorithms_analysis.plot_performance import plot_avg
 from flask import Flask, request, session, render_template, redirect, url_for, g, jsonify
 from flask_restful import Api, Resource, reqparse
-import os
+import os, urllib.parse, pprint, timeit, time
 from pymongo import MongoClient
 from dotenv import load_dotenv
-import urllib.parse
-import pprint
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -35,7 +36,10 @@ class Recom(Resource):
     """ This class represents the REST API that provides the recommendations for
     the webshop. At the moment, the API simply returns a random set of products
     to recommend."""
-    url = "http://127.0.0.1:5000"
+
+    pop_app = PopularityAlgorithm()
+    pop_alg_time = []
+    comb_alg_time = []
 
     def __init__(self):
         self.cursor = connect_to_db().cursor()
@@ -86,16 +90,32 @@ class Recom(Resource):
             tuple : Depending on the recommendation type, it returns different values.
                 A tuple containing product IDs (amount defined by count) and status code 200
         """
-        cats = self.format_page_path(page_path)
+        # if len(self.comb_alg_time) > 2 and len(self.pop_alg_time) > 2:
+        #     plot_avg(self.pop_alg_time, self.comb_alg_time)
+        print(self.pop_alg_time, self.comb_alg_time)
+
+        page_data = self.format_page_path(page_path)
         if r_type == "popular":  # simple alg for the products categories
-            pop_app = PopularityAlgorithm(count, self.cursor, cats)
-            return pop_app.popularity_algorithm(cats[0], cats[1]), 200
+            start = time.perf_counter_ns()
+            prod_ids = self.pop_app.popularity_algorithm(page_data, self.cursor, count)
+            end = time.perf_counter_ns()
+            time_pop = (end - start) / (1.0 * 10**6)
+            self.pop_alg_time.append(time_pop)
+            print(f"time for alg pop = {time_pop}ms")
+            return prod_ids, 200
         elif r_type == "similar":  # alg 1 for the product details
             # Not implemented
             return "Not Implemented", 501
         elif r_type == "combination":  # alg 2 for the shopping cart
-            # Not implemented
-            return "Not Implemented", 501
+            start = time.perf_counter_ns()
+            prod_ids = combination_alg(page_data, self.cursor)
+            end = time.perf_counter_ns()
+
+            time_comb = (end - start) / (1.0 * 10**6)
+            self.comb_alg_time.append(time_comb)
+            print(f"time for alg comb = {time_comb}ms")
+
+            return prod_ids, 200
         elif r_type == "personal":  # alg 3 for the homepage
             # Not implemented
             # return "Not Implemented", 501
@@ -105,6 +125,11 @@ class Recom(Resource):
         rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
         prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
         return prod_ids, 200
+
+    def calc_times(self, data, name):
+        avg_time = sum(data) / len(data)
+        print(f"avg time alg {name} = {avg_time}")
+
 
 # This method binds the Recom class to the REST API, to parse specifically
 # requests in the format described below.

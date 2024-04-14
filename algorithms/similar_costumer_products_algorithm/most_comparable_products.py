@@ -1,10 +1,9 @@
+from algorithms.similar_costumer_products_algorithm.relatable_profile_ids import profile_ids
 
-from algorithms.utils import connect_to_db as connect
-from relatable_profile_ids import vergelijkbare_profiel_ids as profile_ids
-con = connect()
-cur = con.cursor()
-def most_comparable_products(products):
-    profiles, products = profile_ids(products)
+
+def most_comparable_products(products, cursor):
+    profiles, products = profile_ids(products, cursor)
+    print(products)
     most_comparable_products_query = f"""
         SELECT id, SUM(count) as total_count
         FROM (
@@ -20,15 +19,16 @@ def most_comparable_products(products):
         LIMIT 4;
     """
 
-    cur.execute(most_comparable_products_query)
-    most_purchased_products = cur.fetchall()
+    cursor.execute(most_comparable_products_query)
+    most_purchased_products = cursor.fetchall()
 
     recommended_products = []
 
-    for rij in most_purchased_products:
-        recommended_products.append(rij[0])
+    for row in most_purchased_products:
+        recommended_products.append(row[0])
+
     return recommended_products
+
+
 if __name__ == "__main__":
     print(most_comparable_products([8532, 2554]))
-cur.close()
-con.close()

@@ -1,9 +1,5 @@
 
-from algorithms.utils import connect_to_db as connect
-con = connect()
-cur = con.cursor()
-
-def vergelijkbare_profiel_ids(products):
+def profile_ids(products, cursor):
     # pakt de 5 profiel_ids die de meeste producten uit de producten lijst gekocht hebben
     select_relatable_purchased_products_profiles_query = f"""
     SELECT profile_id, COUNT(profile_id) AS count
@@ -15,13 +11,14 @@ def vergelijkbare_profiel_ids(products):
     LIMIT 5;
     """
 
-    cur.execute(select_relatable_purchased_products_profiles_query)
-    profile_ids = cur.fetchall()
+    cursor.execute(select_relatable_purchased_products_profiles_query)
+    profile_ids = cursor.fetchall()
 
     profiles = []
     for profile in profile_ids:
         profiles.append(profile[0])
     return profiles, products
 
+
 if __name__ == "__main__":
-    print(vergelijkbare_profiel_ids([2036,8532]))
+    print(profile_ids([2036,8532]))
