@@ -45,6 +45,7 @@ class Recom(Resource):
         self.cursor = connect_to_db().cursor()
         self.pop_app = PopularityAlgorithm()
         self.brand_app = SimilarBrand()
+        self.shopping_cart = []
 
     def decode_category(self, c) -> str:
         """ This helper function decodes any category with urllib"""
@@ -65,6 +66,7 @@ class Recom(Resource):
         # Return all the products IDs if the page "winkelmand/"
         if split_path[0] == "winkelmand":
             prod_ids = split_path[1:-1]
+            self.shopping_cart = prod_ids
             return tuple(prod_ids)
         # Return all the categories if the page "producten/"
         elif page_type == "producten":
@@ -97,19 +99,19 @@ class Recom(Resource):
         # print(self.pop_alg_time, self.comb_alg_time)
 
         page_data = self.format_page_path(page_path)
-        print(page_data)
+        print(page_data, self.shopping_cart)
         if r_type == "popular":  # simple alg for the products categories
             prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data, self.cursor, count)
             self.pop_alg_time.append(time_pop)
             return prod_ids, 200
         elif r_type == "similar":  # alg 1 for the product details
-            prod_ids = self.brand_app.similar_brand(page_data[0], self.cursor)
+            prod_ids, time_sim = time_function(self.brand_app.similar_brand, page_data[0], self.cursor)
             # return prod_ids, 200
             pass
         elif r_type == "combination":  # alg 2 for the shopping cart
             prod_ids, time_comb = time_function(combination_alg, page_data, self.cursor)
             self.comb_alg_time.append(time_comb)
-            return prod_ids, 200
+            return "not working", 501
         elif r_type == "personal":  # alg 3 for the homepage
             # Not implemented
             return "Not Implemented", 501
