@@ -91,12 +91,10 @@ class Recom(Resource):
         """
         cats = self.format_page_path(page_path)
         if r_type == "popular":  # simple alg for the products categories
-            print(sys.getsizeof(self.pop_app))
             start = timeit.default_timer()
-
             prod_ids = self.pop_app.popularity_algorithm(cats, self.cursor, count)
-
             end = timeit.default_timer()
+
             time = end - start
             print(f"time for alg pop = {time:.4f}s")
             print(time)

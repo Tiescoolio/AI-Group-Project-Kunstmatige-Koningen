@@ -1,4 +1,5 @@
 import pprint
+import sys
 
 class PopularityAlgorithm:
     query = """SELECT COUNT(*) AS count_prod, t1.id, t2.category, t2.sub_category
@@ -13,21 +14,22 @@ class PopularityAlgorithm:
 
     def check_cache(self, cat, sub_cat):
         """ This function returns prod IDs if they are cached"""
-        if cat in self.prod_ids_cache and sub_cat is None:
-            print("yurr")
-            return self.prod_ids_cache[cat]["value"]
-        elif cat in self.prod_ids_cache and sub_cat in self.prod_ids_cache[cat]:
-            print("yurr2")
-            return self.prod_ids_cache[cat][sub_cat]
-        else:
-            return False
+        if cat in self.prod_ids_cache:
+            if sub_cat is None:
+                return self.prod_ids_cache[cat].get("value", False)
+            else:
+                return self.prod_ids_cache[cat].get(sub_cat, False)
+        return False
 
     def add_to_cache(self, cat, sub_cat, prod_ids):
         """ This function adds product IDs to the cache"""
         if cat and sub_cat is None:
             self.prod_ids_cache[cat] = {"value": prod_ids}
         elif cat and sub_cat:
-            self.prod_ids_cache[cat] = {sub_cat: prod_ids}
+            if cat not in self.prod_ids_cache.keys():
+                self.prod_ids_cache[cat] = {}
+
+            self.prod_ids_cache[cat][sub_cat] = prod_ids
 
     def get_top_sub_cat(self, data, count, sub_cat) -> tuple:
         """ This function gets the most popular products per for a subcategory,
@@ -63,7 +65,6 @@ class PopularityAlgorithm:
         checked_cache = self.check_cache(cat, sub_cat)
         if checked_cache is not False:
             return checked_cache
-
 
         # Fetch all products from the given category
         cursor.execute(self.query, (cat,))
