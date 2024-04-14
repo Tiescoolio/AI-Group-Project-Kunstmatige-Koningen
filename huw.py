@@ -263,9 +263,9 @@ class HUWebshop(object):
         request, this function would have to change."""
         shopping_cart_ids = [i[0] for i in session['shopping_cart']]
         if len(shopping_cart_ids) >= 1:
-            shopping_cart_path = ("/".join(shopping_cart_ids))+"/"
+            shopping_cart_path = "ids/"+("/".join(shopping_cart_ids))+"/"
         else:
-            shopping_cart_path = ""
+            shopping_cart_path = "ids/"
 
         url = (f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart_path}")
         resp = requests.get(url)

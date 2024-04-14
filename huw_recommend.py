@@ -38,8 +38,11 @@ class Recom(Resource):
     the webshop. At the moment, the API simply returns a random set of products
     to recommend."""
 
-    pop_alg_time = []
-    comb_alg_time = []
+    timed_alg = {"popular": [],
+                 "similar": [],
+                 "combination": [],
+                 "personal": []
+                 }
 
     def __init__(self):
         self.cursor = connect_to_db().cursor()
@@ -63,12 +66,9 @@ class Recom(Resource):
         # paths = path.replace("producten/", "")[:-1]
         split_path = path.split("/")
         page_type = split_path[0]
-        # Return all the products IDs if the page "winkelmand/"
-        if page_type == "winkelmand":
-            self.shopping_cart = split_path[1:-1]
-            return tuple(self.shopping_cart)
+
         # Return all the categories if the page "producten/"
-        elif page_type == "producten":
+        if page_type == "producten":
             cats = split_path[:-1]
             cats = [self.decode_category(c) for c in cats[1:]]
             for i in range(4 - len(cats)):
@@ -80,7 +80,7 @@ class Recom(Resource):
 
         return (None, None, None, None)
 
-    def get(self, profile_id, count, r_type, page_path):
+    def get(self, profile_id, count, r_type, page_path, shopping_cart):
         """ This function represents the handler for GET requests coming in
         through the API. It currently returns a random sample of products.
 
@@ -89,7 +89,7 @@ class Recom(Resource):
             count (int): The number of products to return.
             r_type (str): The type of recommendation.
             page_path (str): The path of the page.
-
+            shopping_cart (str): The path with the IDs form the shoppingcart.
         Returns:
             tuple : Depending on the recommendation type, it returns different values.
                 A tuple containing product IDs (amount defined by count) and status code 200
@@ -98,19 +98,22 @@ class Recom(Resource):
         #     plot_avg(self.pop_alg_time, self.comb_alg_time)
         # print(self.pop_alg_time, self.comb_alg_time)
 
+        self.shopping_cart = shopping_cart.split("/")[1:-1]
         page_data = self.format_page_path(page_path)
         if r_type == "popular":  # simple alg for the products categories
             prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data, self.cursor, count)
-            self.pop_alg_time.append(time_pop)
+            self.timed_alg["popular"].append(time_pop)
             return prod_ids, 200
         elif r_type == "similar":  # alg 1 for the product details
             prod_ids, time_sim = time_function(self.brand_app.similar_brand, page_data[0], self.shopping_cart, self.cursor)
+            self.timed_alg["similar"].append(time_sim)
             # return prod_ids, 200
             pass
         elif r_type == "combination":  # alg 2 for the shopping cart
-            prod_ids, time_comb = time_function(combination_alg, page_data, self.cursor)
-            self.comb_alg_time.append(time_comb)
-            return "not working", 501
+            # prod_ids, time_comb = time_function(combination_alg, page_data, self.cursor)
+            # self.timed_alg["combination"].append(time_comb)
+            # return "not working", 501
+            pass
         elif r_type == "personal":  # alg 3 for the homepage
             # Not implemented
             return "Not Implemented", 501
@@ -120,11 +123,7 @@ class Recom(Resource):
         prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
         return prod_ids, 200
 
-    def calc_times(self, data, name):
-        avg_time = sum(data) / len(data)
-        print(f"avg time alg {name} = {avg_time}")
-
 
 # This method binds the Recom class to the REST API, to parse specifically
 # requests in the format described below.
-api.add_resource(Recom, "/<string:profile_id>/<int:count>/<string:r_type>/<path:page_path>")
+api.add_resource(Recom, "/<string:profile_id>/<int:count>/<string:r_type>/<path:page_path>/<path:shopping_cart>")
