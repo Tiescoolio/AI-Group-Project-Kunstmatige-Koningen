@@ -29,12 +29,10 @@ class HUWebshop(object):
     rec_ser_address = "http://127.0.0.1:5001"
 
     category_index = None
+    fall_back_threshold = 2
     cat_levels = ["category", "sub_category", "sub_sub_category", "sub_sub_sub_category"]
     cat_encode = {}
     cat_decode = {}
-    cat_encode_urllib = {}
-    cat_encode_urllib2 = {}
-    cat_decode_urllib = {}
     main_menu_count = 8
     main_menu_items = None
 
@@ -43,7 +41,7 @@ class HUWebshop(object):
     product_fields = ["name", "price.selling_price", "properties.discount", "images"]
 
     recommendation_types = {
-        'popular': "populaire producten zoals deze",
+        'popular': "populaire producten bij ",
         'similar': "Soortgelijke producten van",
         'combination': 'Combineert goed met',
         'behaviour': 'Passend bij uw gedrag',
@@ -90,12 +88,6 @@ class HUWebshop(object):
             enc_cat = self.encode_category(cat)
             self.cat_encode[cat] = enc_cat
             self.cat_decode[enc_cat] = cat
-
-            enc_cat_urllib = self.encode_category_urllib(cat)
-            self.cat_encode_urllib[enc_cat] = enc_cat_urllib
-
-            self.cat_encode_urllib2[cat] = enc_cat_urllib
-            self.cat_decode_urllib[enc_cat_urllib] = cat
 
         # Since the main menu can't show all the category options at once in a
         # legible manner, we choose to display a set number with the greatest 
@@ -313,7 +305,8 @@ class HUWebshop(object):
             'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
             'r_products':self.recommendations(4, recommendation_type, page_path), \
             'r_type':recommendation_type,\
-            'r_string':list(self.recommendation_types.values())[0]\
+            'r_string':f"{list(self.recommendation_types.values())[0]} "
+                       f"{self.cat_decode[cat_list[0]]}, {self.cat_decode[cat_list[1]]}"
             })
 
     def product_detail(self, product_id):
