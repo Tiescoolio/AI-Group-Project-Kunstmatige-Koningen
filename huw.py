@@ -7,6 +7,7 @@ from bson.objectid import ObjectId
 # from urllib.parse import quote
 import pprint
 
+# id: "33698-bl39/42" doesn't work cursed _id how! all Bon Giorno products
 
 # The secret key used for session encryption is randomly generated every time
 # the server is started up. This means all session data (including the 
@@ -43,7 +44,7 @@ class HUWebshop(object):
 
     recommendation_types = {
         'popular': "populaire producten zoals deze",
-        'similar': "Soortgelijke producten",
+        'similar': "Soortgelijke producten van",
         'combination': 'Combineert goed met',
         'behaviour': 'Passend bij uw gedrag',
         'personal': 'Producten die je al eerder hebt bekeken'
@@ -337,7 +338,7 @@ class HUWebshop(object):
             'prepproduct':self.prep_product(product),\
             'r_products':self.recommendations(4, recommendation_type, page_path), \
             'r_type':recommendation_type,\
-            'r_string':list(self.recommendation_types.values())[1]
+            'r_string':f"{list(self.recommendation_types.values())[1]} {product['brand']}"
         })
 
     def shoppingcart(self):
