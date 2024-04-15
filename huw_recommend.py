@@ -76,8 +76,10 @@ class Recom(Resource):
         # Return the product ID if the page "productdetail/"
         elif page_type == "productdetail":
             page_data = [self.decode_category(c) for c in split_path[1:-1]]
+            print(page_data)
             for i in range(5 - len(page_data)):
                 page_data.append(None)
+            print(page_data)
             return tuple(page_data)
 
     def get(self, profile_id, count, r_type, page_path, shopping_cart):
@@ -97,34 +99,29 @@ class Recom(Resource):
         # if len(self.comb_alg_time) > 2 and len(self.pop_alg_time) > 2:
         #     plot_avg(self.pop_alg_time, self.comb_alg_time)
         # print(self.pop_alg_time, self.comb_alg_time)
-        print("\n",page_path)
-        print(shopping_cart)
+
         self.shopping_cart = shopping_cart.split("-")[1:]
         page_data = self.format_page_path(page_path)
         print(page_data, self.shopping_cart, "\n")
         if r_type == "popular":  # simple alg for the products categories
-            prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data,
-                                               self.cursor,
-                                               count)
+            prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data, self.cursor, count)
             self.timed_alg["popular"].append(time_pop)
             return prod_ids, 200
         elif r_type == "similar":  # alg 1 for the product details
-            prod_ids, time_sim = time_function(self.brand_app.similar_brand, page_data,
-                                               self.shopping_cart,
-                                               self.cursor,
-                                               count)
+            prod_ids, time_sim = time_function(self.brand_app.similar_brand, page_data, self.cursor, count)
             self.timed_alg["similar"].append(time_sim)
             return prod_ids, 200
         elif r_type == "combination":  # alg 2 for the shopping cart
-            # prod_ids, time_comb = time_function(combination_alg, page_data, self.cursor)
-            # self.timed_alg["combination"].append(time_comb)
-            return "not working", 501
+            prod_ids, time_comb = time_function(combination_alg, shopping_cart, self.cursor)
+            self.timed_alg["combination"].append(time_comb)
+            return prod_ids, 200
         elif r_type == "personal":  # alg 3 for the homepage
             # Not implemented
             return "Not Implemented", 501
 
         # Return random products IDs for testing pages.
         rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
+
         prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
         return prod_ids, 200
 

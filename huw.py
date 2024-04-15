@@ -269,6 +269,10 @@ class HUWebshop(object):
             return result_list
         return []
 
+    def fall_back(self, i, page_path):
+        """ This function fall back on the given alg i"""
+        return self.recommendations(4, list(self.recommendation_types.keys())[i], page_path)
+
     """ ..:: Full Page Endpoints ::.. """
 
     def product_page(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
@@ -323,16 +327,20 @@ class HUWebshop(object):
 
         cat_list = [cat, sub_cat, sub_sub_cat]
         no_nones_cats = [cat for cat in cat_list if cat is not None]
-
+        recommendation_type = list(self.recommendation_types.keys())[1]
         if len(cat_list) >= 1:
             page_path = f"productdetail/{product_id}/{brand}/" + ("/".join(no_nones_cats)) + "/"
         else:
             page_path = f"productdetail/{product_id}/{brand}/"
-        recommendation_type = list(self.recommendation_types.keys())[1]
+
+        r_products = self.recommendations(4, recommendation_type, page_path)
+        if len(r_products) < self.fall_back_threshold:
+            r_products = self.fall_back(0, "producten/" + ("/".join(no_nones_cats)) + "/")
+
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
-            'r_products':self.recommendations(4, recommendation_type, page_path), \
+            'r_products':r_products, \
             'r_type':recommendation_type,\
             'r_string':f"{list(self.recommendation_types.values())[1]} {product['brand']}"
         })

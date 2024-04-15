@@ -72,7 +72,7 @@ class SimilarBrand:
         # Check if there are other similar products based on brand
         if len(prod_ids) < count:
             # If there are not enough similar products, execute query to find additional products based on categories
-            cursor.execute(self.query_no_brand, (sub_cat, sub_sub_cat, int(count - len(prod_ids))))
+            cursor.execute(self.query_no_brand, (sub_cat, sub_sub_cat, count - len(prod_ids)))
             # Fetch all similar products
             similar_prods_no_brand = cursor.fetchall()
 
