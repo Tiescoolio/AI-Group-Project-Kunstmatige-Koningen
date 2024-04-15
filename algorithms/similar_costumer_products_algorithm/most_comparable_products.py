@@ -1,9 +1,8 @@
 from algorithms.similar_costumer_products_algorithm.relatable_profile_ids import profile_ids
-
-
 def most_comparable_products(products, cursor):
+    if len(products) == 0:
+        return None
     profiles, products = profile_ids(products, cursor)
-    print(products)
     most_comparable_products_query = f"""
         SELECT id, SUM(count) as total_count
         FROM (
@@ -29,6 +28,3 @@ def most_comparable_products(products, cursor):
 
     return recommended_products
 
-
-if __name__ == "__main__":
-    print(most_comparable_products([8532, 2554]))
