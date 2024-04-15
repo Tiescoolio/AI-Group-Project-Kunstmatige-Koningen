@@ -1,7 +1,4 @@
 from algorithms.similar_costumer_products_algorithm.relatable_profile_ids import profile_ids
-from algorithms.utils import connect_to_db as connect
-con = connect()
-cur = con.cursor()
 def most_comparable_products(products, cursor):
     if len(products) == 0:
         return None
@@ -31,6 +28,3 @@ def most_comparable_products(products, cursor):
 
     return recommended_products
 
-
-if __name__ == "__main__":
-    print(most_comparable_products((8532, 2554), cur))
