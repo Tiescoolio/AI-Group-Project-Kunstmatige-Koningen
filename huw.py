@@ -291,7 +291,11 @@ class HUWebshop(object):
 
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
-        # pp.pp(prod_list)
+        if len(no_nones_cats) >= 2:
+            r_string = f"{no_nones_cats[0]}, {no_nones_cats[1]}"
+        else:
+            r_string = f"{no_nones_cats[0]}"
+
         if len(no_nones_cats) >= 1:
             page_path = "producten/"+("/".join(no_nones_cats))+"/"
         else:
@@ -305,8 +309,7 @@ class HUWebshop(object):
             'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
             'r_products':self.recommendations(4, recommendation_type, page_path), \
             'r_type':recommendation_type,\
-            'r_string':f"{list(self.recommendation_types.values())[0]} "
-                       f"{self.cat_decode[cat_list[0]]}, {self.cat_decode[cat_list[1]]}"
+            'r_string':f"{list(self.recommendation_types.values())[0]} {r_string}"
             })
 
     def product_detail(self, product_id):
