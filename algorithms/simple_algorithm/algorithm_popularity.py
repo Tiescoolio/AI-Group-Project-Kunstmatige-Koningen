@@ -24,7 +24,7 @@ class PopularityAlgorithm:
         if cat and sub_cat is None:
             self.prod_ids_cache[cat] = {"value": prod_ids}
         elif cat and sub_cat:
-            if cat not in self.prod_ids_cache.keys():
+            if cat not in self.prod_ids_cache:
                 self.prod_ids_cache[cat] = {}
 
             self.prod_ids_cache[cat][sub_cat] = prod_ids
