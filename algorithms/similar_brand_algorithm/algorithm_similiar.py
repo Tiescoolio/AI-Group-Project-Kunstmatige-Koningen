@@ -1,5 +1,5 @@
 import pprint
-from functools import lru_cache
+from algorithms.utils import connect_to_db, time_function
 
 class SimilarBrand:
     query_brand = """
@@ -14,35 +14,22 @@ class SimilarBrand:
     query_no_brand = """
     SELECT DISTINCT ON (sub_sub_category) id, brand, category, sub_category, sub_sub_category 
     FROM products
-    WHERE category = %s 
-    AND sub_category = %s
+    WHERE sub_category = %s
     AND sub_sub_category != %s 
     LIMIT %s"""
 
     def __init__(self):
         self.prod_ids_cache = {}  # Cache for storing retrieved product IDs
 
-    def check_cache(self, cat, sub_cat):
+    def check_cache(self, prod_id):
         """ This function returns prod IDs if they are cached"""
-        if cat in self.prod_ids_cache:
-            if sub_cat is None:
-                return self.prod_ids_cache[cat].get("value", False)
-            else:
-                return self.prod_ids_cache[cat].get(sub_cat, False)
+        if prod_id in self.prod_ids_cache.keys():
+            return self.prod_ids_cache[prod_id]
         return False
 
-    def add_to_cache(self, brand, cat, sub_cat, prod_ids):
+    def add_to_cache(self, prod_id, prod_ids):
         """ This function adds product IDs to the cache"""
-        # if cat and sub_cat is None:
-        #     # self.prod_ids_cache[cat] = {"value": prod_ids}
-        #     pass
-
-        if brand and cat and sub_cat:
-            if brand not in self.prod_ids_cache:
-                self.prod_ids_cache[brand] = {}
-            if cat not in self.prod_ids_cache[brand]:
-                self.prod_ids_cache[brand][cat] = {}
-            self.prod_ids_cache[brand][cat][sub_cat] = prod_ids
+        self.prod_ids_cache[prod_id] = prod_ids
 
     def similar_brand(self, prod_data, shopping_cart, cursor, count) -> tuple:
         """
@@ -60,6 +47,11 @@ class SimilarBrand:
         # Unpack product data
         prod_id, brand, cat, sub_cat, sub_sub_cat = prod_data
 
+        # Check if cached data is available
+        checked_cache = self.check_cache(prod_id)
+        if checked_cache is not False:
+            return checked_cache
+
         # Execute query to find similar products based on brand and category
         cursor.execute(self.query_brand, (brand, cat, sub_cat, sub_sub_cat, count))
         # Fetch all similar products
@@ -72,7 +64,7 @@ class SimilarBrand:
         # Check if there are other similar products based on brand
         if len(prod_ids) < count:
             # If there are not enough similar products, execute query to find additional products based on categories
-            cursor.execute(self.query_no_brand, (cat, sub_cat, sub_sub_cat, count))
+            cursor.execute(self.query_no_brand, (sub_cat, sub_sub_cat, int(count - len(prod_ids))))
             similar_prods_no_brand = cursor.fetchall()
             for prod2 in similar_prods_no_brand:
                 print(prod2, "second query")
@@ -83,15 +75,27 @@ class SimilarBrand:
                     return tuple(prod_ids)
                 prod_ids.append(prod[0])
 
+        prod_ids = tuple(prod_ids)
         # Fall back to still recommend products if the rec alg lacks data
         # if brand is None or sub_cat is None;
             # fall_back(cats, cursor, len(prod_ids), count)
 
         # Adds the product IDs to the cache
-        self.add_to_cache(brand, cat, sub_cat, tuple(prod_ids))
-        pprint.pprint(self.prod_ids_cache)
+        self.add_to_cache(prod_id, prod_ids)
+        print(self.prod_ids_cache)
         # Print similar product IDs (for debugging or logging)
         pprint.pp(prod_ids)
 
         # Return tuple of product IDs
-        return tuple(prod_ids)
+        return prod_ids
+
+
+if __name__ == '__main__':
+    data = ("21858", "At Home", "Huishouden", "Wassen en schoonmaken", "Afwasmiddel")
+    data2 = ("21822", "At Home", "Huishouden", "Wassen en schoonmaken", "Afwasmiddel")
+    app = SimilarBrand()
+    app.add_to_cache("hello", "ass",)
+    with (connect_to_db() as conn, conn.cursor() as cursor):
+        ids = time_function(app.similar_brand, data, [None], cursor, 4)
+
+    print(app.prod_ids_cache)
