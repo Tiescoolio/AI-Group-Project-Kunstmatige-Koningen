@@ -31,6 +31,9 @@ class SimilarBrand:
         """ This function adds product IDs to the cache"""
         self.prod_ids_cache[prod_id] = prod_ids
 
+    def clean_cache(self, shopping_cart):
+        pass
+
     def similar_brand(self, prod_data, shopping_cart, cursor, count) -> tuple:
         """
             Retrieves similar products based on brand and category/subcategories.
