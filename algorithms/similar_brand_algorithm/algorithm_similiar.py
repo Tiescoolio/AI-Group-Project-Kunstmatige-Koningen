@@ -1,22 +1,27 @@
 import pprint
 from algorithms.utils import connect_to_db, time_function
 
+
 class SimilarBrand:
+
     query_brand = """
-    SELECT DISTINCT ON (sub_sub_category) id, brand, category, sub_category, sub_sub_category 
-    FROM products 
-    WHERE brand = %s
-    AND category = %s 
-    AND sub_category = %s 
-    AND sub_sub_category != %s 
+    WITH ranked_products AS (
+    SELECT 
+    id, brand, category, sub_category, sub_sub_category,
+    ROW_NUMBER() OVER (PARTITION BY sub_sub_category ORDER BY id) AS row_num
+    FROM products
+    WHERE brand = %s)
+    SELECT id, brand, category, sub_category, sub_sub_category
+    FROM ranked_products
+    WHERE row_num <= 2
     LIMIT %s"""
 
     query_no_brand = """
-    SELECT DISTINCT ON (sub_sub_category) id, brand, category, sub_category, sub_sub_category 
-    FROM products
-    WHERE sub_category = %s
-    AND sub_sub_category != %s 
-    LIMIT %s"""
+        SELECT DISTINCT ON (sub_sub_category) id, brand, category, sub_category, sub_sub_category 
+        FROM products
+        WHERE (sub_category = %s OR sub_sub_category IS NULL)
+        AND (sub_sub_category != %s OR sub_sub_category IS NULL)
+        LIMIT %s"""
 
     def __init__(self):
         self.prod_ids_cache = {}  # Cache for storing retrieved product IDs
@@ -29,7 +34,8 @@ class SimilarBrand:
 
     def add_to_cache(self, prod_id, prod_ids):
         """ This function adds product IDs to the cache"""
-        self.prod_ids_cache[prod_id] = prod_ids
+        if len(prod_ids) > 2:
+            self.prod_ids_cache[prod_id] = prod_ids
 
     def clean_cache(self, shopping_cart):
         pass
@@ -56,22 +62,25 @@ class SimilarBrand:
             return checked_cache
 
         # Execute query to find similar products based on brand and category
-        cursor.execute(self.query_brand, (brand, cat, sub_cat, sub_sub_cat, count))
+        cursor.execute(self.query_brand, (brand, count))
         # Fetch all similar products
         similar_prods = cursor.fetchall()
-        for prod1 in similar_prods:
-            print(prod1, "first query")
+        pprint.pp(similar_prods)
         # Extract product IDs from similar products
         prod_ids = [prod[0] for prod in similar_prods]
+        if len(prod_ids) == count:
+            pprint.pp(prod_ids)
+            return tuple(prod_ids)
 
         # Check if there are other similar products based on brand
         if len(prod_ids) < count:
             # If there are not enough similar products, execute query to find additional products based on categories
             cursor.execute(self.query_no_brand, (sub_cat, sub_sub_cat, int(count - len(prod_ids))))
             similar_prods_no_brand = cursor.fetchall()
-            for prod2 in similar_prods_no_brand:
-                print(prod2, "second query")
             for prod in similar_prods_no_brand:
+                if prod_id in prod_ids:
+                    continue
+                print(prod, "third query")
                 # Check if enough products have been collected
                 if len(prod_ids) >= count:
                     pprint.pp(prod_ids)
@@ -87,7 +96,7 @@ class SimilarBrand:
         self.add_to_cache(prod_id, prod_ids)
         print(self.prod_ids_cache)
         # Print similar product IDs (for debugging or logging)
-        pprint.pp(prod_ids)
+        print(prod_ids, "hi")
 
         # Return tuple of product IDs
         return prod_ids
