@@ -37,10 +37,8 @@ class SimilarBrand:
         if len(prod_ids) > 2:
             self.prod_ids_cache[prod_id] = prod_ids
 
-    def clean_cache(self, shopping_cart):
-        pass
 
-    def similar_brand(self, prod_data, shopping_cart, cursor, count) -> tuple:
+    def similar_brand(self, prod_data, cursor, count) -> tuple:
         """
             Retrieves similar products based on brand and category/subcategories.
 
@@ -65,40 +63,32 @@ class SimilarBrand:
         cursor.execute(self.query_brand, (brand, count))
         # Fetch all similar products
         similar_prods = cursor.fetchall()
-        pprint.pp(similar_prods)
+
         # Extract product IDs from similar products
         prod_ids = [prod[0] for prod in similar_prods]
         if len(prod_ids) == count:
-            pprint.pp(prod_ids)
             return tuple(prod_ids)
 
         # Check if there are other similar products based on brand
         if len(prod_ids) < count:
             # If there are not enough similar products, execute query to find additional products based on categories
             cursor.execute(self.query_no_brand, (sub_cat, sub_sub_cat, int(count - len(prod_ids))))
+            # Fetch all similar products
             similar_prods_no_brand = cursor.fetchall()
+
             for prod in similar_prods_no_brand:
+                # If statement to check if there are no duplicates
                 if prod_id in prod_ids:
                     continue
-                print(prod, "third query")
                 # Check if enough products have been collected
                 if len(prod_ids) >= count:
                     pprint.pp(prod_ids)
                     return tuple(prod_ids)
                 prod_ids.append(prod[0])
 
-        prod_ids = tuple(prod_ids)
-        # Fall back to still recommend products if the rec alg lacks data
-        # if brand is None or sub_cat is None;
-            # fall_back(cats, cursor, len(prod_ids), count)
-
         # Adds the product IDs to the cache
+        prod_ids = tuple(prod_ids)
         self.add_to_cache(prod_id, prod_ids)
-        print(self.prod_ids_cache)
-        # Print similar product IDs (for debugging or logging)
-        print(prod_ids, "hi")
-
-        # Return tuple of product IDs
         return prod_ids
 
 
@@ -106,7 +96,7 @@ if __name__ == '__main__':
     data = ("21858", "At Home", "Huishouden", "Wassen en schoonmaken", "Afwasmiddel")
     data2 = ("21822", "At Home", "Huishouden", "Wassen en schoonmaken", "Afwasmiddel")
     app = SimilarBrand()
-    app.add_to_cache("hello", "ass",)
+    app.add_to_cache("hello", "ss",)
     with (connect_to_db() as conn, conn.cursor() as cursor):
         ids = time_function(app.similar_brand, data, [None], cursor, 4)
 
