@@ -333,16 +333,22 @@ class HUWebshop(object):
         else:
             page_path = f"productdetail/{product_id}/{brand}/"
 
+        if brand:
+            r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
+        else:
+            r_string = "Soortgelijke producten"
+
         r_products = self.recommendations(4, recommendation_type, page_path)
         if len(r_products) < self.fall_back_threshold:
             r_products = self.fall_back(0, "producten/" + ("/".join(no_nones_cats)) + "/")
+            r_string = list(self.recommendation_types.values())[0]
 
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
             'r_products':r_products, \
             'r_type':recommendation_type,\
-            'r_string':f"{list(self.recommendation_types.values())[1]} {product['brand']}"
+            'r_string': r_string
         })
 
     def shoppingcart(self):
