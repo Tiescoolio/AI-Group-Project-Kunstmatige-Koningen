@@ -77,14 +77,15 @@ class SimilarBrand:
             similar_prods_no_brand = cursor.fetchall()
 
             for prod in similar_prods_no_brand:
+                p_id = prod[0]
                 # If statement to check if there are no duplicates
-                if prod_id in prod_ids:
+                if prod_id in prod_ids and p_id == prod_id:
                     continue
                 # Check if enough products have been collected
                 if len(prod_ids) >= count:
                     pprint.pp(prod_ids)
                     return tuple(prod_ids)
-                prod_ids.append(prod[0])
+                prod_ids.append(p_id)
 
         # Adds the product IDs to the cache
         prod_ids = tuple(prod_ids)
