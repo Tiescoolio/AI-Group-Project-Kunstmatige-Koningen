@@ -82,7 +82,7 @@ class PopularityAlgorithm:
             tuple: Tuple containing the popular product IDs.
         """
         # Extract category and subcategory from the input tuple
-        cat, sub_cat = cats[0], cats[1]
+        cat, sub_cat = cats
 
         # Check if cached data is available
         checked_cache = self.check_cache(cat, sub_cat)
@@ -93,13 +93,15 @@ class PopularityAlgorithm:
         cursor.execute(self.query, (cat,))
         popular_prods = cursor.fetchall()
 
-        pprint.pp(popular_prods)
         if sub_cat:
             prod_ids = self.get_top_sub_cat(popular_prods, count, sub_cat)
         else:
             # Return the popular products if no sub_cat is given.
             prods = popular_prods[:count]
             prod_ids = [p[1] for p in prods]
+
+        if prod_ids is None:
+            prod_ids = []
 
         # If the number of fetched products is less than the requested count,
         # fetch popular products from all categories.
@@ -108,7 +110,6 @@ class PopularityAlgorithm:
             popular_all_prods = cursor.fetchall()
             for p in popular_all_prods:
                 prod_ids.append(p[1])
-
 
         # Adds the product IDs to the cache
         self.add_to_cache(cat, sub_cat, prod_ids)
