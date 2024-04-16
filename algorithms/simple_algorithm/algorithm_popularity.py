@@ -1,3 +1,5 @@
+import pprint
+
 
 class PopularityAlgorithm:
     query = """
@@ -9,11 +11,11 @@ class PopularityAlgorithm:
     ORDER BY count_prod DESC"""
 
     query_all_prods = """
-    SELECT COUNT(*) AS count_prod, t1.id, t2.category, t2.sub_category
+    SELECT COUNT(*) AS count_prod, t1.id
     FROM sessions_products AS t1
     JOIN products AS t2 ON t1.id = t2.id
-    GROUP BY t1.id, t2.category, t2.sub_category
-    ORDER BY count_prod DESC
+    GROUP BY t1.id
+    ORDER BY count_prod DESC 
     LIMIT %s"""
 
     def __init__(self):
@@ -91,20 +93,24 @@ class PopularityAlgorithm:
         cursor.execute(self.query, (cat,))
         popular_prods = cursor.fetchall()
 
+        pprint.pp(popular_prods)
         if sub_cat:
             prod_ids = self.get_top_sub_cat(popular_prods, count, sub_cat)
         else:
             # Return the popular products if no sub_cat is given.
             prods = popular_prods[:count]
-            prod_ids = tuple([p[1] for p in prods])
+            prod_ids = [p[1] for p in prods]
 
-        # if len(prod_ids) < count:
-        #     cursor.execute(self.query_all_prods, (count - len(prod_ids), ))
-        #     popular_all_prods = cursor.fetchall()
-        #     for p in popular_all_prods:
-        #         prod_ids.append(p[1])
+        # If the number of fetched products is less than the requested count,
+        # fetch popular products from all categories.
+        if len(prod_ids) < count - 2:
+            cursor.execute(self.query_all_prods, (count - len(prod_ids), ))
+            popular_all_prods = cursor.fetchall()
+            for p in popular_all_prods:
+                prod_ids.append(p[1])
+
 
         # Adds the product IDs to the cache
         self.add_to_cache(cat, sub_cat, prod_ids)
 
-        return prod_ids
+        return tuple(prod_ids)
