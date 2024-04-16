@@ -1,4 +1,4 @@
-import pymongo, pprint
+import pymongo, pprint, time
 from algorithms.simple_algorithm.algorithm_popularity import PopularityAlgorithm
 from algorithms.similar_brand_algorithm.algorithm_similiar import SimilarBrand
 from algorithms.utils import time_function, connect_to_db
@@ -57,44 +57,33 @@ class Coverage:
         prods = self.db["products"].find()
         return [self.format_product(p) for p in prods]
 
-    def calc_cov_popular_app(self):
-        all_possible_cats = self.all_possible_cats()
-        full_coverage = int(len(all_possible_cats) * self.count)
+    def calc_coverage(self, func, data, *args):
+        full_coverage = int(len(data) * self.count)
         returned_ids = []
-        for cat in all_possible_cats:
-            returned_ids.append(len(self.pop_app.popularity_algorithm(cat, self.cur, self.count)))
-
-        print(f"amount of IDs returned popular algorithm: {sum(returned_ids)}\n"
-              f"amount of possible IDs that can be returned: {full_coverage}")
-        coverage_pop = round((sum(returned_ids) / full_coverage * 100), 2)
-        print(f"Popular algorithm covers {coverage_pop}% of all possibilities")
-
-    def calc_cov_similar_app(self):
-        products_data = self.format_all_products()
-        full_coverage = int(len(products_data) * self.count)
-        returned_ids = []
-        for prod in products_data:
-            returned_ids.append(len(self.sim_app.similar_brand(prod, self.cur, self.count)))
+        for prod in data:
+            returned_ids.append(len(func(prod, *args)))
 
         print(f"amount of IDs returned similar algorithm: {sum(returned_ids)}\n"
               f"amount of possible IDs that can be returned: {full_coverage}")
         coverage_pop = round((sum(returned_ids) / full_coverage * 100), 2)
-        print(f"similar algorithm covers {coverage_pop}% of all possibilities")
+        print(f"similar algorithm covers {coverage_pop}% of all possibilities\n")
 
-    def speed_sessions(self):
-        sessions = self.db["sessions"].find()
-        return [s["_id"] for s in sessions]
+    def main(self):
+        # Measure time for self.pop_app.popularity_algorithm
+        start_time = time.time()
+        self.calc_coverage(self.pop_app.popularity_algorithm,
+                           self.all_possible_cats(),
+                           self.cur, self.count)
+        end_time = time.time()
+        print(f"Execution time for popularity algorithm: {round(end_time - start_time,2)}s")
 
-    def session_check(self, s: dict) -> bool:
-        ids = s.get("order", {}).get("ids")
-        if ids is None or ("recommendations" not in s and "order" not in s):
-            return False
-
-        return True
-
-    def speed_profiles(self):
-        sessions = self.db["profiles"].find()
-        return [s["_id"] for s in sessions if self.session_check(s)]
+        # Measure time for self.sim_app.similar_brand
+        start_time = time.time()
+        self.calc_coverage(self.sim_app.similar_brand,
+                           self.format_all_products(),
+                           self.cur, self.count)
+        end_time = time.time()
+        print(f"Execution time for similar brand algorithm: {round(end_time - start_time, 2)}s")
 
 
 if __name__ == '__main__':
@@ -105,10 +94,6 @@ if __name__ == '__main__':
     # pprint.pp(ids)
 
     # coverages tests
-    # time_function(app.calc_cov_popular_app)  # 2.91s 100% coverage
-    # time_function(app.calc_cov_similar_app)  # 18.33s
-    ids, time = time_function(app.speed_profiles)
-    print(f"Time for looping sessions: {round((time / 1000), 2)}s")
-
+    app.main()
     # profiles check without data check = 20.98s
     # profiles check  with check = 17.5s
