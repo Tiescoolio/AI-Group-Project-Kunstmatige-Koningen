@@ -44,7 +44,7 @@ class Coverage:
         return self.get_all_keys(cats_index)
 
     @staticmethod
-    def format_product(self, p: dict) -> tuple:
+    def format_product(p: dict) -> tuple:
         brand = p.get("brand", None)
         cat = p.get("category", None)
         sub_cat = p.get("sub_category", None)
@@ -52,35 +52,63 @@ class Coverage:
 
         return p["_id"], brand, cat, sub_cat, sub_sub_cat
 
-    def get_all_ids(self):
+    def format_all_products(self):
         """ This function retrieves all the product IDs"""
         prods = self.db["products"].find()
         return [self.format_product(p) for p in prods]
 
     def calc_cov_popular_app(self):
         all_possible_cats = self.all_possible_cats()
-        full_coverage_pop = int(len(all_possible_cats) * self.count)
+        full_coverage = int(len(all_possible_cats) * self.count)
         returned_ids = []
         for cat in all_possible_cats:
             returned_ids.append(len(self.pop_app.popularity_algorithm(cat, self.cur, self.count)))
 
         print(f"amount of IDs returned popular algorithm: {sum(returned_ids)}\n"
-              f"amount of possible IDs that can be returned: {full_coverage_pop}")
-        coverage_pop = round((sum(returned_ids) / full_coverage_pop * 100), 2)
+              f"amount of possible IDs that can be returned: {full_coverage}")
+        coverage_pop = round((sum(returned_ids) / full_coverage * 100), 2)
         print(f"Popular algorithm covers {coverage_pop}% of all possibilities")
 
     def calc_cov_similar_app(self):
-        prod_ids = self.get_all_ids()
+        products_data = self.format_all_products()
+        full_coverage = int(len(products_data) * self.count)
         returned_ids = []
-        for p_id in prod_ids:
-            returned_ids.append(len(self.sim_app.similar_brand(p_id, self.cur, self.count)))
+        for prod in products_data:
+            returned_ids.append(len(self.sim_app.similar_brand(prod, self.cur, self.count)))
+
+        print(f"amount of IDs returned similar algorithm: {sum(returned_ids)}\n"
+              f"amount of possible IDs that can be returned: {full_coverage}")
+        coverage_pop = round((sum(returned_ids) / full_coverage * 100), 2)
+        print(f"similar algorithm covers {coverage_pop}% of all possibilities")
+
+    def speed_sessions(self):
+        sessions = self.db["sessions"].find()
+        return [s["_id"] for s in sessions]
+
+    def session_check(self, s: dict) -> bool:
+        ids = s.get("order", {}).get("ids")
+        if ids is None or ("recommendations" not in s and "order" not in s):
+            return False
+
+        return True
+
+    def speed_profiles(self):
+        sessions = self.db["profiles"].find()
+        return [s["_id"] for s in sessions if self.session_check(s)]
 
 
 if __name__ == '__main__':
     app = Coverage(4)
     # categories = app.all_possible_cats()
     # pprint.pp(categories)
-    ids = time_function(app.get_all_ids)
-    pprint.pp(ids)
-    # time_function(app.calc_cov_popular_app)
-    # time_function(app.calc_cov_similar_app)
+    # ids = time_function(app.format_all_products)
+    # pprint.pp(ids)
+
+    # coverages tests
+    # time_function(app.calc_cov_popular_app)  # 2.91s 100% coverage
+    # time_function(app.calc_cov_similar_app)  # 18.33s
+    ids, time = time_function(app.speed_profiles)
+    print(f"Time for looping sessions: {round((time / 1000), 2)}s")
+
+    # profiles check without data check = 20.98s
+    # profiles check  with check = 17.5s
