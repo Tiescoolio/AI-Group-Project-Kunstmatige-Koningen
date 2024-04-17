@@ -1,6 +1,7 @@
 from algorithms.simple_algorithm.algorithm_popularity import PopularityAlgorithm
 from algorithms.similar_costumer_products_algorithm.most_comparable_products import most_comparable_products as combination_alg
 from algorithms.similar_brand_algorithm.algorithm_similiar import SimilarBrand
+from algorithms.discount_algorithm.algortihm_discount import get_recommendation
 from algorithms.utils import connect_to_db, time_function
 from algorithms.algorithms_analysis.plot_performance import plot_avg
 from flask import Flask, request, session, render_template, redirect, url_for, g, jsonify
@@ -104,6 +105,7 @@ class Recom(Resource):
         page_data = self.format_page_path(page_path)
         print(page_data, self.shopping_cart, "\n")
         if r_type == "popular":  # simple alg for the products categories
+            print(page_data)
             prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data, self.cursor, count)
             self.timed_alg["popular"].append(time_pop)
             return prod_ids, 200
@@ -116,8 +118,9 @@ class Recom(Resource):
             self.timed_alg["combination"].append(time_comb)
             return prod_ids, 200
         elif r_type == "personal":  # alg 3 for the homepage
-            # Not implemented
-            return "Not Implemented", 501
+            prod_ids, time_per = time_function(get_recommendation, profile_id, self.cursor)
+            self.timed_alg["personal"].append(time_per)
+            return prod_ids, 200
 
         # Return random products IDs for testing pages.
         rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
