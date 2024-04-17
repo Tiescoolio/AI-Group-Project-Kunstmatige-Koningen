@@ -1,7 +1,5 @@
 from algorithms.similar_costumer_products_algorithm.relatable_profile_ids import profile_ids
 def most_comparable_products(products, cursor):
-    if len(products) == 0:
-        return None
     profiles, products = profile_ids(products, cursor)
     most_comparable_products_query = f"""
         SELECT id, SUM(count) as total_count
@@ -27,4 +25,3 @@ def most_comparable_products(products, cursor):
         recommended_products.append(row[0])
 
     return recommended_products
-
