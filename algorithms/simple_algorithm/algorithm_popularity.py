@@ -83,6 +83,7 @@ class PopularityAlgorithm:
         """
         # Extract category and subcategory from the input tuple
         cat, sub_cat = cats[:2]
+        popular_all = False
 
         # Check if cached data is available
         checked_cache = self.check_cache(cat, sub_cat)
@@ -106,12 +107,17 @@ class PopularityAlgorithm:
         # If the number of fetched products is less than the requested count,
         # fetch popular products from all categories.
         if len(prod_ids) < count - 2:
+            popular_all = True
             cursor.execute(self.query_all_prods, (count - len(prod_ids), ))
             popular_all_prods = cursor.fetchall()
             for p in popular_all_prods:
                 prod_ids.append(p[1])
 
-        # Adds the product IDs to the cache
-        self.add_to_cache(cat, sub_cat, prod_ids)
+        try:
+            prod_ids.append(popular_all)
+        except AttributeError:
+            list(prod_ids).append(popular_all)
 
+        # Adds the product IDs to the cache
+        self.add_to_cache(cat, sub_cat, tuple(prod_ids))
         return tuple(prod_ids)
