@@ -1,10 +1,11 @@
 # kijkt naar wat de gebruiker bekeken heeft, en geeft een aanbeveling als er een aanbieding is op die producten.
 from algorithms.utils import connect_to_db as connect
+import time
 
+def get_correct_query(profiel_id, cur):
+    # con = connect()
+    # cur = con.cursor()
 
-def get_correct_query(profiel_id):
-    con = connect()
-    cur = con.cursor()
     # Query to get similars items
     similars_query = f"""
                     SELECT similars.id, aanbiedingen, selling_price, price_discount FROM similars
@@ -27,8 +28,8 @@ def get_correct_query(profiel_id):
 
     cur.execute(viewed_before_query)
     viewed_before_values = cur.fetchall()
-    return similars_values, viewed_before_values
 
+    return similars_values, viewed_before_values
 
 # Sort the list based on the percentage discount
 def rank_list(values, viewed_before_values, count=4):
@@ -61,15 +62,19 @@ def rank_list(values, viewed_before_values, count=4):
 
 
 # Functie om de lijst te sorteren op de beste aanbiedingen
-def get_recommendation(profiel_id, count=4):
+def get_recommendation(profiel_id, cur, count=4):
     # Get the values from the query
-    similars_values, viewed_before_values = get_correct_query(profiel_id)
+    similars_values, viewed_before_values = get_correct_query(profiel_id, cur=cur)
     # Sort the values based on the discount
     recommendation = rank_list(similars_values, viewed_before_values, count)
     return recommendation
 
 
+cur = connect().cursor()
+
 if __name__ == '__main__':
-    get_recommendation('5a39ac51ed29590001040a30')
+  get_recommendation('5a393d68ed295900010384ca', cur)
+
+
 
 # con.close()

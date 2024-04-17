@@ -4,7 +4,6 @@ import time
 
 start_time = time.time()
 
-
 def get_correct_query(max_profiles=10000):
     if max_profiles > 2081649:
         max_profiles = 2081649
@@ -95,4 +94,4 @@ def show_data(length=10000):
 
 
 if __name__ == '__main__':
-    show_data(100)
+    show_data(1000)

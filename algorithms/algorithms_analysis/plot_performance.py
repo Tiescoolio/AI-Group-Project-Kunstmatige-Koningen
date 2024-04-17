@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 def plot_avg(*args):
     colors = ["red", "blue", "green", "pink", "yellow"]
