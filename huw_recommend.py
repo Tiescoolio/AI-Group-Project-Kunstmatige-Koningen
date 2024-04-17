@@ -77,10 +77,8 @@ class Recom(Resource):
         # Return the product ID if the page "productdetail/"
         elif page_type == "productdetail":
             page_data = [self.decode_category(c) for c in split_path[1:-1]]
-            print(page_data)
             for i in range(5 - len(page_data)):
                 page_data.append(None)
-            print(page_data)
             return tuple(page_data)
 
     def get(self, profile_id, count, r_type, page_path, shopping_cart):
@@ -105,7 +103,6 @@ class Recom(Resource):
         page_data = self.format_page_path(page_path)
         print(page_data, self.shopping_cart, "\n")
         if r_type == "popular":  # simple alg for the products categories
-            print(page_data)
             prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data, self.cursor, count)
             self.timed_alg["popular"].append(time_pop)
             return prod_ids, 200
