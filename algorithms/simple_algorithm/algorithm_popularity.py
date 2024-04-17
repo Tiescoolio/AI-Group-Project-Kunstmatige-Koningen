@@ -96,6 +96,7 @@ class PopularityAlgorithm:
 
         if sub_cat:
             prod_ids = self.get_top_sub_cat(popular_prods, count, sub_cat)
+            print(prod_ids)
         else:
             # Return the popular products if no sub_cat is given.
             prods = popular_prods[:count]
@@ -113,11 +114,7 @@ class PopularityAlgorithm:
             for p in popular_all_prods:
                 prod_ids.append(p[1])
 
-        try:
-            prod_ids.append(popular_all)
-        except AttributeError:
-            list(prod_ids).append(popular_all)
-
         # Adds the product IDs to the cache
         self.add_to_cache(cat, sub_cat, tuple(prod_ids))
+
         return tuple(prod_ids)
