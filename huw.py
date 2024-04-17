@@ -41,7 +41,7 @@ class HUWebshop(object):
     product_fields = ["name", "price.selling_price", "properties.discount", "images"]
 
     recommendation_types = {
-        'popular': "populaire producten bij ",
+        'popular': "Meest verkochte producten in de categorie ",
         'similar': "Soortgelijke producten van",
         'combination': 'Combineert goed met',
         'behaviour': 'Passend bij uw gedrag',
@@ -74,7 +74,7 @@ class HUWebshop(object):
 
         # Once we have a connection to the database, we check to see whether it
         # has a category index prepared; if not, we have a function to make it.
-        if "categoryindex" not in self.database.list_collection_names() or self.database.category_index.count_documents({}) == 0:
+        if "category_index" not in self.database.list_collection_names() or self.database.category_index.count_documents({}) == 0:
             self.create_category_index()
 
         # We retrieve the categoryindex from the database when it is set.
@@ -295,15 +295,24 @@ class HUWebshop(object):
 
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
+
         if len(no_nones_cats) >= 2:
-            r_string = f"{no_nones_cats[0]}, {no_nones_cats[1]}"
+            r_string_cats = f"{no_nones_cats[0]}, {no_nones_cats[1]}"
         else:
-            r_string = f"{no_nones_cats[0]}"
+            r_string_cats = f"{no_nones_cats[0]}"
 
         if len(no_nones_cats) >= 1:
             page_path = "producten/"+("/".join(no_nones_cats))+"/"
         else:
             page_path = "producten/"
+
+        pop_data = self.recommendations(4, recommendation_type, page_path)
+        print(pop_data)
+        if pop_data[1] is True:
+            r_string = "Meest gekochte producten"
+        else:
+            r_string = list(self.recommendation_types.values())[0]
+
         return self.render_packet_template('products.html', {
             'products': prod_list,
             'productcount': prod_count, \
@@ -311,9 +320,9 @@ class HUWebshop(object):
             'pend': skip_index + session['items_per_page'] if session['items_per_page'] > 0 else prod_count, \
             'prevpage': page_path+str(page-1) if (page > 1) else False, \
             'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
-            'r_products':self.recommendations(4, recommendation_type, page_path), \
+            'r_products':pop_data[0], \
             'r_type':recommendation_type,\
-            'r_string':f"{list(self.recommendation_types.values())[0]} {r_string}"
+            'r_string':f"{r_string} {r_string_cats}"
             })
 
     def product_detail(self, product_id):
@@ -340,8 +349,8 @@ class HUWebshop(object):
 
         r_products = self.recommendations(4, recommendation_type, page_path)
         if len(r_products) < self.fall_back_threshold:
-            r_products = self.fall_back(0, "producten/" + ("/".join(no_nones_cats)) + "/")
-            r_string = list(self.recommendation_types.values())[0]
+            r_products = self.fall_back(0, "producten/" + ("/".join(no_nones_cats)) + "/")[0]
+            r_string = "Meest gekochte producten"
 
         return self.render_packet_template('productdetail.html', {
             'product':product,\
