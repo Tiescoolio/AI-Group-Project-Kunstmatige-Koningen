@@ -1,11 +1,22 @@
+import pprint
+
 
 class PopularityAlgorithm:
-    query = """SELECT COUNT(*) AS count_prod, t1.id, t2.category, t2.sub_category
-                        FROM sessions_products AS t1
-                        JOIN products AS t2 ON t1.id = t2.id
-                        WHERE t2.category = %s
-                        GROUP BY t1.id, t2.category, t2.sub_category
-                        ORDER BY count_prod DESC"""
+    query = """
+    SELECT COUNT(*) AS count_prod, t1.id, t2.category, t2.sub_category
+    FROM sessions_products AS t1
+    JOIN products AS t2 ON t1.id = t2.id
+    WHERE t2.category = %s
+    GROUP BY t1.id, t2.category, t2.sub_category
+    ORDER BY count_prod DESC"""
+
+    query_all_prods = """
+    SELECT COUNT(*) AS count_prod, t1.id
+    FROM sessions_products AS t1
+    JOIN products AS t2 ON t1.id = t2.id
+    GROUP BY t1.id
+    ORDER BY count_prod DESC 
+    LIMIT %s"""
 
     def __init__(self):
         self.prod_ids_cache = {}  # Cache for storing retrieved product IDs
@@ -24,7 +35,7 @@ class PopularityAlgorithm:
         if cat and sub_cat is None:
             self.prod_ids_cache[cat] = {"value": prod_ids}
         elif cat and sub_cat:
-            if cat not in self.prod_ids_cache.keys():
+            if cat not in self.prod_ids_cache:
                 self.prod_ids_cache[cat] = {}
 
             self.prod_ids_cache[cat][sub_cat] = prod_ids
@@ -71,7 +82,7 @@ class PopularityAlgorithm:
             tuple: Tuple containing the popular product IDs.
         """
         # Extract category and subcategory from the input tuple
-        cat, sub_cat = cats[0], cats[1]
+        cat, sub_cat = cats
 
         # Check if cached data is available
         checked_cache = self.check_cache(cat, sub_cat)
@@ -86,10 +97,21 @@ class PopularityAlgorithm:
             prod_ids = self.get_top_sub_cat(popular_prods, count, sub_cat)
         else:
             # Return the popular products if no sub_cat is given.
-            prods = popular_prods[:4]
-            prod_ids = tuple([p[1] for p in prods])
+            prods = popular_prods[:count]
+            prod_ids = [p[1] for p in prods]
+
+        if prod_ids is None:
+            prod_ids = []
+
+        # If the number of fetched products is less than the requested count,
+        # fetch popular products from all categories.
+        if len(prod_ids) < count - 2:
+            cursor.execute(self.query_all_prods, (count - len(prod_ids), ))
+            popular_all_prods = cursor.fetchall()
+            for p in popular_all_prods:
+                prod_ids.append(p[1])
 
         # Adds the product IDs to the cache
         self.add_to_cache(cat, sub_cat, prod_ids)
 
-        return prod_ids
+        return tuple(prod_ids)

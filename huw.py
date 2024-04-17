@@ -7,6 +7,7 @@ from bson.objectid import ObjectId
 # from urllib.parse import quote
 import pprint
 
+# id: "33698-bl39/42" doesn't work cursed _id how! all Bon Giorno products
 
 # The secret key used for session encryption is randomly generated every time
 # the server is started up. This means all session data (including the 
@@ -28,10 +29,10 @@ class HUWebshop(object):
     rec_ser_address = "http://127.0.0.1:5001"
 
     category_index = None
+    fall_back_threshold = 2
     cat_levels = ["category", "sub_category", "sub_sub_category", "sub_sub_sub_category"]
     cat_encode = {}
     cat_decode = {}
-    cat_encode_urllib = {}
     main_menu_count = 8
     main_menu_items = None
 
@@ -40,8 +41,8 @@ class HUWebshop(object):
     product_fields = ["name", "price.selling_price", "properties.discount", "images"]
 
     recommendation_types = {
-        'popular': "populaire producten zoals deze",
-        'similar': "Soortgelijke producten",
+        'popular': "populaire producten bij ",
+        'similar': "Soortgelijke producten van",
         'combination': 'Combineert goed met',
         'behaviour': 'Passend bij uw gedrag',
         'personal': 'Producten die je al eerder hebt bekeken'
@@ -87,7 +88,6 @@ class HUWebshop(object):
             enc_cat = self.encode_category(cat)
             self.cat_encode[cat] = enc_cat
             self.cat_decode[enc_cat] = cat
-            self.cat_encode_urllib[enc_cat] = self.encode_category_urllib(cat)
 
         # Since the main menu can't show all the category options at once in a
         # legible manner, we choose to display a set number with the greatest 
@@ -254,7 +254,12 @@ class HUWebshop(object):
         service. At the moment, it only transmits the profile ID and the number
         of expected recommendations; to have more user information in the REST
         request, this function would have to change."""
-        url = f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}"
+        shopping_cart_ids = [i[0] for i in session['shopping_cart']]
+        if len(shopping_cart_ids) >= 1:
+            shopping_cart_path = "ids-"+("-".join(shopping_cart_ids))
+        else:
+            shopping_cart_path = "ids"
+        url = (f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart_path}/")
         resp = requests.get(url)
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
@@ -264,6 +269,10 @@ class HUWebshop(object):
             return result_list
         return []
 
+    def fall_back(self, i, page_path):
+        """ This function fall back on the given alg i"""
+        return self.recommendations(4, list(self.recommendation_types.keys())[i], page_path)
+
     """ ..:: Full Page Endpoints ::.. """
 
     def product_page(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
@@ -272,11 +281,11 @@ class HUWebshop(object):
         corresponds to product categories). """
         cat_list = [cat1, cat2, cat3, cat4]
         queryfilter = {}
-        nononescats = []
+        no_nones_cats = []
         for k, v in enumerate(cat_list):
             if v is not None:
                 queryfilter[self.cat_levels[k]] = self.cat_decode[v]
-                nononescats.append(self.cat_encode_urllib[v])
+                no_nones_cats.append(self.cat_decode[v])
 
         query_cursor = self.database.products.find(queryfilter, self.product_fields)
         prod_count = self.database.products.count_documents(queryfilter)
@@ -284,13 +293,15 @@ class HUWebshop(object):
         query_cursor.skip(skip_index)
         query_cursor.limit(session['items_per_page'])
 
-        print(nononescats, cat_list)
-
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
-        # pp.pp(prod_list)
-        if len(nononescats) >= 1:
-            page_path = "producten/"+("/".join(nononescats))+"/"
+        if len(no_nones_cats) >= 2:
+            r_string = f"{no_nones_cats[0]}, {no_nones_cats[1]}"
+        else:
+            r_string = f"{no_nones_cats[0]}"
+
+        if len(no_nones_cats) >= 1:
+            page_path = "producten/"+("/".join(no_nones_cats))+"/"
         else:
             page_path = "producten/"
         return self.render_packet_template('products.html', {
@@ -302,34 +313,55 @@ class HUWebshop(object):
             'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
             'r_products':self.recommendations(4, recommendation_type, page_path), \
             'r_type':recommendation_type,\
-            'r_string':list(self.recommendation_types.values())[0]\
+            'r_string':f"{list(self.recommendation_types.values())[0]} {r_string}"
             })
 
     def product_detail(self, product_id):
         """ This function renders the product detail page based on the product
         id provided. """
         product = self.database.products.find_one({"_id":str(product_id)})
+        brand = product.get('brand', None)
+        cat = product.get('category', None)
+        sub_cat = product.get('sub_category', None)
+        sub_sub_cat = product.get('sub_sub_category', None)
+
+        cat_list = [cat, sub_cat, sub_sub_cat]
+        no_nones_cats = [cat for cat in cat_list if cat is not None]
         recommendation_type = list(self.recommendation_types.keys())[1]
+        if len(cat_list) >= 1:
+            page_path = f"productdetail/{product_id}/{brand}/" + ("/".join(no_nones_cats)) + "/"
+        else:
+            page_path = f"productdetail/{product_id}/{brand}/"
+
+        if brand:
+            r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
+        else:
+            r_string = "Soortgelijke producten"
+
+        r_products = self.recommendations(4, recommendation_type, page_path)
+        if len(r_products) < self.fall_back_threshold:
+            r_products = self.fall_back(0, "producten/" + ("/".join(no_nones_cats)) + "/")
+            r_string = list(self.recommendation_types.values())[0]
+
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
-            'r_products':self.recommendations(4, recommendation_type, f"productdetail/{product_id}/"), \
+            'r_products':r_products, \
             'r_type':recommendation_type,\
-            'r_string':list(self.recommendation_types.values())[1]
+            'r_string': r_string
         })
 
     def shoppingcart(self):
         """ This function renders the shopping cart for the user."""
         i = []
-        page_path = "/winkelmand/"
+        page_path = "winkelmand/"
         recommendation_type = list(self.recommendation_types.keys())[2]
         for tup in session['shopping_cart']:
             product = self.prep_product(self.database.products.find_one({"_id":str(tup[0])}))
             product["itemcount"] = tup[1]
-            prod_id = product["id"]
             i.append(product)
-            # page_path += f"{prod_id}-{product['itemcount']}/" if prod_id not in page_path else "" #
-            page_path += f"{prod_id}/" if prod_id not in page_path else ""
+            # prod_id = product["id"]
+            # page_path += f"{prod_id}/" if prod_id not in page_path else ""
 
         return self.render_packet_template('shoppingcart.html', {
             'itemsincart':i,\

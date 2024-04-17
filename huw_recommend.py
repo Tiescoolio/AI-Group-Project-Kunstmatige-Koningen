@@ -1,6 +1,7 @@
 from algorithms.simple_algorithm.algorithm_popularity import PopularityAlgorithm
 from algorithms.similar_costumer_products_algorithm.most_comparable_products import most_comparable_products as combination_alg
-from algorithms.utils import connect_to_db
+from algorithms.similar_brand_algorithm.algorithm_similiar import SimilarBrand
+from algorithms.utils import connect_to_db, time_function
 from algorithms.algorithms_analysis.plot_performance import plot_avg
 from flask import Flask, request, session, render_template, redirect, url_for, g, jsonify
 from flask_restful import Api, Resource, reqparse
@@ -37,12 +38,17 @@ class Recom(Resource):
     the webshop. At the moment, the API simply returns a random set of products
     to recommend."""
 
-    pop_app = PopularityAlgorithm()
-    pop_alg_time = []
-    comb_alg_time = []
+    timed_alg = {"popular": [],
+                 "similar": [],
+                 "combination": [],
+                 "personal": []
+                 }
 
     def __init__(self):
         self.cursor = connect_to_db().cursor()
+        self.pop_app = PopularityAlgorithm()
+        self.brand_app = SimilarBrand()
+        self.shopping_cart = []
 
     def decode_category(self, c) -> str:
         """ This helper function decodes any category with urllib"""
@@ -60,23 +66,23 @@ class Recom(Resource):
         # paths = path.replace("producten/", "")[:-1]
         split_path = path.split("/")
         page_type = split_path[0]
-        # Return all the products IDs if the page "winkelmand/"
-        if split_path[0] == "winkelmand":
-            prod_ids = split_path[1:-1]
-            return tuple(prod_ids)
+
         # Return all the categories if the page "producten/"
-        elif page_type == "producten":
-            cats = split_path[:-1]
-            cats = [self.decode_category(c) for c in cats[1:]]
+        if page_type == "producten":
+            cats = [self.decode_category(c) for c in split_path[:-1][1:]]
             for i in range(4 - len(cats)):
                 cats.append(None)
             return tuple(cats)
         # Return the product ID if the page "productdetail/"
         elif page_type == "productdetail":
-            prod_id = split_path[1:-1]
-            return tuple(prod_id)
+            page_data = [self.decode_category(c) for c in split_path[1:-1]]
+            print(page_data)
+            for i in range(5 - len(page_data)):
+                page_data.append(None)
+            print(page_data)
+            return tuple(page_data)
 
-    def get(self, profile_id, count, r_type, page_path):
+    def get(self, profile_id, count, r_type, page_path, shopping_cart):
         """ This function represents the handler for GET requests coming in
         through the API. It currently returns a random sample of products.
 
@@ -85,52 +91,41 @@ class Recom(Resource):
             count (int): The number of products to return.
             r_type (str): The type of recommendation.
             page_path (str): The path of the page.
-
+            shopping_cart (str): The path with the IDs form the shoppingcart.
         Returns:
             tuple : Depending on the recommendation type, it returns different values.
                 A tuple containing product IDs (amount defined by count) and status code 200
         """
         # if len(self.comb_alg_time) > 2 and len(self.pop_alg_time) > 2:
         #     plot_avg(self.pop_alg_time, self.comb_alg_time)
-        print(self.pop_alg_time, self.comb_alg_time)
+        # print(self.pop_alg_time, self.comb_alg_time)
 
+        self.shopping_cart = shopping_cart.split("-")[1:]
         page_data = self.format_page_path(page_path)
+        print(page_data, self.shopping_cart, "\n")
         if r_type == "popular":  # simple alg for the products categories
-            start = time.perf_counter_ns()
-            prod_ids = self.pop_app.popularity_algorithm(page_data, self.cursor, count)
-            end = time.perf_counter_ns()
-            time_pop = (end - start) / (1.0 * 10**6)
-            self.pop_alg_time.append(time_pop)
-            print(f"time for alg pop = {time_pop}ms")
+            prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data, self.cursor, count)
+            self.timed_alg["popular"].append(time_pop)
             return prod_ids, 200
         elif r_type == "similar":  # alg 1 for the product details
-            # Not implemented
-            return "Not Implemented", 501
+            prod_ids, time_sim = time_function(self.brand_app.similar_brand, page_data, self.cursor, count)
+            self.timed_alg["similar"].append(time_sim)
+            return prod_ids, 200
         elif r_type == "combination":  # alg 2 for the shopping cart
-            start = time.perf_counter_ns()
-            prod_ids = combination_alg(page_data, self.cursor)
-            end = time.perf_counter_ns()
-
-            time_comb = (end - start) / (1.0 * 10**6)
-            self.comb_alg_time.append(time_comb)
-            print(f"time for alg comb = {time_comb}ms")
-
+            prod_ids, time_comb = time_function(combination_alg, shopping_cart, self.cursor)
+            self.timed_alg["combination"].append(time_comb)
             return prod_ids, 200
         elif r_type == "personal":  # alg 3 for the homepage
             # Not implemented
-            # return "Not Implemented", 501
-            pass
+            return "Not Implemented", 501
 
         # Return random products IDs for testing pages.
         rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
+
         prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
         return prod_ids, 200
-
-    def calc_times(self, data, name):
-        avg_time = sum(data) / len(data)
-        print(f"avg time alg {name} = {avg_time}")
 
 
 # This method binds the Recom class to the REST API, to parse specifically
 # requests in the format described below.
-api.add_resource(Recom, "/<string:profile_id>/<int:count>/<string:r_type>/<path:page_path>")
+api.add_resource(Recom, "/<string:profile_id>/<int:count>/<string:r_type>/<path:page_path>/<string:shopping_cart>/")
