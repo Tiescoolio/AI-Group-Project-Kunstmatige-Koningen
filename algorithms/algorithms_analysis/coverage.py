@@ -50,6 +50,8 @@ class Coverage:
         cat = p.get("category", None)
         sub_cat = p.get("sub_category", None)
         sub_sub_cat = p.get("sub_sub_category", None)
+        if isinstance(cat, list):
+            cat = cat[0]
 
         return p["_id"], brand, cat, sub_cat, sub_sub_cat
 
@@ -72,10 +74,11 @@ class Coverage:
 
     def create_shopping_lists(self):
         prod_ids = self.product_ids()
-        amount_lists = 1 * 10**7
+        amount_lists = 1 * 10**4
 
-        print(f"Creating {format(amount_lists, '_d')} of random shopping carts")
-        return [self.create_list(prod_ids) for _ in tqdm(range(amount_lists))]
+        print(f"Creating {format(amount_lists, '_d')} of random shopping carts\n")
+        items = [self.create_list(prod_ids) for _ in tqdm(range(amount_lists), colour="white")]
+        return items
 
     def calc_coverage(self, func, data, *args):
         full_coverage = int(len(data) * self.count)
@@ -127,3 +130,4 @@ if __name__ == '__main__':
     # profiles check without data check = 20.98s
     # profiles check  with check = 17.5s
 
+    # 33.88 % of the time the similar algorithm gets a recommendation for a similar brand
