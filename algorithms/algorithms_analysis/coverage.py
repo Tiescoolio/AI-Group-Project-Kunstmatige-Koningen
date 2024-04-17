@@ -1,9 +1,9 @@
-import pymongo, pprint, time
+import pymongo, pprint, time, random
 from tqdm import tqdm
 from algorithms.simple_algorithm.algorithm_popularity import PopularityAlgorithm
 from algorithms.similar_brand_algorithm.algorithm_similiar import SimilarBrand
 from algorithms.utils import time_function, connect_to_db
-from algorithms.discount_algorithm.algortihm_discount import get_recommendation
+from algorithms.similar_costumer_products_algorithm.most_comparable_products import most_comparable_products
 
 class Coverage:
 
@@ -58,14 +58,24 @@ class Coverage:
         prods = self.db["products"].find()
         return [self.format_product(p) for p in prods]
 
+    def product_ids(self):
+        prods = self.db["products"].find()
+        return [p["_id"] for p in prods]
+
     def format_all_profiles(self):
         """ This function retrieves all the profile IDs"""
         prof = self.db["profiles"].find()
         return [p["_id"] for p in prof]
 
-    def print_progress(self):
-        for i in range(1, 10):
-            print("\r", i)
+    def create_list(self, prod_ids) -> tuple:
+        return random.choices(prod_ids, k=random.randint(1, 15))
+
+    def create_shopping_lists(self):
+        prod_ids = self.product_ids()
+        amount_lists = 1 * 10**7
+
+        print(f"Creating {format(amount_lists, '_d')} of random shopping carts")
+        return [self.create_list(prod_ids) for _ in tqdm(range(amount_lists))]
 
     def calc_coverage(self, func, data, *args):
         full_coverage = int(len(data) * self.count)
@@ -95,11 +105,11 @@ class Coverage:
         end_time = time.time()
         print(f"Execution time for similar brand algorithm: {round(end_time - start_time, 2)}s\n")
 
-        # Measure time for get_recommendation
+        # Measure time for shopping cart
         start_time = time.time()
-        self.calc_coverage(get_recommendation,
-                           self.format_all_profiles(),
-                           self.cur, self.count)
+        self.calc_coverage(most_comparable_products,
+                           self.create_shopping_lists(),
+                           self.cur)
         end_time = time.time()
         print(f"Execution time for discount algorithm: {round(end_time - start_time, 2)}s")
 
@@ -113,7 +123,7 @@ if __name__ == '__main__':
 
     # coverages tests
     app.main()
-    app.print_progress()
+    # app.create_shopping_lists()
     # profiles check without data check = 20.98s
     # profiles check  with check = 17.5s
 
