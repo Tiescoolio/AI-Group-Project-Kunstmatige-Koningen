@@ -82,7 +82,7 @@ class PopularityAlgorithm:
             tuple: Tuple containing the popular product IDs.
         """
         # Extract category and subcategory from the input tuple
-        cat, sub_cat = cats
+        cat, sub_cat = cats[:2]
 
         # Check if cached data is available
         checked_cache = self.check_cache(cat, sub_cat)
