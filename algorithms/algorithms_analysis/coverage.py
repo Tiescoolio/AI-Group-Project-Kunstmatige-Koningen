@@ -1,8 +1,9 @@
 import pymongo, pprint, time
+from tqdm import tqdm
 from algorithms.simple_algorithm.algorithm_popularity import PopularityAlgorithm
 from algorithms.similar_brand_algorithm.algorithm_similiar import SimilarBrand
 from algorithms.utils import time_function, connect_to_db
-
+from algorithms.discount_algorithm.algortihm_discount import get_recommendation
 
 class Coverage:
 
@@ -23,7 +24,7 @@ class Coverage:
         return keys
 
     def all_possible_cats(self):
-        category_index = self.db["categoryindex"]
+        category_index = self.db["category_index"]
         cats_index = category_index.find_one()
 
         cats = []
@@ -57,16 +58,25 @@ class Coverage:
         prods = self.db["products"].find()
         return [self.format_product(p) for p in prods]
 
+    def format_all_profiles(self):
+        """ This function retrieves all the profile IDs"""
+        prof = self.db["profiles"].find()
+        return [p["_id"] for p in prof]
+
+    def print_progress(self):
+        for i in range(1, 10):
+            print("\r", i)
+
     def calc_coverage(self, func, data, *args):
         full_coverage = int(len(data) * self.count)
         returned_ids = []
-        for prod in data:
+        for prod in tqdm(data, colour="white"):
             returned_ids.append(len(func(prod, *args)))
 
         print(f"amount of IDs returned similar algorithm: {sum(returned_ids)}\n"
               f"amount of possible IDs that can be returned: {full_coverage}")
         coverage_pop = round((sum(returned_ids) / full_coverage * 100), 2)
-        print(f"similar algorithm covers {coverage_pop}% of all possibilities\n")
+        print(f"similar algorithm covers {coverage_pop}% of all possibilities")
 
     def main(self):
         # Measure time for self.pop_app.popularity_algorithm
@@ -75,7 +85,7 @@ class Coverage:
                            self.all_possible_cats(),
                            self.cur, self.count)
         end_time = time.time()
-        print(f"Execution time for popularity algorithm: {round(end_time - start_time,2)}s")
+        print(f"Execution time for popularity algorithm: {round(end_time - start_time,2)}s\n")
 
         # Measure time for self.sim_app.similar_brand
         start_time = time.time()
@@ -83,17 +93,27 @@ class Coverage:
                            self.format_all_products(),
                            self.cur, self.count)
         end_time = time.time()
-        print(f"Execution time for similar brand algorithm: {round(end_time - start_time, 2)}s")
+        print(f"Execution time for similar brand algorithm: {round(end_time - start_time, 2)}s\n")
+
+        # Measure time for get_recommendation
+        start_time = time.time()
+        self.calc_coverage(get_recommendation,
+                           self.format_all_profiles(),
+                           self.cur, self.count)
+        end_time = time.time()
+        print(f"Execution time for discount algorithm: {round(end_time - start_time, 2)}s")
 
 
 if __name__ == '__main__':
     app = Coverage(4)
-    # categories = app.all_possible_cats()
-    # pprint.pp(categories)
+    # ids = app.format_all_profiles()
+    # pprint.pp(ids)
     # ids = time_function(app.format_all_products)
     # pprint.pp(ids)
 
     # coverages tests
     app.main()
+    app.print_progress()
     # profiles check without data check = 20.98s
     # profiles check  with check = 17.5s
+
