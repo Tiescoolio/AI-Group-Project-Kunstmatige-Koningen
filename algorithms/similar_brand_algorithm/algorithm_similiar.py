@@ -19,7 +19,7 @@ class SimilarBrand:
     query_no_brand = """
         SELECT DISTINCT ON (sub_sub_category) id, brand, category, sub_category, sub_sub_category 
         FROM products
-        WHERE (sub_category = %s OR sub_sub_category IS NULL)
+        WHERE (category = %s OR category IS NULL)
         AND (sub_sub_category != %s OR sub_sub_category IS NULL)
         LIMIT %s"""
 
@@ -72,7 +72,7 @@ class SimilarBrand:
         # Check if there are other similar products based on brand
         if len(prod_ids) < count:
             # If there are not enough similar products, execute query to find additional products based on categories
-            cursor.execute(self.query_no_brand, (sub_cat, sub_sub_cat, count - len(prod_ids)))
+            cursor.execute(self.query_no_brand, (cat, sub_sub_cat, count - len(prod_ids)))
             # Fetch all similar products
             similar_prods_no_brand = cursor.fetchall()
 
