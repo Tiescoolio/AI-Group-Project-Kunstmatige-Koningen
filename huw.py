@@ -80,7 +80,6 @@ class HUWebshop(object):
 
         # We retrieve the categoryindex from the database when it is set.
         self.category_index = self.database.category_index.find_one({}, {'_id' : 0})
-
         # In order to save time in future, we flatten the category index once,
         # and translate all values to and from an encoded, URL-friendly, legible
         # format.
@@ -273,9 +272,9 @@ class HUWebshop(object):
             return result_list
         return []
 
-    def fall_back(self):
+    def fall_back(self, page_path="producten/"):
         """ This function fall back on the given alg i"""
-        r_products = self.recommendations(4, list(self.recommendation_types.keys())[0], "producten/")
+        r_products = self.recommendations(4, list(self.recommendation_types.keys())[0], page_path)
         r_string = f"{list(self.recommendation_types.values())[5]}"
         return r_products, r_string
 
@@ -341,14 +340,13 @@ class HUWebshop(object):
         cat_list = [cat, sub_cat, sub_sub_cat]
         no_nones_cats = [cat for cat in cat_list if cat is not None]
         recommendation_type = list(self.recommendation_types.keys())[1]
-
+        r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
         if len(no_nones_cats) >= 1:
             page_path = f"productdetail/{product_id}/{brand}/" + ("/".join(no_nones_cats)) + "/"
         else:
             page_path = f"productdetail/{product_id}/{brand}/"
 
         r_products = self.recommendations(4, recommendation_type, page_path)
-        r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
         if len(r_products) <= self.fall_back_threshold:
             r_products, r_string = self.fall_back()
 
@@ -365,16 +363,22 @@ class HUWebshop(object):
         i = []
         page_path = "winkelmand/"
         recommendation_type = list(self.recommendation_types.keys())[2]
+        r_string = list(self.recommendation_types.values())[2]
         for tup in session['shopping_cart']:
             product = self.prep_product(self.database.products.find_one({"_id":str(tup[0])}))
             product["itemcount"] = tup[1]
             i.append(product)
 
+        r_products = self.recommendations(4, recommendation_type, page_path)
+        if len(r_products) <= self.fall_back_threshold:
+            print(random.choice(list(self.category_index.keys())))
+            r_products, r_string = self.fall_back(f"producten/{random.choice(list(self.category_index.keys()))}/")
+
         return self.render_packet_template('shoppingcart.html', {
             'itemsincart':i,\
             'r_products':self.recommendations(4, recommendation_type, page_path), \
             'r_type':recommendation_type,\
-            'r_string':list(self.recommendation_types.values())[2]
+            'r_string':r_string
             })
 
     def category_overview(self):
