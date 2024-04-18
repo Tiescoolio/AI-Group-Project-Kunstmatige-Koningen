@@ -239,11 +239,14 @@ class HUWebshop(object):
         packet['shopping_cart'] = session['shopping_cart']
         packet['shopping_cart_count'] = self.shopping_cart_count()
         if template == "homepage.html":
-            r_products = self.recommendations(4, list(self.recommendation_types.keys())[4],
-                                              "viewed-before/")
+            page_path = "viewed-before/"
+            recommendation_type =  list(self.recommendation_types.keys())[4]
+            r_products = self.recommendations(4, recommendation_type, page_path)
             r_string = list(self.recommendation_types.values())[4]
+
             if len(r_products) <= self.fall_back_threshold:
-                r_products, r_string = self.fall_back()
+                r_products, r_string = self.fall_back_rand()
+
             packet['r_type'] = list(self.recommendation_types.keys())[4]
             packet['r_string'] = r_string
             packet['r_products'] = r_products
@@ -276,6 +279,13 @@ class HUWebshop(object):
         """ This function fall back on the given alg i"""
         r_products = self.recommendations(4, list(self.recommendation_types.keys())[0], page_path)
         r_string = f"{list(self.recommendation_types.values())[5]}"
+        return r_products, r_string
+
+    def fall_back_rand(self):
+        """ This function fall back on popular algorithm given a random category"""
+        cat = random.choice(list(self.category_index.keys())[:-5])
+        r_products = self.fall_back(f"producten/{cat}/")[0]
+        r_string = f"{list(self.recommendation_types.values())[0]} {cat}"
         return r_products, r_string
 
     """ ..:: Full Page Endpoints ::.. """
@@ -371,9 +381,7 @@ class HUWebshop(object):
 
         r_products = self.recommendations(4, recommendation_type, page_path)
         if len(r_products) <= self.fall_back_threshold:
-            cat = random.choice(list(self.category_index.keys())[:-5])
-            r_products = self.fall_back(f"producten/{cat}/")[0]
-            r_string = f"{list(self.recommendation_types.values())[0]} {cat}"
+            r_products, r_string = self.fall_back_rand()
 
         return self.render_packet_template('shoppingcart.html', {
             'itemsincart':i,\
