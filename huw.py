@@ -45,7 +45,8 @@ class HUWebshop(object):
         'similar': "Soortgelijke producten van",
         'combination': 'Combineert goed met',
         'behaviour': 'Passend bij uw gedrag',
-        'personal': 'Producten die je al eerder hebt bekeken'
+        'personal': 'Soortelijke producten die je al eerder hebt bekeken',
+        "popular_all": "Meest gekochte producten"
     }
 
     """ ..:: Initialization and Category Index Functions ::.. """
@@ -126,7 +127,7 @@ class HUWebshop(object):
         index = {}
         for entry in pcat_entries:
             self.rec_cat_index(index, entry, 0, len(self.cat_levels) - 1)
-            pprint.pp(self.rec_cat_index(index, entry, 0, len(self.cat_levels) - 1))
+            # pprint.pp(self.rec_cat_index(index, entry, 0, len(self.cat_levels) - 1))
         for k, v in index.items():
             self.rec_cat_count(k, v, 0, len(self.cat_levels) - 1)
         self.database.category_index.insert_one(index)
@@ -273,6 +274,20 @@ class HUWebshop(object):
         """ This function fall back on the given alg i"""
         return self.recommendations(4, list(self.recommendation_types.keys())[i], page_path)
 
+    def test_fall_back(self, count, r_type, page_path, i, page_data):
+        """ This function fall back on the given alg i"""
+        prod_ids = self.recommendations(count, r_type, page_path)
+        if r_type == "similar":
+            r_string = f"{list(self.recommendation_types.values())[1]} {page_data}"
+        else:
+            r_string = list(self.recommendation_types.values())[i]
+
+        if len(prod_ids) < self.fall_back_threshold:
+            prod_ids = self.recommendations(count, list(self.recommendation_types.keys())[0], page_path)
+            r_string = list(self.recommendation_types.values())[5]
+            return prod_ids, r_string
+        return prod_ids, r_string
+
     """ ..:: Full Page Endpoints ::.. """
 
     def product_page(self, cat1=None, cat2=None, cat3=None, cat4=None, page=1):
@@ -306,12 +321,7 @@ class HUWebshop(object):
         else:
             page_path = "producten/"
 
-        pop_data = self.recommendations(4, recommendation_type, page_path)
-        print(pop_data)
-        if pop_data[1] is True:
-            r_string = "Meest gekochte producten"
-        else:
-            r_string = list(self.recommendation_types.values())[0]
+        prod_ids, r_string = self.test_fall_back(4, recommendation_type, page_path,  0, None)
 
         return self.render_packet_template('products.html', {
             'products': prod_list,
@@ -320,7 +330,7 @@ class HUWebshop(object):
             'pend': skip_index + session['items_per_page'] if session['items_per_page'] > 0 else prod_count, \
             'prevpage': page_path+str(page-1) if (page > 1) else False, \
             'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
-            'r_products':pop_data[0], \
+            'r_products':prod_ids, \
             'r_type':recommendation_type,\
             'r_string':f"{r_string} {r_string_cats}"
             })
@@ -328,7 +338,7 @@ class HUWebshop(object):
     def product_detail(self, product_id):
         """ This function renders the product detail page based on the product
         id provided. """
-        product = self.database.products.find_one({"_id":str(product_id)})
+        product = self.database.products.find_one({"_id": str(product_id)})
         brand = product.get('brand', None)
         cat = product.get('category', None)
         sub_cat = product.get('sub_category', None)
@@ -337,25 +347,22 @@ class HUWebshop(object):
         cat_list = [cat, sub_cat, sub_sub_cat]
         no_nones_cats = [cat for cat in cat_list if cat is not None]
         recommendation_type = list(self.recommendation_types.keys())[1]
-        if len(cat_list) >= 1:
+        print(no_nones_cats, "Ddaasdasads")
+        if len(no_nones_cats) >= 1:
             page_path = f"productdetail/{product_id}/{brand}/" + ("/".join(no_nones_cats)) + "/"
         else:
             page_path = f"productdetail/{product_id}/{brand}/"
 
-        if brand:
-            r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
-        else:
-            r_string = "Soortgelijke producten"
-
-        r_products = self.recommendations(4, recommendation_type, page_path)
-        if len(r_products) < self.fall_back_threshold:
-            r_products = self.fall_back(0, "producten/" + ("/".join(no_nones_cats)) + "/")[0]
-            r_string = "Meest gekochte producten"
+        prod_ids = self.recommendations(4, recommendation_type, page_path)
+        r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
+        if len(prod_ids) <= self.fall_back_threshold:
+            prod_ids = self.recommendations(4, list(self.recommendation_types.keys())[0], "producten/")
+            r_string = f"{list(self.recommendation_types.values())[5]}"
 
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
-            'r_products':r_products, \
+            'r_products':prod_ids, \
             'r_type':recommendation_type,\
             'r_string': r_string
         })
