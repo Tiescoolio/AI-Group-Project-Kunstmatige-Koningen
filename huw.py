@@ -371,12 +371,13 @@ class HUWebshop(object):
 
         r_products = self.recommendations(4, recommendation_type, page_path)
         if len(r_products) <= self.fall_back_threshold:
-            print(random.choice(list(self.category_index.keys())))
-            r_products, r_string = self.fall_back(f"producten/{random.choice(list(self.category_index.keys()))}/")
+            cat = random.choice(list(self.category_index.keys())[:-5])
+            r_products = self.fall_back(f"producten/{cat}/")[0]
+            r_string = f"{list(self.recommendation_types.values())[0]} {cat}"
 
         return self.render_packet_template('shoppingcart.html', {
             'itemsincart':i,\
-            'r_products':self.recommendations(4, recommendation_type, page_path), \
+            'r_products':r_products, \
             'r_type':recommendation_type,\
             'r_string':r_string
             })
