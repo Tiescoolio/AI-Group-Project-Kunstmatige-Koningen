@@ -109,12 +109,12 @@ class Coverage:
         print(f"Execution time for similar brand algorithm: {round(end_time - start_time, 2)}s\n")
 
         # Measure time for shopping cart
-        start_time = time.time()
-        self.calc_coverage(most_comparable_products,
-                           self.create_shopping_lists(),
-                           self.cur)
-        end_time = time.time()
-        print(f"Execution time for discount algorithm: {round(end_time - start_time, 2)}s")
+        # start_time = time.time()
+        # self.calc_coverage(most_comparable_products,
+        #                    self.create_shopping_lists(),
+        #                    self.cur)
+        # end_time = time.time()
+        # print(f"Execution time for discount algorithm: {round(end_time - start_time, 2)}s")
 
 
 if __name__ == '__main__':
@@ -131,3 +131,4 @@ if __name__ == '__main__':
     # profiles check  with check = 17.5s
 
     # 33.88 % of the time the similar algorithm gets a recommendation for a similar brand
+    # sim 56.26%
