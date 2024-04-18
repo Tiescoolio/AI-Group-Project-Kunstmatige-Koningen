@@ -42,7 +42,7 @@ class HUWebshop(object):
 
     recommendation_types = {
         'popular': "Meest verkochte producten in de categorie ",
-        'similar': "Soortgelijke producten van",
+        'similar': "Soortelijke producten van",
         'combination': 'Combineert goed met',
         'behaviour': 'Passend bij uw gedrag',
         'personal': 'Soortelijke producten die je al eerder hebt bekeken',
@@ -206,7 +206,6 @@ class HUWebshop(object):
         r['bigimage'] = p['images'][0][1]  # TODO: replace this with actual images!
         r['id'] = p['_id']
         return r
-
     def shopping_cart_count(self):
         """ This function returns the number of items in the shopping cart. """
         return sum(list(map(lambda x: x[1], session['shopping_cart'])))
@@ -223,6 +222,15 @@ class HUWebshop(object):
         r_products = self.fall_back(f"producten/{cat}/")[0]
         r_string = f"{list(self.recommendation_types.values())[0]} {cat}"
         return r_products, r_string
+
+    def check_brands(self, p_brand: str, rec_brands: list) -> bool:
+        similar_c = 0
+        for b in rec_brands:
+            if b == p_brand:
+                similar_c += 1
+        if similar_c > 2:
+            return True
+        return False
 
     """ ..:: Session and Templating Functions ::.. """
 
@@ -253,7 +261,7 @@ class HUWebshop(object):
         packet['shopping_cart_count'] = self.shopping_cart_count()
         if template == "homepage.html":
             page_path = "viewed-before/"
-            recommendation_type =  list(self.recommendation_types.keys())[4]
+            recommendation_type = list(self.recommendation_types.keys())[4]
             r_products = self.recommendations(4, recommendation_type, page_path)
             r_string = list(self.recommendation_types.values())[4]
 
@@ -351,6 +359,7 @@ class HUWebshop(object):
         no_nones_cats = [cat for cat in cat_list if cat is not None]
         recommendation_type = list(self.recommendation_types.keys())[1]
         r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
+
         if len(no_nones_cats) >= 1:
             page_path = f"productdetail/{product_id}/{brand}/" + ("/".join(no_nones_cats)) + "/"
         else:
@@ -365,7 +374,13 @@ class HUWebshop(object):
                     page_path += f"{sub_cat}/"
 
             r_products, r_string = self.fall_back(page_path)
-
+        queryfilter = {"_id": {"$in": list(p["id"] for p in r_products)}}
+        query_cursor = self.database.products.find(queryfilter, ["brand"])
+        if isinstance(brand, str):
+            same_brands = self.check_brands(brand, list(p["brand"] for p in query_cursor))
+            if same_brands is not True:
+                r_string = f"Soortelijke producten"
+            pass
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
