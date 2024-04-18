@@ -104,6 +104,8 @@ class Recom(Resource):
             return combination_alg(shopping_cart, self.cursor), 200
         elif r_type == "personal":  # alg 3 for the homepage
             return get_recommendation(profile_id, self.cursor), 200
+        else:
+            return None, 404
 
 
 # This method binds the Recom class to the REST API, to parse specifically
