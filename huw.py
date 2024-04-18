@@ -309,7 +309,10 @@ class HUWebshop(object):
         else:
             page_path = "producten/"
 
-        prod_ids, r_string = self.test_fall_back(4, recommendation_type, page_path,  0, None)
+        prod_ids = self.recommendations(4, recommendation_type, page_path)
+        r_string = list(self.recommendation_types.values())[0] + r_string_cats
+        if prod_ids[0]["id"] == "25960":  # man what is this
+            r_string = list(self.recommendation_types.values())[5]
 
         return self.render_packet_template('products.html', {
             'products': prod_list,
@@ -320,7 +323,7 @@ class HUWebshop(object):
             'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
             'r_products':prod_ids, \
             'r_type':recommendation_type,\
-            'r_string':f"{r_string} {r_string_cats}"
+            'r_string':f"{r_string}"
             })
 
     def product_detail(self, product_id):
@@ -335,7 +338,7 @@ class HUWebshop(object):
         cat_list = [cat, sub_cat, sub_sub_cat]
         no_nones_cats = [cat for cat in cat_list if cat is not None]
         recommendation_type = list(self.recommendation_types.keys())[1]
-        print(no_nones_cats, "Ddaasdasads")
+
         if len(no_nones_cats) >= 1:
             page_path = f"productdetail/{product_id}/{brand}/" + ("/".join(no_nones_cats)) + "/"
         else:
