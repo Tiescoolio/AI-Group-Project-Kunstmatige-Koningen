@@ -211,6 +211,19 @@ class HUWebshop(object):
         """ This function returns the number of items in the shopping cart. """
         return sum(list(map(lambda x: x[1], session['shopping_cart'])))
 
+    def fall_back(self, page_path="producten/"):
+        """ This function fall back on the given alg i"""
+        r_products = self.recommendations(4, list(self.recommendation_types.keys())[0], page_path)
+        r_string = f"{list(self.recommendation_types.values())[5]}"
+        return r_products, r_string
+
+    def fall_back_rand(self):
+        """ This function fall back on popular algorithm given a random category"""
+        cat = random.choice(list(self.category_index.keys())[:-5])
+        r_products = self.fall_back(f"producten/{cat}/")[0]
+        r_string = f"{list(self.recommendation_types.values())[0]} {cat}"
+        return r_products, r_string
+
     """ ..:: Session and Templating Functions ::.. """
 
     def check_session(self):
@@ -274,19 +287,6 @@ class HUWebshop(object):
             result_list = list(map(self.prep_product, list(query_cursor)))
             return result_list
         return []
-
-    def fall_back(self, page_path="producten/"):
-        """ This function fall back on the given alg i"""
-        r_products = self.recommendations(4, list(self.recommendation_types.keys())[0], page_path)
-        r_string = f"{list(self.recommendation_types.values())[5]}"
-        return r_products, r_string
-
-    def fall_back_rand(self):
-        """ This function fall back on popular algorithm given a random category"""
-        cat = random.choice(list(self.category_index.keys())[:-5])
-        r_products = self.fall_back(f"producten/{cat}/")[0]
-        r_string = f"{list(self.recommendation_types.values())[0]} {cat}"
-        return r_products, r_string
 
     """ ..:: Full Page Endpoints ::.. """
 
