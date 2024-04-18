@@ -270,22 +270,10 @@ class HUWebshop(object):
             return result_list
         return []
 
-    def fall_back(self, i, page_path):
+    def fall_back(self):
         """ This function fall back on the given alg i"""
-        return self.recommendations(4, list(self.recommendation_types.keys())[i], page_path)
-
-    def test_fall_back(self, count, r_type, page_path, i, page_data):
-        """ This function fall back on the given alg i"""
-        prod_ids = self.recommendations(count, r_type, page_path)
-        if r_type == "similar":
-            r_string = f"{list(self.recommendation_types.values())[1]} {page_data}"
-        else:
-            r_string = list(self.recommendation_types.values())[i]
-
-        if len(prod_ids) < self.fall_back_threshold:
-            prod_ids = self.recommendations(count, list(self.recommendation_types.keys())[0], page_path)
-            r_string = list(self.recommendation_types.values())[5]
-            return prod_ids, r_string
+        prod_ids = self.recommendations(4, list(self.recommendation_types.keys())[0], "producten/")
+        r_string = f"{list(self.recommendation_types.values())[5]}"
         return prod_ids, r_string
 
     """ ..:: Full Page Endpoints ::.. """
@@ -356,8 +344,7 @@ class HUWebshop(object):
         prod_ids = self.recommendations(4, recommendation_type, page_path)
         r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
         if len(prod_ids) <= self.fall_back_threshold:
-            prod_ids = self.recommendations(4, list(self.recommendation_types.keys())[0], "producten/")
-            r_string = f"{list(self.recommendation_types.values())[5]}"
+            prod_ids, r_string = self.fall_back()
 
         return self.render_packet_template('productdetail.html', {
             'product':product,\
@@ -376,8 +363,6 @@ class HUWebshop(object):
             product = self.prep_product(self.database.products.find_one({"_id":str(tup[0])}))
             product["itemcount"] = tup[1]
             i.append(product)
-            # prod_id = product["id"]
-            # page_path += f"{prod_id}/" if prod_id not in page_path else ""
 
         return self.render_packet_template('shoppingcart.html', {
             'itemsincart':i,\
