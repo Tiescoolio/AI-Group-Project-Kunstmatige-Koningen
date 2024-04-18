@@ -1,6 +1,8 @@
 from algorithms.similar_costumer_products_algorithm.relatable_profile_ids import profile_ids
 def most_comparable_products(products, cursor):
     profiles, products = profile_ids(products, cursor)
+    if len(profiles) <= 0:
+        return []
     most_comparable_products_query = f"""
         SELECT id, SUM(count) as total_count
         FROM (
