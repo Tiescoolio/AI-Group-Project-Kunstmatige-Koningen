@@ -39,12 +39,6 @@ class Recom(Resource):
     the webshop. At the moment, the API simply returns a random set of products
     to recommend."""
 
-    timed_alg = {"popular": [],
-                 "similar": [],
-                 "combination": [],
-                 "personal": []
-                 }
-
     def __init__(self):
         self.cursor = connect_to_db().cursor()
         self.pop_app = PopularityAlgorithm()
@@ -103,27 +97,13 @@ class Recom(Resource):
         page_data = self.format_page_path(page_path)
         print(page_data, self.shopping_cart, "\n")
         if r_type == "popular":  # simple alg for the products categories
-            prod_ids, time_pop = time_function(self.pop_app.popularity_algorithm, page_data, self.cursor, count)
-            self.timed_alg["popular"].append(time_pop)
-            return prod_ids, 200
+            return self.pop_app.popularity_algorithm(page_data, self.cursor, count), 200
         elif r_type == "similar":  # alg 1 for the product details
-            prod_ids, time_sim = time_function(self.brand_app.similar_brand, page_data, self.cursor, count)
-            self.timed_alg["similar"].append(time_sim)
-            return prod_ids, 200
+            return self.brand_app.similar_brand( page_data, self.cursor, count), 200
         elif r_type == "combination":  # alg 2 for the shopping cart
-            prod_ids, time_comb = time_function(combination_alg, shopping_cart, self.cursor)
-            self.timed_alg["combination"].append(time_comb)
-            return prod_ids, 200
+            return combination_alg(shopping_cart, self.cursor), 200
         elif r_type == "personal":  # alg 3 for the homepage
-            prod_ids, time_per = time_function(get_recommendation, profile_id, self.cursor)
-            self.timed_alg["personal"].append(time_per)
-            return prod_ids, 200
-
-        # Return random products IDs for testing pages.
-        rand_cursor = database.products.aggregate([{'$sample': {'size': count}}])
-
-        prod_ids = list(map(lambda x: x['_id'], list(rand_cursor)))
-        return prod_ids, 200
+            return get_recommendation(profile_id, self.cursor), 200
 
 
 # This method binds the Recom class to the REST API, to parse specifically
