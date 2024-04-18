@@ -358,7 +358,13 @@ class HUWebshop(object):
 
         r_products = self.recommendations(4, recommendation_type, page_path)
         if len(r_products) <= self.fall_back_threshold:
-            r_products, r_string = self.fall_back()
+            page_path = "producten/"
+            if cat is not None:
+                page_path += f"{cat}/"
+                if sub_cat is not None:
+                    page_path += f"{sub_cat}/"
+
+            r_products, r_string = self.fall_back(page_path)
 
         return self.render_packet_template('productdetail.html', {
             'product':product,\
