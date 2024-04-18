@@ -224,6 +224,8 @@ class HUWebshop(object):
         return r_products, r_string
 
     def check_brands(self, p_brand: str, rec_brands: list) -> bool:
+        """ This helper function counts how many times a given
+        brand appears in the list of recommended brands."""
         similar_c = 0
         for b in rec_brands:
             if b == p_brand:
@@ -319,11 +321,13 @@ class HUWebshop(object):
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
 
+        # Prepare recommendation string based on retrieved categories
         if len(no_nones_cats) >= 2:
             r_string_cats = f"{no_nones_cats[0]}, {no_nones_cats[1]}"
         else:
             r_string_cats = f"{no_nones_cats[0]}"
 
+        # Construct the page path based on retrieved categories
         if len(no_nones_cats) >= 1:
             page_path = "producten/"+("/".join(no_nones_cats))+"/"
         else:
@@ -331,6 +335,8 @@ class HUWebshop(object):
 
         r_products = self.recommendations(4, recommendation_type, page_path)
         r_string = list(self.recommendation_types.values())[0] + r_string_cats
+
+        # Determine the recommendation string based on retrieved products
         if r_products[0]["id"] == "25960":  # man what is this
             r_string = list(self.recommendation_types.values())[5]
 
@@ -360,27 +366,36 @@ class HUWebshop(object):
         recommendation_type = list(self.recommendation_types.keys())[1]
         r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
 
+        # Construct the page path based on the available categories
         if len(no_nones_cats) >= 1:
             page_path = f"productdetail/{product_id}/{brand}/" + ("/".join(no_nones_cats)) + "/"
         else:
             page_path = f"productdetail/{product_id}/{brand}/"
 
+        # Retrieve recommendations based on the constructed page path
         r_products = self.recommendations(4, recommendation_type, page_path)
+
+        # Check if the number of retrieved products is below a certain threshold
         if len(r_products) <= self.fall_back_threshold:
             page_path = "producten/"
+
+            # If category information is available, append it to the fallback path
             if cat is not None:
                 page_path += f"{cat}/"
                 if sub_cat is not None:
                     page_path += f"{sub_cat}/"
 
             r_products, r_string = self.fall_back(page_path)
+
         queryfilter = {"_id": {"$in": list(p["id"] for p in r_products)}}
         query_cursor = self.database.products.find(queryfilter, ["brand"])
+
+        # If there are no similar brands, update the recommendation string
         if isinstance(brand, str):
             same_brands = self.check_brands(brand, list(p["brand"] for p in query_cursor))
             if same_brands is not True:
                 r_string = f"Soortelijke producten"
-            pass
+
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
