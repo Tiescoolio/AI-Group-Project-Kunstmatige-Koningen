@@ -240,11 +240,14 @@ class HUWebshop(object):
         packet['shopping_cart'] = session['shopping_cart']
         packet['shopping_cart_count'] = self.shopping_cart_count()
         if template == "homepage.html":
+            r_products = self.recommendations(4, list(self.recommendation_types.keys())[4],
+                                              "viewed-before/")
+            r_string = list(self.recommendation_types.values())[4]
+            if len(r_products) <= self.fall_back_threshold:
+                r_products, r_string = self.fall_back()
             packet['r_type'] = list(self.recommendation_types.keys())[4]
-            packet['r_string'] = list(self.recommendation_types.values())[4]
-            packet['r_products'] = self.recommendations(4,
-                                                        list(self.recommendation_types.keys())[4],
-                                                        "viewed-before/")
+            packet['r_string'] = r_string
+            packet['r_products'] = r_products
         return render_template(template, packet=packet)
 
     """ ..:: Recommendation Functions ::.. """
@@ -272,9 +275,9 @@ class HUWebshop(object):
 
     def fall_back(self):
         """ This function fall back on the given alg i"""
-        prod_ids = self.recommendations(4, list(self.recommendation_types.keys())[0], "producten/")
+        r_products = self.recommendations(4, list(self.recommendation_types.keys())[0], "producten/")
         r_string = f"{list(self.recommendation_types.values())[5]}"
-        return prod_ids, r_string
+        return r_products, r_string
 
     """ ..:: Full Page Endpoints ::.. """
 
@@ -309,9 +312,9 @@ class HUWebshop(object):
         else:
             page_path = "producten/"
 
-        prod_ids = self.recommendations(4, recommendation_type, page_path)
+        r_products = self.recommendations(4, recommendation_type, page_path)
         r_string = list(self.recommendation_types.values())[0] + r_string_cats
-        if prod_ids[0]["id"] == "25960":  # man what is this
+        if r_products[0]["id"] == "25960":  # man what is this
             r_string = list(self.recommendation_types.values())[5]
 
         return self.render_packet_template('products.html', {
@@ -321,7 +324,7 @@ class HUWebshop(object):
             'pend': skip_index + session['items_per_page'] if session['items_per_page'] > 0 else prod_count, \
             'prevpage': page_path+str(page-1) if (page > 1) else False, \
             'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
-            'r_products':prod_ids, \
+            'r_products':r_products, \
             'r_type':recommendation_type,\
             'r_string':f"{r_string}"
             })
@@ -344,15 +347,15 @@ class HUWebshop(object):
         else:
             page_path = f"productdetail/{product_id}/{brand}/"
 
-        prod_ids = self.recommendations(4, recommendation_type, page_path)
+        r_products = self.recommendations(4, recommendation_type, page_path)
         r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
-        if len(prod_ids) <= self.fall_back_threshold:
-            prod_ids, r_string = self.fall_back()
+        if len(r_products) <= self.fall_back_threshold:
+            r_products, r_string = self.fall_back()
 
         return self.render_packet_template('productdetail.html', {
             'product':product,\
             'prepproduct':self.prep_product(product),\
-            'r_products':prod_ids, \
+            'r_products':r_products, \
             'r_type':recommendation_type,\
             'r_string': r_string
         })
