@@ -5,13 +5,13 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 
-
 # The secret key used for session encryption is randomly generated every time
 # the server is started up. This means all session data (including the 
 # shopping cart) is erased between server instances.
 app = Flask(__name__)
 api = Api(app)
 app.secret_key = os.urandom(16)
+
 
 class HUWebshop(object):
     """ This class combines all logic behind the HU Example Webshop project. 
@@ -201,6 +201,7 @@ class HUWebshop(object):
         r['bigimage'] = p['images'][0][1]  # TODO: replace this with actual images!
         r['id'] = p['_id']
         return r
+
     def shopping_cart_count(self):
         """ This function returns the number of items in the shopping cart. """
         return sum(list(map(lambda x: x[1], session['shopping_cart'])))
@@ -218,7 +219,8 @@ class HUWebshop(object):
         r_string = f"{list(self.recommendation_types.values())[0]} {cat}"
         return r_products, r_string
 
-    def check_brands(self, p_brand: str, rec_brands: list) -> bool:
+    @staticmethod
+    def check_brands(p_brand: str, rec_brands: list) -> bool:
         """ This helper function counts how many times a given
         brand appears in the list of recommended brands."""
         similar_c = 0

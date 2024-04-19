@@ -1,4 +1,3 @@
-import pprint
 from algorithms.utils import connect_to_db, time_function
 
 
@@ -36,7 +35,6 @@ class SimilarBrand:
         """ This function adds product IDs to the cache"""
         if len(prod_ids) > 2:
             self.prod_ids_cache[prod_id] = prod_ids
-
 
     def similar_brand(self, prod_data, cursor, count) -> tuple:
         """
@@ -83,7 +81,6 @@ class SimilarBrand:
                     continue
                 # Check if enough products have been collected
                 if len(prod_ids) >= count:
-                    pprint.pp(prod_ids)
                     return tuple(prod_ids)
                 prod_ids.append(p_id)
 
