@@ -278,7 +278,7 @@ class HUWebshop(object):
             shopping_cart_path = "ids-"+("-".join(shopping_cart_ids))
         else:
             shopping_cart_path = "ids"
-        url = (f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart_path}/")
+        url = f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart_path}/"
         resp = requests.get(url)
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
@@ -323,7 +323,7 @@ class HUWebshop(object):
 
         r_products = self.recommendations(4, recommendation_type, page_path)
         r_string = list(self.recommendation_types.values())[0] + r_string_cats
-        if r_products[0]["id"] == "25960":  # man what is this
+        if r_products[0]["id"] == "25960" and r_products[1]["id"] == "38815":  # man what is this
             r_string = list(self.recommendation_types.values())[5]
 
         return self.render_packet_template('products.html', {
