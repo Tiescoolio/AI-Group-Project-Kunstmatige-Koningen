@@ -334,7 +334,7 @@ class HUWebshop(object):
         r_string = list(self.recommendation_types.values())[0] + r_string_cats
 
         # Determine the recommendation string based on retrieved products
-        if r_products[0]["id"] == "25960":  # man what is this
+        if r_products[0]["id"] == "25960" and r_products[1]["id"] == "38815":  # man what is this
             r_string = list(self.recommendation_types.values())[5]
 
         return self.render_packet_template('products.html', {
