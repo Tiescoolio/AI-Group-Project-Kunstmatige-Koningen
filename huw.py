@@ -4,8 +4,6 @@ from flask_restful import Api, Resource
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
-# from urllib.parse import quote
-import pprint
 
 # id: "33698-bl39/42" doesn't work cursed _id how! all Bon Giorno products
 
@@ -126,7 +124,6 @@ class HUWebshop(object):
         index = {}
         for entry in pcat_entries:
             self.rec_cat_index(index, entry, 0, len(self.cat_levels) - 1)
-            # pprint.pp(self.rec_cat_index(index, entry, 0, len(self.cat_levels) - 1))
         for k, v in index.items():
             self.rec_cat_count(k, v, 0, len(self.cat_levels) - 1)
         self.database.category_index.insert_one(index)
