@@ -13,13 +13,14 @@ def most_comparable_products(products, cursor):
             tuple: A tuple containing a list of recommended product IDs.
     """
     profiles, products = profile_ids(products, cursor)
-
     # If there are no profiles, return an empty list
-    if len(profiles) <= 0:
+    if len(profiles) == 0:
         return []
 
     # Construct the SQL query to find the most comparable products
     most_comparable_products_query = f"""
+        SELECT id
+        FROM (
         SELECT id, SUM(count) as total_count
         FROM (
             SELECT id, COUNT(id) as count
@@ -31,13 +32,13 @@ def most_comparable_products(products, cursor):
         )
         GROUP BY id
         ORDER BY total_count DESC
-        LIMIT 4;
+        LIMIT 4)
+        as ordered_products;
     """
 
     # Execute the SQL query and fetch the results
     cursor.execute(most_comparable_products_query)
     most_purchased_products = cursor.fetchall()
-
     # Extract recommended product IDs from the fetched results
     recommended_products = [r[0] for r in most_purchased_products]
     return recommended_products
