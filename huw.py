@@ -5,7 +5,6 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 
-# id: "33698-bl39/42" doesn't work cursed _id how! all Bon Giorno products
 
 # The secret key used for session encryption is randomly generated every time
 # the server is started up. This means all session data (including the 
@@ -189,7 +188,6 @@ class HUWebshop(object):
     def prep_product(self, p):
         """ This helper function flattens and rationalizes the values retrieved
         for a product block element. """
-        # pp.pp(p)
 
         r = {}
         r['name'] = p['name']
@@ -285,7 +283,7 @@ class HUWebshop(object):
             shopping_cart_path = "ids-"+("-".join(shopping_cart_ids))
         else:
             shopping_cart_path = "ids"
-        url = (f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart_path}/")
+        url = f"{self.rec_ser_address}/{session['profile_id']}/{count}/{r_type}/{page_path}/{shopping_cart_path}/"
         resp = requests.get(url)
         if resp.status_code == 200:
             recs = eval(resp.content.decode())
@@ -339,13 +337,13 @@ class HUWebshop(object):
 
         return self.render_packet_template('products.html', {
             'products': prod_list,
-            'productcount': prod_count, \
-            'pstart': skip_index + 1, \
-            'pend': skip_index + session['items_per_page'] if session['items_per_page'] > 0 else prod_count, \
-            'prevpage': page_path+str(page-1) if (page > 1) else False, \
-            'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
-            'r_products':r_products, \
-            'r_type':recommendation_type,\
+            'productcount': prod_count,
+            'pstart': skip_index + 1,
+            'pend': skip_index + session['items_per_page'] if session['items_per_page'] > 0 else prod_count,
+            'prevpage': page_path+str(page-1) if (page > 1) else False,
+            'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False,
+            'r_products':r_products,
+            'r_type':recommendation_type,
             'r_string':f"{r_string}"
             })
 
@@ -394,10 +392,10 @@ class HUWebshop(object):
                 r_string = f"Soortelijke producten"
 
         return self.render_packet_template('productdetail.html', {
-            'product':product,\
-            'prepproduct':self.prep_product(product),\
-            'r_products':r_products, \
-            'r_type':recommendation_type,\
+            'product':product,
+            'prepproduct':self.prep_product(product),
+            'r_products':r_products,
+            'r_type':recommendation_type,
             'r_string': r_string
         })
 
@@ -417,9 +415,9 @@ class HUWebshop(object):
             r_products, r_string = self.fall_back_rand()
 
         return self.render_packet_template('shoppingcart.html', {
-            'itemsincart':i,\
-            'r_products':r_products, \
-            'r_type':recommendation_type,\
+            'itemsincart':i,
+            'r_products':r_products,
+            'r_type':recommendation_type,
             'r_string':r_string
             })
 
