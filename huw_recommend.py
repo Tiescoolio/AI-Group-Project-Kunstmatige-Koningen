@@ -43,7 +43,7 @@ class Recom(Resource):
         self.cursor = connect_to_db().cursor()
         self.pop_app = PopularityAlgorithm()
         self.brand_app = SimilarBrand()
-        self.shopping_cart = []
+        self.shopping_cart_ids = []
 
     def decode_category(self, c) -> str:
         """ This helper function decodes any category with urllib"""
@@ -90,14 +90,14 @@ class Recom(Resource):
                 A tuple containing product IDs (amount defined by count) and status code 200
         """
 
-        self.shopping_cart = shopping_cart.split("-")[1:]
+        self.shopping_cart_ids = shopping_cart.split("-")[1:]
         page_data = self.format_page_path(page_path)
         if r_type == "popular":  # simple alg for the products categories
             return self.pop_app.popularity_algorithm(page_data, self.cursor, count), 200
         elif r_type == "similar":  # alg 1 for the product details
-            return self.brand_app.similar_brand( page_data, self.cursor, count), 200
+            return self.brand_app.similar_brand(page_data, self.cursor, count), 200
         elif r_type == "combination":  # alg 2 for the shopping cart
-            return combination_alg(shopping_cart, self.cursor), 200
+            return combination_alg(self.shopping_cart_ids, self.cursor), 200
         elif r_type == "personal":  # alg 3 for the homepage
             return get_recommendation(profile_id, self.cursor), 200
         else:
