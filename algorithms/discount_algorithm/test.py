@@ -4,18 +4,19 @@ import time
 
 start_time = time.time()
 
+
 def get_correct_query(max_profiles=10000):
     if max_profiles > 2081649:
         max_profiles = 2081649
     con = connect()
     cur = con.cursor()
-    # Query to get similars items
-    similars_query = f"""
+    # Query to get similar items
+    similar_query = f"""
                     select * from profiles
                 """
-    cur.execute(similars_query)
-    similars_values = cur.fetchall()
-    return similars_values[:max_profiles]
+    cur.execute(similar_query)
+    similar_values = cur.fetchall()
+    return similar_values[:max_profiles]
 
 
 def check_runtime(runtime):
@@ -34,7 +35,7 @@ def runtime_heipetetikal(runtime, length, interval=[100, 10000, 100000, 1000000,
             check_runtime(run_time_per_item * i)
             print(f" For {i} profiles")
 
-def check_howfar(here, togo):
+def check_how_far(here, togo):
     # Probably not the most efficient way to do this, but it works
     interval_list = []
     for i in range(0, togo, int(togo/10)):
@@ -61,13 +62,13 @@ def show_data(length=10000):
         except:
             troubled_list.append(i[0])
         finally:
-            check_howfar(index, length)
+            check_how_far(index, length)
     # Show where the errors are:
     if len(troubled_list) > 0:
         print(
-            f"________________________________________________________________________________________\nErrors with: {len(troubled_list)}, id's, thats {(len(troubled_list) / length) * 100} percent with Id's: {troubled_list}\n")
+            f"{'-' * 80}\nErrors with: {len(troubled_list)}, id's, thats {(len(troubled_list) / length) * 100} percent with Id's: {troubled_list}\n")
     else:
-        print("________________________________________________________________________________________\nNo errors found\n")
+        print(f"{'-' * 80}\nNo errors found\n")
 
     # Shows for reference the first and last 5 items
     print("Eerste 5:", output_list[:5], "\nLaatste 5:", output_list[-5:])

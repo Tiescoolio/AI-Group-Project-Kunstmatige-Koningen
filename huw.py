@@ -4,10 +4,6 @@ from flask_restful import Api, Resource
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
-# from urllib.parse import quote
-import pprint
-
-# id: "33698-bl39/42" doesn't work cursed _id how! all Bon Giorno products
 
 # The secret key used for session encryption is randomly generated every time
 # the server is started up. This means all session data (including the 
@@ -15,6 +11,7 @@ import pprint
 app = Flask(__name__)
 api = Api(app)
 app.secret_key = os.urandom(16)
+
 
 class HUWebshop(object):
     """ This class combines all logic behind the HU Example Webshop project. 
@@ -42,7 +39,7 @@ class HUWebshop(object):
 
     recommendation_types = {
         'popular': "Meest verkochte producten in de categorie ",
-        'similar': "Soortgelijke producten van",
+        'similar': "Soortelijke producten van",
         'combination': 'Combineert goed met',
         'behaviour': 'Passend bij uw gedrag',
         'personal': 'Soortelijke producten die je al eerder hebt bekeken',
@@ -126,7 +123,6 @@ class HUWebshop(object):
         index = {}
         for entry in pcat_entries:
             self.rec_cat_index(index, entry, 0, len(self.cat_levels) - 1)
-            # pprint.pp(self.rec_cat_index(index, entry, 0, len(self.cat_levels) - 1))
         for k, v in index.items():
             self.rec_cat_count(k, v, 0, len(self.cat_levels) - 1)
         self.database.category_index.insert_one(index)
@@ -192,7 +188,6 @@ class HUWebshop(object):
     def prep_product(self, p):
         """ This helper function flattens and rationalizes the values retrieved
         for a product block element. """
-        # pp.pp(p)
 
         r = {}
         r['name'] = p['name']
@@ -224,6 +219,18 @@ class HUWebshop(object):
         r_string = f"{list(self.recommendation_types.values())[0]} {cat}"
         return r_products, r_string
 
+    @staticmethod
+    def check_brands(p_brand: str, rec_brands: list) -> bool:
+        """ This helper function counts how many times a given
+        brand appears in the list of recommended brands."""
+        similar_c = 0
+        for b in rec_brands:
+            if b == p_brand:
+                similar_c += 1
+        if similar_c > 2:
+            return True
+        return False
+
     """ ..:: Session and Templating Functions ::.. """
 
     def check_session(self):
@@ -253,7 +260,7 @@ class HUWebshop(object):
         packet['shopping_cart_count'] = self.shopping_cart_count()
         if template == "homepage.html":
             page_path = "viewed-before/"
-            recommendation_type =  list(self.recommendation_types.keys())[4]
+            recommendation_type = list(self.recommendation_types.keys())[4]
             r_products = self.recommendations(4, recommendation_type, page_path)
             r_string = list(self.recommendation_types.values())[4]
 
@@ -311,11 +318,13 @@ class HUWebshop(object):
         prod_list = list(map(self.prep_product, list(query_cursor)))
         recommendation_type = list(self.recommendation_types.keys())[0]
 
+        # Prepare recommendation string based on retrieved categories
         if len(no_nones_cats) >= 2:
             r_string_cats = f"{no_nones_cats[0]}, {no_nones_cats[1]}"
         else:
             r_string_cats = f"{no_nones_cats[0]}"
 
+        # Construct the page path based on retrieved categories
         if len(no_nones_cats) >= 1:
             page_path = "producten/"+("/".join(no_nones_cats))+"/"
         else:
@@ -323,18 +332,20 @@ class HUWebshop(object):
 
         r_products = self.recommendations(4, recommendation_type, page_path)
         r_string = list(self.recommendation_types.values())[0] + r_string_cats
-        if r_products[0]["id"] == "25960" and r_products[1]["id"] == "38815":  # man what is this
+
+        # Determine the recommendation string based on retrieved products
+        if r_products[0]["id"] == "25960":  # man what is this
             r_string = list(self.recommendation_types.values())[5]
 
         return self.render_packet_template('products.html', {
             'products': prod_list,
-            'productcount': prod_count, \
-            'pstart': skip_index + 1, \
-            'pend': skip_index + session['items_per_page'] if session['items_per_page'] > 0 else prod_count, \
-            'prevpage': page_path+str(page-1) if (page > 1) else False, \
-            'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False, \
-            'r_products':r_products, \
-            'r_type':recommendation_type,\
+            'productcount': prod_count,
+            'pstart': skip_index + 1,
+            'pend': skip_index + session['items_per_page'] if session['items_per_page'] > 0 else prod_count,
+            'prevpage': page_path+str(page-1) if (page > 1) else False,
+            'nextpage': page_path+str(page+1) if (session['items_per_page']*page < prod_count) else False,
+            'r_products':r_products,
+            'r_type':recommendation_type,
             'r_string':f"{r_string}"
             })
 
@@ -351,14 +362,21 @@ class HUWebshop(object):
         no_nones_cats = [cat for cat in cat_list if cat is not None]
         recommendation_type = list(self.recommendation_types.keys())[1]
         r_string = f"{list(self.recommendation_types.values())[1]} {brand}"
+
+        # Construct the page path based on the available categories
         if len(no_nones_cats) >= 1:
             page_path = f"productdetail/{product_id}/{brand}/" + ("/".join(no_nones_cats)) + "/"
         else:
             page_path = f"productdetail/{product_id}/{brand}/"
 
+        # Retrieve recommendations based on the constructed page path
         r_products = self.recommendations(4, recommendation_type, page_path)
+
+        # Check if the number of retrieved products is below a certain threshold
         if len(r_products) <= self.fall_back_threshold:
             page_path = "producten/"
+
+            # If category information is available, append it to the fallback path
             if cat is not None:
                 page_path += f"{cat}/"
                 if sub_cat is not None:
@@ -366,11 +384,20 @@ class HUWebshop(object):
 
             r_products, r_string = self.fall_back(page_path)
 
+        queryfilter = {"_id": {"$in": list(p["id"] for p in r_products)}}
+        query_cursor = self.database.products.find(queryfilter, ["brand"])
+
+        # If there are no similar brands, update the recommendation string
+        if isinstance(brand, str):
+            same_brands = self.check_brands(brand, list(p["brand"] for p in query_cursor))
+            if same_brands is not True:
+                r_string = f"Soortelijke producten"
+
         return self.render_packet_template('productdetail.html', {
-            'product':product,\
-            'prepproduct':self.prep_product(product),\
-            'r_products':r_products, \
-            'r_type':recommendation_type,\
+            'product':product,
+            'prepproduct':self.prep_product(product),
+            'r_products':r_products,
+            'r_type':recommendation_type,
             'r_string': r_string
         })
 
@@ -390,9 +417,9 @@ class HUWebshop(object):
             r_products, r_string = self.fall_back_rand()
 
         return self.render_packet_template('shoppingcart.html', {
-            'itemsincart':i,\
-            'r_products':r_products, \
-            'r_type':recommendation_type,\
+            'itemsincart':i,
+            'r_products':r_products,
+            'r_type':recommendation_type,
             'r_string':r_string
             })
 

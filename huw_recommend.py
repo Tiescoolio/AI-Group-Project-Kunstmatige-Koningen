@@ -89,13 +89,9 @@ class Recom(Resource):
             tuple : Depending on the recommendation type, it returns different values.
                 A tuple containing product IDs (amount defined by count) and status code 200
         """
-        # if len(self.comb_alg_time) > 2 and len(self.pop_alg_time) > 2:
-        #     plot_avg(self.pop_alg_time, self.comb_alg_time)
-        # print(self.pop_alg_time, self.comb_alg_time)
 
         self.shopping_cart = shopping_cart.split("-")[1:]
         page_data = self.format_page_path(page_path)
-        print(page_data, self.shopping_cart, "\n")
         if r_type == "popular":  # simple alg for the products categories
             return self.pop_app.popularity_algorithm(page_data, self.cursor, count), 200
         elif r_type == "similar":  # alg 1 for the product details

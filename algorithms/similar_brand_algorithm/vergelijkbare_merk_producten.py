@@ -1,14 +1,12 @@
 from bekeken_products_info import bekeken_products_info as product_info
-from algorithms.utils import connect_to_db as connect
-con = connect()
-cur = con.cursor()
 
-def vergelijkbare_merk_producten(profiel_id):
-    id, merk, categorie, sub_categorien, sub_sub_categorien = product_info(profiel_id)
+
+def vergelijkbare_merk_producten(profile_id):
+    product_id, brand, category, sub_categories, sub_sub_categories = product_info(profile_id)
     vergelijkbare_merk_producten_query = f"""
             SELECT id FROM products
-            WHERE id <> '{id}'
-            AND brand = '{merk}'
-            AND category = '{categorie}'
-            AND sub_category = '{sub_categorien}'
-            AND sub_sub_category IS NOT '{sub_sub_categorien}';"""
+            WHERE id <> '{product_id}'
+            AND brand = '{brand}'
+            AND category = '{category}'
+            AND sub_category = '{sub_categories}'
+            AND sub_sub_category IS NOT '{sub_sub_categories}';"""

@@ -1,5 +1,3 @@
-import pprint
-
 
 class PopularityAlgorithm:
     query = """
@@ -113,5 +111,4 @@ class PopularityAlgorithm:
 
         # Adds the product IDs to the cache
         self.add_to_cache(cat, sub_cat, tuple(prod_ids))
-
         return tuple(prod_ids)
